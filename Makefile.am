@@ -345,6 +345,8 @@ openxcom_SOURCES = \
 	src/Engine/OpenGL.h \
 	src/Engine/Options.cpp \
 	src/Engine/Options.h \
+	src/Engine/OptionsFolders.cpp \
+	src/Engine/OptionsFolders.h \
 	src/Engine/Palette.cpp \
 	src/Engine/Palette.h \
 	src/Engine/RNG.cpp \

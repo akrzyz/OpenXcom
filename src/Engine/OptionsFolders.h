@@ -19,3 +19,35 @@
 #ifndef OPENXCOM_OPTIONSFOLDERS_H
 #define OPENXCOM_OPTIONSFOLDERS_H
 
+#include <vector>
+#include <string>
+#include <yaml-cpp/yaml.h>
+
+namespace OpenXcom
+{
+
+/**
+ * Contains a set of data for specific game entry
+ * defined in 'settings.cfg'.
+ */
+class OptionsFolders
+{
+private:
+	std::string _type;
+	std::string _vanillaFolder, _openxcomFolder;
+	std::vector<std::string> _rulesets;
+public:
+	/// Creates a blank option folder for game.
+	OptionsFolders(const std::string &type);
+	/// Cleans up the option folder for game.
+	~OptionsFolders();
+	/// Loads the game entry from YAML.
+	void load(const YAML::Node& node);
+	/// Saves the game entry to YAML.
+	void save(YAML::Emitter& out) const;
+	/// Gets the list of rulesets to use with current game entry.
+	std::vector<std::string> getRulesets();
+};
+
+}
+#endif

@@ -17,9 +17,9 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "OptionsFolders.h"
+
 namespace OpenXcom
-{
-namespace OptionsFolders
 {
 	/// Creates a blank option folder for game.
 	OptionsFolders::OptionsFolders(const std::string &type)
@@ -39,10 +39,15 @@ namespace OptionsFolders
 
 	}
 
+	/// Saves the game entry to YAML.
+	void OptionsFolders::save(YAML::Emitter& out) const
+	{
+
+	}
+
 	/// Gets the list of rulesets to use with current game entry.
 	std::vector<std::string> OptionsFolders::getRulesets()
 	{
 		return _rulesets;
 	}
-}
 }

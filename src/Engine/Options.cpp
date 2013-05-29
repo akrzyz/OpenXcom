@@ -18,6 +18,7 @@
  */
 
 #include "Options.h"
+#include "OptionsFolders.h"
 #include "../version.h"
 #include <SDL.h>
 #include <SDL_keysym.h>
@@ -44,7 +45,7 @@ std::string _userFolder = "";
 std::string _configFolder = "";
 std::vector<std::string> _userList;
 std::map<std::string, std::string> _options;
-std::vector<std::string> _rulesets;
+std::map<std::string, OptionsFolders*> _folders;
 std::vector<std::string> _purchaseexclusions;
 
 /**
@@ -237,8 +238,8 @@ void createDefault()
 	setInt("keyBattleCenterEnemy9", SDLK_9);
 	setInt("keyBattleCenterEnemy10", SDLK_0);
 
-	_rulesets.clear();
-	_rulesets.push_back("Xcom1Ruleset");
+	_folders.clear();
+//	_folders = new OptionsFolders("Xcom1Ruleset");
 }
 
 /**
@@ -454,9 +455,26 @@ void load(const std::string &filename)
 		(*pName) >> _purchaseexclusions;
 	}
 
-	if (const YAML::Node *pName = doc.FindValue("rulesets"))
+	if (const YAML::Node *pName = doc.FindValue("games"))
 	{
-		(*pName) >> _rulesets;
+/*		const YAML::Node *xcom1 = doc.FindValue("xcom1");
+		if (!xcom1)
+		{
+			xcom1 = &doc;
+		}*/
+
+		for (YAML::Iterator i = options->begin(); i != options->end(); ++i)
+		{
+			std::string key;
+			i.first() >> key;
+			for (YAML::Iterator j = i.second().begin(); j != i.second().end(); ++j)
+			{
+				OptionsFolders *temporary = new OptionsFolders(key);
+				_folders[key] = temporary;
+				_folders[key]->load(*pName);
+			}
+			
+		}
 	}
 
 	fin.close();
@@ -479,7 +497,14 @@ void save(const std::string &filename)
 
 	out << YAML::BeginMap;
 	out << YAML::Key << "options" << YAML::Value << _options;
-	out << YAML::Key << "rulesets" << YAML::Value << _rulesets;
+	out << YAML::Key << "games" << YAML::Value;
+	out << YAML::BeginSeq;
+	for (std::map<std::string, OptionsFolders*>::const_iterator i = _folders.begin(); i != _folders.end(); ++i)
+	{
+		i->second->save(out);
+	}
+	out << YAML::EndSeq;
+
 	out << YAML::EndMap;
 
 	sav << out.c_str();
@@ -603,7 +628,12 @@ void setBool(const std::string& id, bool value)
  */
 std::vector<std::string> getRulesets()
 {
-	return _rulesets;
+	std::vector<std::string> temporary;
+	for (std::map<std::string, OptionsFolders*>::const_iterator i = _folders.begin(); i != _folders.end(); ++i)
+	{
+		temporary.insert( temporary.end(), (((*i).second)->getRulesets()).begin(), (((*i).second)->getRulesets()).end() );
+	}
+	return temporary;
 }
 
 std::vector<std::string> getPurchaseExclusions()

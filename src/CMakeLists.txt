@@ -214,6 +214,8 @@ set ( engine_src
   Engine/OpenGL.h
   Engine/Options.cpp
   Engine/Options.h
+  Engine/OptionsFolders.cpp
+  Engine/OptionsFolders.h
   Engine/CrossPlatform.cpp
   Engine/CrossPlatform.h
   Engine/Sound.h
