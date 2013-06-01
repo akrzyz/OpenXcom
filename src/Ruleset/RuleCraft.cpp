@@ -27,7 +27,7 @@ namespace OpenXcom
  * type of craft.
  * @param type String defining the type.
  */
-RuleCraft::RuleCraft(const std::string &type) : _type(type), _sprite(-1), _fuelMax(0), _damageMax(0), _speedMax(0), _accel(0), _weapons(0), _soldiers(0), _vehicles(0), _costBuy(0), _refuelItem(""), _repairRate(1), _refuelRate(1), _radarRange(600), _transferTime(0), _score(0), _battlescapeTerrainData(0), _spacecraft(false)
+RuleCraft::RuleCraft(const std::string &type, const std::string &folder) : _type(type), _folder(folder), _sprite(-1), _fuelMax(0), _damageMax(0), _speedMax(0), _accel(0), _weapons(0), _soldiers(0), _vehicles(0), _costBuy(0), _refuelItem(""), _repairRate(1), _refuelRate(1), _radarRange(600), _transferTime(0), _score(0), _battlescapeTerrainData(0), _spacecraft(false)
 {
 
 }
@@ -119,7 +119,7 @@ void RuleCraft::load(const YAML::Node &node, Ruleset *ruleset)
 		{
 			std::string name;
 			i.second()["name"] >> name;
-			RuleTerrain *rule = new RuleTerrain(name);
+			RuleTerrain *rule = new RuleTerrain(name, _folder);
 			rule->load(i.second(), ruleset);
 			_battlescapeTerrainData = rule;
 		}

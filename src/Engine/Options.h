@@ -21,6 +21,8 @@
 
 #include <string>
 #include <vector>
+#include <map>
+#include "OptionsFolders.h"
 
 namespace OpenXcom
 {
@@ -51,8 +53,12 @@ namespace Options
 	void save(const std::string &filename = "options");
 	/// Gets the game's data folder.
 	std::string getDataFolder();
+	/// Gets the game's data folder of specific game entry.
+	std::string getDataFolder(const std::string &gameName);
 	/// Sets the game's data folder.
 	void setDataFolder(const std::string &folder);
+	/// Gets folder to openxcom's data of specific game entry.
+	std::string getOpenxcomFolder(const std::string &gameName);
 	/// Gets the game's data list.
 	std::vector<std::string> *getDataList();
 	/// Gets the game's user folder.
@@ -70,9 +76,11 @@ namespace Options
 	/// Sets a boolean option.
 	void setBool(const std::string& id, bool value);
 	/// Gets the list of rulesets to use.
-	std::vector<std::string> getRulesets();
-	/// Gets the list of rulesets to use.
+	std::map<std::string, std::string> getRulesets();
+	/// Gets the list of items that can't be purchased after technological breakthrough.
 	std::vector<std::string> getPurchaseExclusions();
+	/// Gets the list of OptionsFolders class items.
+	std::map<std::string, OptionsFolders*> getOptionsFolders();
 }
 
 }

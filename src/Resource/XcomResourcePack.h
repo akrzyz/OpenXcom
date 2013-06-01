@@ -32,11 +32,11 @@ class XcomResourcePack : public ResourcePack
 {
 public:
 	/// Creates the X-Com ruleset.
-	XcomResourcePack(std::map<std::string, ExtraSprites *> extraSprites);
+	XcomResourcePack(std::map<std::string, ExtraSprites *> extraSprites, const std::string &gameFolder);
 	/// Cleans up the X-Com ruleset.
 	~XcomResourcePack();
 	/// Loads battlescape specific resources
-	void loadBattlescapeResources();
+	void loadBattlescapeResources(const std::string &gameFolder);
 };
 
 }

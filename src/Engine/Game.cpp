@@ -469,11 +469,7 @@ Ruleset *Game::getRuleset() const
 void Game::loadRuleset()
 {
 	_rules = new Ruleset();
-	std::vector<std::string> rulesets = Options::getRulesets();
-	for (std::vector<std::string>::iterator i = rulesets.begin(); i != rulesets.end(); ++i)
-	{
-		_rules->load(*i);
-	}
+	_rules->load(Options::getRulesets());
 }
 
 /**

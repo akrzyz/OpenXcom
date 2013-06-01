@@ -97,16 +97,16 @@ protected:
 	std::vector<std::vector<int> > _alienItemLevels;
 
 	/// Loads a ruleset from a YAML file.
-	void loadFile(const std::string &filename);
+	void loadFile(const std::string &filename, const std::string &folder);
 	/// Loads all ruleset files from a directory.
-	void loadFiles(const std::string &dirname);
+	void loadFiles(const std::string &dirname, const std::string &shortFolder);
 public:
 	/// Creates a blank ruleset.
 	Ruleset();
 	/// Cleans up the ruleset.
 	virtual ~Ruleset();
 	/// Loads a ruleset from the given source.
-	void load(const std::string &source);
+	void load(const std::map<std::string, std::string> &listRulesets);
 	/// Saves a ruleset to a YAML file.
 	void save(const std::string &filename) const;
 	/// Generates the starting saved game.
@@ -146,7 +146,7 @@ public:
 	/// Gets terrains for battlescape games.
 	RuleTerrain *getTerrain(const std::string &name) const;
 	/// Gets mapdatafile for battlescape games.
-	MapDataSet *getMapDataSet(const std::string &name);
+	MapDataSet *getMapDataSet(const std::string &name, const std::string &dataFolder);
 	/// Gets soldier unit rules.
 	RuleSoldier *getSoldier(const std::string &name) const;
 	/// Gets generated unit rules.

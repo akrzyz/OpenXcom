@@ -21,33 +21,84 @@
 
 namespace OpenXcom
 {
-	/// Creates a blank option folder for game.
-	OptionsFolders::OptionsFolders(const std::string &type)
+/// Creates a blank option folder for game.
+OptionsFolders::OptionsFolders(const std::string &type) : _type(type), _vanillaFolder(""), _openxcomFolder("")
+{
+
+}
+
+/// Creates basic option folder for game - contains entry ruleset 'name'.
+OptionsFolders::OptionsFolders(const std::string &type,const std::string &name) : _type(type), _vanillaFolder(""), _openxcomFolder("")
+{
+	_rulesets.push_back(name);
+}
+
+/// Cleans up the option folder for game.
+OptionsFolders::~OptionsFolders()
+{
+
+}
+
+/// Loads the game entry from YAML.
+void OptionsFolders::load(const YAML::Node& node)
+{
+	for (YAML::Iterator i = node.begin(); i != node.end(); ++i)
 	{
-
+		std::string key;
+		i.first() >> key;
+		if (key == "vanilla")
+		{
+			i.second() >> _vanillaFolder;
+		}
+		else if (key == "openxcom")
+		{
+			i.second() >> _openxcomFolder;
+		}
+		else if (key == "rulesets")
+		{
+			_rulesets.clear();
+			for (YAML::Iterator j = i.second().begin(); j != i.second().end(); ++j)
+			{
+				std::string name;
+				*j >> name;
+				_rulesets.push_back(name);
+			}
+		}
 	}
+}
 
-	/// Cleans up the option folder for game.
-	OptionsFolders::~OptionsFolders()
+/// Saves the game entry to YAML.
+void OptionsFolders::save(YAML::Emitter& out) const
+{
+	out << YAML::Key << _type << YAML::Value;
+	out << YAML::BeginMap;
+	out << YAML::Key << "vanilla" << YAML::Value << _vanillaFolder;
+	out << YAML::Key << "openxcom" << YAML::Value << _openxcomFolder;
+	out << YAML::Key << "rulesets" << YAML::Value;
+	out << YAML::BeginSeq;
+	for (std::vector<std::string>::const_iterator i = _rulesets.begin(); i != _rulesets.end(); ++i)
 	{
-
+		out << (*i);
 	}
+	out << YAML::EndSeq;
+	out << YAML::EndMap;
+}
 
-	/// Loads the game entry from YAML.
-	void OptionsFolders::load(const YAML::Node& node)
-	{
+/// Gets the list of rulesets to use with current game entry.
+std::vector<std::string> OptionsFolders::getRulesets()
+{
+	return _rulesets;
+}
 
-	}
+/// Gets vanilla data folder from entry.
+std::string OptionsFolders::getVanillaFolder()
+{
+	return _vanillaFolder;
+}
 
-	/// Saves the game entry to YAML.
-	void OptionsFolders::save(YAML::Emitter& out) const
-	{
-
-	}
-
-	/// Gets the list of rulesets to use with current game entry.
-	std::vector<std::string> OptionsFolders::getRulesets()
-	{
-		return _rulesets;
-	}
+/// Gets additional data folder from entry.
+std::string OptionsFolders::getOpenxcomFolder()
+{
+	return _openxcomFolder;
+}
 }

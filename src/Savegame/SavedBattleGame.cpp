@@ -112,9 +112,10 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 
 	for (YAML::Iterator i = node["mapdatasets"].begin(); i != node["mapdatasets"].end(); ++i)
 	{
-		std::string name;
-		*i >> name;
-		MapDataSet *mds = new MapDataSet(name);
+		std::string name, folder;
+		i.first() >> name;
+		i.second() >> folder;
+		MapDataSet *mds = new MapDataSet(name, folder);
 		_mapDataSets.push_back(mds);
 	}
 
@@ -357,7 +358,7 @@ void SavedBattleGame::save(YAML::Emitter &out) const
 	out << YAML::BeginSeq;
 	for (std::vector<MapDataSet*>::const_iterator i = _mapDataSets.begin(); i != _mapDataSets.end(); ++i)
 	{
-		out << (*i)->getName();
+		out << YAML::Key << (*i)->getName() << YAML::Value << (*i)->getDataFolder();
 	}
 	out << YAML::EndSeq;
 #if 0

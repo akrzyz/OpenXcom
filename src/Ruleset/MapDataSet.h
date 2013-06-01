@@ -40,14 +40,14 @@ class ResourcePack;
 class MapDataSet
 {
 private:
-	std::string _name;
+	std::string _name, _dataFolder;
 	std::vector<MapData*> _objects;
 	SurfaceSet *_surfaceSet;
 	bool _loaded;
 	static MapData *_blankTile;
 	static MapData *_scorchedTile;
 public:
-	MapDataSet(const std::string &name);
+	MapDataSet(const std::string &name, const std::string &dataFolder);
 	~MapDataSet();
 	/// Loads the map data set from YAML.
 	void load(const YAML::Node& node);
@@ -57,6 +57,8 @@ public:
 	static void loadLOFTEMPS(const std::string &filename, std::vector<Uint16> *voxelData);
 	/// Get the dataset name (used for MAP generation).
 	std::string getName() const;
+	/// Get the dataset folder (used for MAP generation).
+	std::string getDataFolder() const;
 	/// Get the dataset size.
 	int getSize() const;
 	/// Get objects in this dataset.

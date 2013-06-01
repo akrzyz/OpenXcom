@@ -18,14 +18,12 @@
  */
 
 #include "Options.h"
-#include "OptionsFolders.h"
 #include "../version.h"
 #include <SDL.h>
 #include <SDL_keysym.h>
 #include <SDL_mixer.h>
 #include <stdio.h>
 #include <iostream>
-#include <map>
 #include <sstream>
 #include <fstream>
 #include <algorithm>
@@ -238,8 +236,10 @@ void createDefault()
 	setInt("keyBattleCenterEnemy9", SDLK_9);
 	setInt("keyBattleCenterEnemy10", SDLK_0);
 
+	
 	_folders.clear();
-//	_folders = new OptionsFolders("Xcom1Ruleset");
+	OptionsFolders *temporary = new OptionsFolders("xcom1","Xcom1Ruleset");
+	_folders["xcom1"] = temporary;
 }
 
 /**
@@ -455,25 +455,16 @@ void load(const std::string &filename)
 		(*pName) >> _purchaseexclusions;
 	}
 
-	if (const YAML::Node *pName = doc.FindValue("games"))
+	if (const YAML::Node *games = doc.FindValue("games"))
 	{
-/*		const YAML::Node *xcom1 = doc.FindValue("xcom1");
-		if (!xcom1)
-		{
-			xcom1 = &doc;
-		}*/
 
-		for (YAML::Iterator i = options->begin(); i != options->end(); ++i)
+		for (YAML::Iterator i = games->begin(); i != games->end(); ++i)
 		{
 			std::string key;
 			i.first() >> key;
-			for (YAML::Iterator j = i.second().begin(); j != i.second().end(); ++j)
-			{
-				OptionsFolders *temporary = new OptionsFolders(key);
-				_folders[key] = temporary;
-				_folders[key]->load(*pName);
-			}
-			
+			OptionsFolders *temporary = new OptionsFolders(key);
+			temporary->load(i.second());
+			_folders[key] = temporary;
 		}
 	}
 
@@ -498,12 +489,12 @@ void save(const std::string &filename)
 	out << YAML::BeginMap;
 	out << YAML::Key << "options" << YAML::Value << _options;
 	out << YAML::Key << "games" << YAML::Value;
-	out << YAML::BeginSeq;
+	out << YAML::BeginMap;
 	for (std::map<std::string, OptionsFolders*>::const_iterator i = _folders.begin(); i != _folders.end(); ++i)
 	{
 		i->second->save(out);
 	}
-	out << YAML::EndSeq;
+	out << YAML::EndMap;
 
 	out << YAML::EndMap;
 
@@ -512,13 +503,24 @@ void save(const std::string &filename)
 }
 
 /**
- * Returns the game's current Data folder where resources
- * and X-Com files are loaded from.
+ * Returns the game's main Data folder where resources
+ * are loaded from.
  * @return Full path to Data folder.
  */
 std::string getDataFolder()
 {
 	return _dataFolder;
+}
+
+/**
+ * Returns the game's Data folder where resources and X-Com files
+ * for specific game entry are loaded from.
+ * @param gameName Game entry.
+ * @return Full path to Data folder.
+ */
+std::string getDataFolder(const std::string &gameName)
+{
+	return _dataFolder + _folders[gameName]->getVanillaFolder();
 }
 
 /**
@@ -529,6 +531,17 @@ std::string getDataFolder()
 void setDataFolder(const std::string &folder)
 {
 	_dataFolder = folder;
+}
+
+/**
+ * Returns folder to additional openxcom specific data
+ * for specific game entry to load from.
+ * @param gameName Game entry.
+ * @return Full path to OpenxcomData folder.
+ */
+std::string getOpenxcomFolder(const std::string &gameName)
+{
+	return _dataFolder + _folders[gameName]->getOpenxcomFolder();
 }
 
 /**
@@ -626,14 +639,18 @@ void setBool(const std::string& id, bool value)
  * Returns the list of rulesets to be used by the game.
  * @return Ruleset list.
  */
-std::vector<std::string> getRulesets()
+std::map<std::string, std::string> getRulesets()
 {
-	std::vector<std::string> temporary;
+	std::map<std::string, std::string> result;
 	for (std::map<std::string, OptionsFolders*>::const_iterator i = _folders.begin(); i != _folders.end(); ++i)
 	{
-		temporary.insert( temporary.end(), (((*i).second)->getRulesets()).begin(), (((*i).second)->getRulesets()).end() );
+		std::vector<std::string> currentFolder = (*i).second->getRulesets();
+		for (std::vector<std::string>::iterator j = currentFolder.begin(); j != currentFolder.end(); ++j)
+		{
+			result.insert( std::pair<std::string, std::string> ((*i).first, *j) );
+		}
 	}
-	return temporary;
+	return result;
 }
 
 std::vector<std::string> getPurchaseExclusions()
@@ -641,5 +658,12 @@ std::vector<std::string> getPurchaseExclusions()
 	return _purchaseexclusions;
 }
 
+/**
+ * Gets the list of OptionsFolders class items.
+ */
+std::map<std::string, OptionsFolders*> getOptionsFolders()
+{
+	return _folders;
+}
 }
 }

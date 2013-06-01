@@ -995,7 +995,7 @@ void BattlescapeGenerator::generateMap()
 	int ufoX = 0, ufoY = 0;
 	bool placed = false;
 
-	MapBlock* dummy = new MapBlock(_terrain, "dummy", 0, 0, MT_DEFAULT);
+	MapBlock* dummy = new MapBlock(_terrain, "", "dummy", 0, 0, MT_DEFAULT);
 	MapBlock* craftMap = 0;
 	MapBlock* ufoMap = 0;
 
@@ -1515,7 +1515,7 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, RuleTe
 	char size[3];
 	unsigned char value[4];
 	std::stringstream filename;
-	filename << "MAPS/" << mapblock->getName() << ".MAP";
+	filename << terrain->getFolder() << "MAPS/" << mapblock->getName() << ".MAP";
 	int terrainObjectID;
 
 	// Load file
@@ -1612,7 +1612,7 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int s
 	int id = 0;
 	char value[24];
 	std::stringstream filename;
-	filename << "ROUTES/" << mapblock->getName() << ".RMP";
+	filename << mapblock->getFolder() << "ROUTES/" << mapblock->getName() << ".RMP";
 
 	// Load file
 	std::ifstream mapFile (CrossPlatform::getDataFile(filename.str()).c_str(), std::ios::in| std::ios::binary);

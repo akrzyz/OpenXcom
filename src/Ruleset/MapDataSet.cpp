@@ -35,7 +35,7 @@ MapData *MapDataSet::_scorchedTile = 0;
 /**
 * MapDataSet construction.
 */
-MapDataSet::MapDataSet(const std::string &name) : _name(name), _objects(), _surfaceSet(0), _loaded(false)
+MapDataSet::MapDataSet(const std::string &name, const std::string &dataFolder) : _name(name), _dataFolder(dataFolder), _objects(), _surfaceSet(0), _loaded(false)
 {
 }
 
@@ -75,6 +75,15 @@ void MapDataSet::save(YAML::Emitter &out) const
 std::string MapDataSet::getName() const
 {
 	return _name;
+}
+
+/**
+* Gets the MapDataSet folder (string).
+* @return folder.
+*/
+std::string MapDataSet::getDataFolder() const
+{
+	return _dataFolder;
 }
 
 /**
@@ -167,7 +176,7 @@ void MapDataSet::loadData()
 
 	// Load Terrain Data from MCD file
 	std::stringstream s;
-	s << "TERRAIN/" << _name << ".MCD";
+	s << _dataFolder + "TERRAIN/" << _name << ".MCD";
 
 	// Load file
 	std::ifstream mapFile (CrossPlatform::getDataFile(s.str()).c_str(), std::ios::in | std::ios::binary);
@@ -242,8 +251,8 @@ void MapDataSet::loadData()
 
 	// Load terrain sprites/surfaces/PCK files into a surfaceset
 	std::stringstream s1,s2;
-	s1 << "TERRAIN/" << _name << ".PCK";
-	s2 << "TERRAIN/" << _name << ".TAB";
+	s1 << _dataFolder + "TERRAIN/" << _name << ".PCK";
+	s2 << _dataFolder + "TERRAIN/" << _name << ".TAB";
 	_surfaceSet = new SurfaceSet(32, 40);
 	_surfaceSet->loadPck(CrossPlatform::getDataFile(s1.str()), CrossPlatform::getDataFile(s2.str()));
 

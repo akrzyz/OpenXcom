@@ -433,7 +433,11 @@ void StartState::think()
 			_game->loadRuleset();
 			Log(LOG_INFO) << "Ruleset loaded successfully.";
 			Log(LOG_INFO) << "Loading resources...";
-			_game->setResourcePack(new XcomResourcePack(_game->getRuleset()->getExtraSprites()));
+			std::map<std::string, OptionsFolders*> folders = Options::getOptionsFolders();
+			for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
+			{
+				_game->setResourcePack( new XcomResourcePack(_game->getRuleset()->getExtraSprites(), ((*i).second)->getVanillaFolder()) );
+			}
 			Log(LOG_INFO) << "Resources loaded successfully.";
 			std::vector<std::string> langs = Language::getList(0);
 			if (langs.empty())

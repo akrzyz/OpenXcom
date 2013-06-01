@@ -185,23 +185,28 @@ Ruleset::~Ruleset()
 
 /**
  * Loads a ruleset's contents from the given source.
+ * @param listRulesets List of folder names.
  * @param source The source to use.
  */
-void Ruleset::load(const std::string &source)
+void Ruleset::load(const std::map<std::string, std::string> &listRulesets)
 {
-	std::string dirname = CrossPlatform::getDataFolder("Ruleset/" + source + '/');
-	if (!CrossPlatform::folderExists(dirname))
-		loadFile(CrossPlatform::getDataFile("Ruleset/" + source + ".rul"));
-	else
-		loadFiles(dirname);
+	for (std::map<std::string, std::string>::const_iterator i = listRulesets.begin(); i != listRulesets.end(); ++i)
+	{
+		std::string dirname = CrossPlatform::getDataFolder(Options::getOpenxcomFolder(i->first) + "Ruleset/" + i->second + '/');
+		if (!CrossPlatform::folderExists(dirname))
+			loadFile(CrossPlatform::getDataFile(Options::getOpenxcomFolder((*i).first) + "Ruleset/" + i->second + ".rul"), Options::getDataFolder(i->first));
+		else
+			loadFiles(dirname, Options::getDataFolder(i->first));
+	}
 }
 
 /**
  * Loads a ruleset's contents from a YAML file.
  * Rules that match pre-existing rules overwrite them.
+ * @param folder Directory containing files for this ruleset.
  * @param filename YAML filename.
  */
-void Ruleset::loadFile(const std::string &filename)
+void Ruleset::loadFile(const std::string &filename, const std::string &folder)
 {
 	std::ifstream fin(filename.c_str());
 	if (!fin)
@@ -289,7 +294,7 @@ void Ruleset::loadFile(const std::string &filename)
 				}
 				else
 				{
-					rule = new RuleCraft(type);
+					rule = new RuleCraft(type, folder);
 					_crafts[type] = rule;
 					_craftsIndex.push_back(type);
 				}
@@ -349,7 +354,7 @@ void Ruleset::loadFile(const std::string &filename)
 				}
 				else
 				{
-					rule = new RuleUfo(type);
+					rule = new RuleUfo(type, folder);
 					_ufos[type] = rule;
 					_ufosIndex.push_back(type);
 				}
@@ -388,7 +393,7 @@ void Ruleset::loadFile(const std::string &filename)
 				}
 				else
 				{
-					rule = new RuleTerrain(type);
+					rule = new RuleTerrain(type, folder);
 					_terrains[type] = rule;
 					_terrainIndex.push_back(type);
 				}
@@ -698,15 +703,16 @@ void Ruleset::loadFile(const std::string &filename)
 
 /**
  * Load the contents of all rule files in the given directory.
+ * @param shortFolder Short name of directory containing rule files.
  * @param dirname The name of an existing directory containing rule files.
  */
-void Ruleset::loadFiles(const std::string &dirname)
+void Ruleset::loadFiles(const std::string &dirname, const std::string &shortFolder)
 {
 	std::vector<std::string> names = CrossPlatform::getFolderContents(dirname, "rul");
 
 	for (std::vector<std::string>::iterator i = names.begin(); i != names.end(); ++i)
 	{
-		loadFile(dirname + *i);
+		loadFile(dirname + *i, shortFolder);
 	}
 }
 
@@ -1132,12 +1138,12 @@ RuleTerrain *Ruleset::getTerrain(const std::string &name) const
  * @param name datafile name.
  * @return Rules for the datafile.
  */
-MapDataSet *Ruleset::getMapDataSet(const std::string &name)
+MapDataSet *Ruleset::getMapDataSet(const std::string &name, const std::string &dataFolder)
 {
 	std::map<std::string, MapDataSet*>::iterator map = _mapDataSets.find(name);
 	if (map == _mapDataSets.end())
 	{
-		MapDataSet *set = new MapDataSet(name);
+		MapDataSet *set = new MapDataSet(name, dataFolder);
 		_mapDataSets[name] = set;
 		return set;
 	}
