@@ -764,6 +764,10 @@ void DogfightState::move()
 			if (_currentDist < _targetDist && !_ufo->isCrashed() && !_craft->isDestroyed())
 			{
 				distanceChange = 4;
+				if (_currentDist + distanceChange >_targetDist)
+				{
+					distanceChange = _targetDist - _currentDist;
+				}
 			}
 			else if (_currentDist > _targetDist && !_ufo->isCrashed() && !_craft->isDestroyed())
 			{
