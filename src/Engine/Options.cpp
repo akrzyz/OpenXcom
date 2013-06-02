@@ -644,10 +644,10 @@ std::map<std::string, std::string> getRulesets()
 	std::map<std::string, std::string> result;
 	for (std::map<std::string, OptionsFolders*>::const_iterator i = _folders.begin(); i != _folders.end(); ++i)
 	{
-		std::vector<std::string> currentFolder = (*i).second->getRulesets();
+		std::vector<std::string> currentFolder = i->second->getRulesets();
 		for (std::vector<std::string>::iterator j = currentFolder.begin(); j != currentFolder.end(); ++j)
 		{
-			result.insert( std::pair<std::string, std::string> ((*i).first, *j) );
+			result.insert( std::pair<std::string, std::string> (i->first, *j) );
 		}
 	}
 	return result;

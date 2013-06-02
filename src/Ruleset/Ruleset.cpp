@@ -194,7 +194,7 @@ void Ruleset::load(const std::map<std::string, std::string> &listRulesets)
 	{
 		std::string dirname = CrossPlatform::getDataFolder(Options::getOpenxcomFolder(i->first) + "Ruleset/" + i->second + '/');
 		if (!CrossPlatform::folderExists(dirname))
-			loadFile(CrossPlatform::getDataFile(Options::getOpenxcomFolder((*i).first) + "Ruleset/" + i->second + ".rul"), Options::getDataFolder(i->first));
+			loadFile(CrossPlatform::getDataFile(Options::getOpenxcomFolder(i->first) + "Ruleset/" + i->second + ".rul"), Options::getDataFolder(i->first));
 		else
 			loadFiles(dirname, Options::getDataFolder(i->first));
 	}
