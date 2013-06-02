@@ -647,7 +647,7 @@ std::map<std::string, std::string> getRulesets()
 		std::vector<std::string> currentFolder = i->second->getRulesets();
 		for (std::vector<std::string>::iterator j = currentFolder.begin(); j != currentFolder.end(); ++j)
 		{
-			result.insert( std::pair<std::string, std::string> (i->first, *j) );
+			result.insert( std::pair<std::string, std::string> (*j, i->first) );
 		}
 	}
 	return result;

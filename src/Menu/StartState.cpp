@@ -436,7 +436,7 @@ void StartState::think()
 			std::map<std::string, OptionsFolders*> folders = Options::getOptionsFolders();
 			for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
 			{
-				_game->setResourcePack( new XcomResourcePack(_game->getRuleset()->getExtraSprites(), ((*i).second)->getVanillaFolder()) );
+				_game->setResourcePack( new XcomResourcePack(_game->getRuleset()->getExtraSprites(), i->second->getVanillaFolder()) );
 			}
 			Log(LOG_INFO) << "Resources loaded successfully.";
 			std::vector<std::string> langs = Language::getList(0);

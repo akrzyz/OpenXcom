@@ -192,11 +192,11 @@ void Ruleset::load(const std::map<std::string, std::string> &listRulesets)
 {
 	for (std::map<std::string, std::string>::const_iterator i = listRulesets.begin(); i != listRulesets.end(); ++i)
 	{
-		std::string dirname = CrossPlatform::getDataFolder(Options::getOpenxcomFolder(i->first) + "Ruleset/" + i->second + '/');
+		std::string dirname = CrossPlatform::getDataFolder(Options::getOpenxcomFolder(i->second) + "Ruleset/" + i->first + '/');
 		if (!CrossPlatform::folderExists(dirname))
-			loadFile(CrossPlatform::getDataFile(Options::getOpenxcomFolder(i->first) + "Ruleset/" + i->second + ".rul"), Options::getDataFolder(i->first));
+			loadFile(CrossPlatform::getDataFile(Options::getOpenxcomFolder(i->second) + "Ruleset/" + i->first + ".rul"), Options::getDataFolder(i->second));
 		else
-			loadFiles(dirname, Options::getDataFolder(i->first));
+			loadFiles(dirname, Options::getDataFolder(i->second));
 	}
 }
 
@@ -704,6 +704,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder)
 /**
  * Load the contents of all rule files in the given directory.
  * @param shortFolder Short name of directory containing rule files.
+ * @param auxShortFolder Short name of backup directory containing rule files.
  * @param dirname The name of an existing directory containing rule files.
  */
 void Ruleset::loadFiles(const std::string &dirname, const std::string &shortFolder)
