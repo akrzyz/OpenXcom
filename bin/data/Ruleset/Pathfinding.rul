@@ -1,0 +1,6 @@
+extraSprites:
+  - type: Pathfinding
+    width: 64
+    height: 80
+    files:
+      0: Resources/Pathfinding/

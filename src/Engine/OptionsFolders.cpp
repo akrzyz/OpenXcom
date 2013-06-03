@@ -28,9 +28,9 @@ OptionsFolders::OptionsFolders(const std::string &type) : _type(type), _vanillaF
 }
 
 /// Creates basic option folder for game - contains entry ruleset 'name'.
-OptionsFolders::OptionsFolders(const std::string &type,const std::string &name) : _type(type), _vanillaFolder(""), _openxcomFolder("")
+OptionsFolders::OptionsFolders(const std::string &type, const std::string &name) : _type(type), _vanillaFolder(""), _openxcomFolder("")
 {
-	_rulesets.push_back(name);
+	_rulesets.insert(std::pair<std::string, std::string>(name, ""));
 }
 
 /// Cleans up the option folder for game.
@@ -59,9 +59,10 @@ void OptionsFolders::load(const YAML::Node& node)
 			_rulesets.clear();
 			for (YAML::Iterator j = i.second().begin(); j != i.second().end(); ++j)
 			{
-				std::string name;
-				*j >> name;
-				_rulesets.push_back(name);
+				std::string name, folder;
+				(*j)["name"] >> name;
+				(*j)["folder"] >> folder;
+				_rulesets.insert(std::pair<std::string, std::string>(name, folder));
 			}
 		}
 	}
@@ -76,16 +77,19 @@ void OptionsFolders::save(YAML::Emitter& out) const
 	out << YAML::Key << "openxcom" << YAML::Value << _openxcomFolder;
 	out << YAML::Key << "rulesets" << YAML::Value;
 	out << YAML::BeginSeq;
-	for (std::vector<std::string>::const_iterator i = _rulesets.begin(); i != _rulesets.end(); ++i)
+	for (std::map<std::string, std::string>::const_iterator i = _rulesets.begin(); i != _rulesets.end(); ++i)
 	{
-		out << (*i);
+		out << YAML::BeginMap;
+		out << YAML::Key << "name" << YAML::Value << i->first;
+		out << YAML::Key << "folder" << YAML::Value << i->second;
+		out << YAML::EndMap;
 	}
 	out << YAML::EndSeq;
 	out << YAML::EndMap;
 }
 
 /// Gets the list of rulesets to use with current game entry.
-std::vector<std::string> OptionsFolders::getRulesets()
+std::map<std::string, std::string> OptionsFolders::getRulesets()
 {
 	return _rulesets;
 }

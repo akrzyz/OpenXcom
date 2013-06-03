@@ -469,7 +469,7 @@ Ruleset *Game::getRuleset() const
 void Game::loadRuleset()
 {
 	_rules = new Ruleset();
-	_rules->load(Options::getRulesets());
+	_rules->load();
 }
 
 /**

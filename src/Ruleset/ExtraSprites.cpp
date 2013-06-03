@@ -22,7 +22,7 @@
 namespace OpenXcom
 {
 
-ExtraSprites::ExtraSprites() : _width(320), _height(200), _singleImage(false)
+ExtraSprites::ExtraSprites(const std::string &folder) : _folder(folder), _width(320), _height(200), _singleImage(false)
 {
 }
 
@@ -81,5 +81,10 @@ int ExtraSprites::getHeight()
 bool ExtraSprites::getSingleImage()
 {
 	return _singleImage;
+}
+
+std::string ExtraSprites::getFolder()
+{
+	return _folder;
 }
 }

@@ -106,7 +106,7 @@ public:
 	/// Cleans up the ruleset.
 	virtual ~Ruleset();
 	/// Loads a ruleset from the given source.
-	void load(const std::map<std::string, std::string> &listRulesets);
+	void load();
 	/// Saves a ruleset to a YAML file.
 	void save(const std::string &filename) const;
 	/// Generates the starting saved game.

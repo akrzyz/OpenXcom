@@ -188,15 +188,20 @@ Ruleset::~Ruleset()
  * @param listRulesets List of folder names.
  * @param source The source to use.
  */
-void Ruleset::load(const std::map<std::string, std::string> &listRulesets)
+void Ruleset::load()
 {
-	for (std::map<std::string, std::string>::const_iterator i = listRulesets.begin(); i != listRulesets.end(); ++i)
+	const std::map<std::string, OptionsFolders*> folders = Options::getOptionsFolders();
+	for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
 	{
-		std::string dirname = CrossPlatform::getDataFolder(Options::getOpenxcomFolder(i->second) + "Ruleset/" + i->first + '/');
-		if (!CrossPlatform::folderExists(dirname))
-			loadFile(CrossPlatform::getDataFile(Options::getOpenxcomFolder(i->second) + "Ruleset/" + i->first + ".rul"), Options::getDataFolder(i->second));
-		else
-			loadFiles(dirname, Options::getDataFolder(i->second));
+		std::map<std::string, std::string> rulesets = i->second->getRulesets();
+		for (std::map<std::string, std::string>::const_iterator j = rulesets.begin(); j != rulesets.end(); ++j)
+		{
+			std::string dirname = CrossPlatform::getDataFolder(Options::getOpenxcomFolder(i->first) + "Ruleset/" + j->first + '/');
+			if (!CrossPlatform::folderExists(dirname))
+				loadFile(CrossPlatform::getDataFile(Options::getOpenxcomFolder(i->first) + "Ruleset/" + j->first + ".rul"), CrossPlatform::getDataFolder(j->second));
+			else
+				loadFiles(dirname, CrossPlatform::getDataFolder(j->second));
+		}
 	}
 }
 
@@ -671,7 +676,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder)
 				}
 				else
 				{
-					std::auto_ptr<ExtraSprites> extraSprites(new ExtraSprites());
+					std::auto_ptr<ExtraSprites> extraSprites(new ExtraSprites(folder));
 					extraSprites->load(*j);
 					_extraSprites[type] = extraSprites.release();
 					_extraSpritesIndex.push_back(type);

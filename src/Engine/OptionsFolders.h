@@ -35,12 +35,12 @@ class OptionsFolders
 private:
 	std::string _type;
 	std::string _vanillaFolder, _openxcomFolder;
-	std::vector<std::string> _rulesets;
+	std::map<std::string, std::string> _rulesets;
 public:
 	/// Creates a blank option folder for game.
 	OptionsFolders(const std::string &type);
 	/// Creates basic option folder for game - contains entry ruleset 'name'.
-	OptionsFolders(const std::string &type,const std::string &name);
+	OptionsFolders(const std::string &type, const std::string &name);
 	/// Cleans up the option folder for game.
 	~OptionsFolders();
 	/// Loads the game entry from YAML.
@@ -48,7 +48,7 @@ public:
 	/// Saves the game entry to YAML.
 	void save(YAML::Emitter& out) const;
 	/// Gets the list of rulesets to use with current game entry.
-	std::vector<std::string> getRulesets();
+	std::map<std::string, std::string> getRulesets();
 	/// Gets vanilla data folder from entry.
 	std::string getVanillaFolder();
 	/// Gets additional data folder from entry.

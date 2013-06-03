@@ -526,7 +526,7 @@ XcomResourcePack::XcomResourcePack(std::map<std::string, ExtraSprites *> extraSp
 				_surfaces[i->first] = new Surface((*i).second->getWidth(), (*i).second->getHeight());
 			}
 			s.str("");
-			s << CrossPlatform::getDataFile(i->second->getSprites()->operator[](0));
+			s << CrossPlatform::getDataFile(i->second->getFolder() + i->second->getSprites()->operator[](0));
 			_surfaces[i->first]->loadImage(s.str());
 		}
 		else
@@ -542,7 +542,7 @@ XcomResourcePack::XcomResourcePack(std::map<std::string, ExtraSprites *> extraSp
 				{
 					int offset = j->first;
 					std::stringstream folder;
-					folder << CrossPlatform::getDataFolder(j->second);
+					folder << CrossPlatform::getDataFolder(i->second->getFolder() + j->second);
 					std::vector<std::string> contents = CrossPlatform::getFolderContents(folder.str());
 					for (std::vector<std::string>::iterator k = contents.begin();
 						k != contents.end(); ++k)
@@ -555,7 +555,7 @@ XcomResourcePack::XcomResourcePack(std::map<std::string, ExtraSprites *> extraSp
 				}
 				else
 				{
-					s << CrossPlatform::getDataFile(j->second);
+					s << CrossPlatform::getDataFile(i->second->getFolder() + j->second);
 					_sets[i->first]->getFrame(j->first)->loadImage(s.str());
 				}
 			}

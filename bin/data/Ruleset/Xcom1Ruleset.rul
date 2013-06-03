@@ -9311,12 +9311,6 @@ MCDPatches:
         deathTile: 75
       - MCDIndex: 73
         deathTile: 76
-extraSprites:
-  - type: Pathfinding
-    width: 64
-    height: 80
-    files:
-      0: Resources/Pathfinding/
 #New spritesheet Example:
 #  - type: GIANTBUNNY.PCK
 #    width: 32

@@ -28,16 +28,18 @@ class ExtraSprites
 {
 private:
 	std::map<int, std::string> _sprites;
+	std::string _folder;
 	int _width, _height;
 	bool _singleImage;
 public:
-	ExtraSprites();
+	ExtraSprites(const std::string &folder);
 	virtual ~ExtraSprites();
 	void load(const YAML::Node &node);
 	std::map<int, std::string> *getSprites();
 	int getWidth();
 	int getHeight();
 	bool getSingleImage();
+	std::string getFolder();
 };
 
 }

@@ -238,7 +238,7 @@ void createDefault()
 
 	
 	_folders.clear();
-	OptionsFolders *temporary = new OptionsFolders("xcom1","Xcom1Ruleset");
+	OptionsFolders *temporary = new OptionsFolders("xcom1", "Xcom1Ruleset");
 	_folders["xcom1"] = temporary;
 }
 
@@ -639,19 +639,16 @@ void setBool(const std::string& id, bool value)
  * Returns the list of rulesets to be used by the game.
  * @return Ruleset list.
  */
-std::map<std::string, std::string> getRulesets()
+/*std::map<std::string, std::string> getRulesets()
 {
 	std::map<std::string, std::string> result;
 	for (std::map<std::string, OptionsFolders*>::const_iterator i = _folders.begin(); i != _folders.end(); ++i)
 	{
-		std::vector<std::string> currentFolder = i->second->getRulesets();
-		for (std::vector<std::string>::iterator j = currentFolder.begin(); j != currentFolder.end(); ++j)
-		{
-			result.insert( std::pair<std::string, std::string> (*j, i->first) );
-		}
+		std::map<std::string, std::string> currentFolder = i->second->getRulesets();
+		result.insert( currentFolder.begin(), currentFolder.end() );
 	}
 	return result;
-}
+}*/
 
 std::vector<std::string> getPurchaseExclusions()
 {
