@@ -238,7 +238,7 @@ void createDefault()
 
 	
 	_folders.clear();
-	OptionsFolders *temporary = new OptionsFolders("xcom1", "Xcom1Ruleset");
+	OptionsFolders *temporary = new OptionsFolders("xcom1", "Xcom1Ruleset", "Pathfinding");
 	_folders["xcom1"] = temporary;
 }
 

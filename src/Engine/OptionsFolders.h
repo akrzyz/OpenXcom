@@ -39,8 +39,8 @@ private:
 public:
 	/// Creates a blank option folder for game.
 	OptionsFolders(const std::string &type);
-	/// Creates basic option folder for game - contains entry ruleset 'name'.
-	OptionsFolders(const std::string &type, const std::string &name);
+	/// Creates basic option folder for game - contains entry ruleset 'name1' and 'name2'.
+	OptionsFolders(const std::string &type, const std::string &name1, const std::string &name2);
 	/// Cleans up the option folder for game.
 	~OptionsFolders();
 	/// Loads the game entry from YAML.

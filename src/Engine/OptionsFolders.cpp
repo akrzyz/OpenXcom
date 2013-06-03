@@ -28,9 +28,10 @@ OptionsFolders::OptionsFolders(const std::string &type) : _type(type), _vanillaF
 }
 
 /// Creates basic option folder for game - contains entry ruleset 'name'.
-OptionsFolders::OptionsFolders(const std::string &type, const std::string &name) : _type(type), _vanillaFolder(""), _openxcomFolder("")
+OptionsFolders::OptionsFolders(const std::string &type, const std::string &name1, const std::string &name2) : _type(type), _vanillaFolder(""), _openxcomFolder("")
 {
-	_rulesets.insert(std::pair<std::string, std::string>(name, ""));
+	_rulesets.insert(std::pair<std::string, std::string>(name1, ""));
+	_rulesets.insert(std::pair<std::string, std::string>(name2, ""));
 }
 
 /// Cleans up the option folder for game.
