@@ -580,15 +580,11 @@ XcomResourcePack::XcomResourcePack(std::map<std::string, ExtraSprites *> extraSp
 				}
 				else
 				{
-<<<<<<< HEAD
-					s << CrossPlatform::getDataFile(i->second->getFolder() + j->second);
-=======
 					if (debugOutput)
 					{
 						Log(LOG_INFO) << "Adding/Replacing frame: " << j->first;
 					}
-					s << CrossPlatform::getDataFile(j->second);
->>>>>>> upstream/master
+					s << CrossPlatform::getDataFile(i->second->getFolder() + j->second);
 					_sets[i->first]->getFrame(j->first)->loadImage(s.str());
 				}
 			}
