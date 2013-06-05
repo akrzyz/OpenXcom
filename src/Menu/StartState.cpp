@@ -437,7 +437,7 @@ void StartState::think()
 //			for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
 //			{
 //				if (i->first == "Xcom1Ruleset")
-					_game->setResourcePack( new XcomResourcePack(_game->getRuleset()->getExtraSprites(), Options::getOptionsFolders().begin()->second->getVanillaFolder()) );
+					_game->setResourcePack( new XcomResourcePack(_game->getRuleset()->getExtraSprites(), _game->getRuleset()->getExtraSounds(), Options::getOptionsFolders().begin()->second->getVanillaFolder()) );
 //			}
 			Log(LOG_INFO) << "Resources loaded successfully.";
 			std::vector<std::string> langs = Language::getList(0);
