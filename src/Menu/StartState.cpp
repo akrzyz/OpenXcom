@@ -438,7 +438,7 @@ void StartState::think()
 			std::map<std::string, OptionsFolders*> folders = Options::getOptionsFolders();
 			for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
 			{
-				_game->getResourcePack()->loadGeoscapeResources(_game->getRuleset()->getExtraSprites(), _game->getRuleset()->getExtraSounds(), Options::getOptionsFolders().begin()->second->getVanillaFolder(), i->first);
+				_game->getResourcePack()->loadGeoscapeResources(_game->getRuleset()->getExtraSprites(), _game->getRuleset()->getExtraSounds(), i->second->getVanillaFolder(), i->first);
 			}
 			Log(LOG_INFO) << "Resources loaded successfully.";
 			std::vector<std::string> langs = Language::getList(0);

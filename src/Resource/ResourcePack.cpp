@@ -275,7 +275,7 @@ std::vector<Uint16> *ResourcePack::getVoxelData()
 }
 
 /**
- * Initializes the resource pack by loading all the resources
+ * Fills the resource pack with all the resources
  * contained in the original game folder.
  * @param extraSprites List of additional sprites.
  * @param ExtraSounds List of additional sounds.
@@ -302,22 +302,25 @@ void ResourcePack::loadGeoscapeResources(std::map<std::string, ExtraSprites *> e
 		_palettes[s2.str()] = new Palette();
 		_palettes[s2.str()]->loadDat(CrossPlatform::getDataFile(s1.str()), 128);
 
-		// Load fonts
-		Font::loadIndex(CrossPlatform::getDataFile("Language/Font.dat"));
-
-		std::string font[] = {"Big.fnt",
-							  "Small.fnt"};
-
-		for (int i = 0; i < 2; ++i)
+		// Load fonts only once
+		if (_fonts.empty())
 		{
-			std::stringstream s;
-			s << "Language/" << font[i];
-			if (font[i] == "Big.fnt")
-				_fonts[font[i]] = new Font(16, 16, 0);
-			else if (font[i] == "Small.fnt")
-				_fonts[font[i]] = new Font(8, 9, -1);
-			_fonts[font[i]]->getSurface()->loadScr(CrossPlatform::getDataFile(s.str()));
-			_fonts[font[i]]->load();
+			Font::loadIndex(CrossPlatform::getDataFile("Language/Font.dat"));
+
+			std::string font[] = {"Big.fnt",
+								  "Small.fnt"};
+
+			for (int i = 0; i < 2; ++i)
+			{
+				std::stringstream s;
+				s << "Language/" << font[i];
+				if (font[i] == "Big.fnt")
+					_fonts[font[i]] = new Font(16, 16, 0);
+				else if (font[i] == "Small.fnt")
+					_fonts[font[i]] = new Font(8, 9, -1);
+				_fonts[font[i]]->getSurface()->loadScr(CrossPlatform::getDataFile(s.str()));
+				_fonts[font[i]]->load();
+			}
 		}
 
 		// Load surfaces
@@ -727,127 +730,277 @@ void ResourcePack::loadGeoscapeResources(std::map<std::string, ExtraSprites *> e
 			surf->unlock();
 		}
 
-		Log(LOG_INFO) << "Loading extra resources from ruleset...";
-		bool debugOutput = Options::getBool("debug");
-		
-		for (std::map<std::string, ExtraSprites*>::iterator i = extraSprites.begin(); i != extraSprites.end(); ++i)
-		{
-			if (i->second->getSingleImage())
-			{
-				if (_surfaces.find(i->first) == _surfaces.end())
-				{
-					if (debugOutput)
-					{
-						Log(LOG_INFO) << "Creating new single image: " << i->first;
-					}
-					_surfaces[i->first] = new Surface((*i).second->getWidth(), (*i).second->getHeight());
-				}
-				else if (debugOutput)
-				{
-					Log(LOG_INFO) << "Adding/Replacing single image: " << i->first;
-				}
-				s.str("");
-				s << CrossPlatform::getDataFile(i->second->getFolder() + i->second->getSprites()->operator[](0));
-				_surfaces[i->first]->loadImage(s.str());
-			}
-			else
-			{
-				if (_sets.find(i->first) == _sets.end())
-				{
-					if (debugOutput)
-					{
-						Log(LOG_INFO) << "Creating new surface set: " << i->first;
-					}
-					_sets[i->first] = new SurfaceSet((*i).second->getWidth(), (*i).second->getHeight());
-				}
-				else if (debugOutput)
-				{
-					Log(LOG_INFO) << "Adding/Replacing items in surface set: " << i->first;
-				}
-				for (std::map<int, std::string>::iterator j = i->second->getSprites()->begin(); j != i->second->getSprites()->end(); ++j)
-				{
-					s.str("");
-					if ((*j).second.substr((*j).second.length() - 1, 1) == "/")
-					{
-						if (debugOutput)
-						{
-							Log(LOG_INFO) << "Loading surface set from folder: " << j->second << " starting at frame: " << j->first;
-						}
-						int offset = j->first;
-						std::stringstream folder;
-						folder << CrossPlatform::getDataFolder(i->second->getFolder() + j->second);
-						std::vector<std::string> contents = CrossPlatform::getFolderContents(folder.str());
-						for (std::vector<std::string>::iterator k = contents.begin();
-							k != contents.end(); ++k)
-						{
-							s.str("");
-							s << folder.str() << CrossPlatform::getDataFile(*k);
-							_sets[i->first]->getFrame(offset)->loadImage(s.str());
-							offset++;
-						}
-					}
-					else
-					{
-						if (debugOutput)
-						{
-							Log(LOG_INFO) << "Adding/Replacing frame: " << j->first;
-						}
-						s << CrossPlatform::getDataFile(i->second->getFolder() + j->second);
-						_sets[i->first]->getFrame(j->first)->loadImage(s.str());
-					}
-				}
-			}
-		}
-		for (std::map<std::string, ExtraSounds*>::iterator i = extraSounds.begin(); i != extraSounds.end(); ++i)
-		{
-			if (_sounds.find(i->first) == _sounds.end())
-			{
-				if (debugOutput)
-				{
-					Log(LOG_INFO) << "Creating new sound set: " << i->first;
-				}
-				_sounds[i->first] = new SoundSet();
-			}
-			else if (debugOutput)
-			{
-				Log(LOG_INFO) << "Adding/Replacing items in sound set: " << i->first;
-			}
-			for (std::map<int, std::string>::iterator j = i->second->getSounds()->begin(); j != i->second->getSounds()->end(); ++j)
-			{
-				s.str("");
-				if ((*j).second.substr((*j).second.length() - 1, 1) == "/")
-				{
-					if (debugOutput)
-					{
-						Log(LOG_INFO) << "Loading sound set from folder: " << j->second << " starting at index: " << j->first;
-					}
-					int offset = j->first;
-					std::stringstream folder;
-					folder << CrossPlatform::getDataFolder(j->second);
-					std::vector<std::string> contents = CrossPlatform::getFolderContents(folder.str());
-					for (std::vector<std::string>::iterator k = contents.begin();
-						k != contents.end(); ++k)
-					{
-						s.str("");
-						s << folder.str() << CrossPlatform::getDataFile(*k);
-						_sounds[i->first]->getSound(offset)->load(s.str());
-						offset++;
-					}
-				}
-				else
-				{
-					if (debugOutput)
-					{
-						Log(LOG_INFO) << "adding/Replacing index: " << j->first;
-					}
-					s << CrossPlatform::getDataFile(j->second);
-					_sounds[i->first]->getSound(j->first)->load(s.str());
-				}
-			}
-		}
+		loadExtraResources(extraSprites, extraSounds);
 	}
 	else if (game == "xcom2")
 	{
+		// Load TFTD palettes
+		for (int i = 0; i < 5; ++i)
+		{
+			std::stringstream s1, s2;
+			s1 << gameFolder << "GEODATA/PALETTES.DAT";
+			s2 << "PALETTES.DAT_" << i;
+			_palettes["TFTD_" + s2.str()] = new Palette();
+			_palettes["TFTD_" + s2.str()]->loadDat(CrossPlatform::getDataFile(s1.str()), 256, Palette::palOffset(i));
+		}
+
+		std::stringstream s1, s2;
+		s1 << gameFolder << "GEODATA/BACKPALS.DAT";
+		s2 << "BACKPALS.DAT";
+		_palettes["TFTD_" + s2.str()] = new Palette();
+		_palettes["TFTD_" + s2.str()]->loadDat(CrossPlatform::getDataFile(s1.str()), 128);
+
+		// Load fonts only once
+		if (_fonts.empty())
+		{
+			Font::loadIndex(CrossPlatform::getDataFile("Language/Font.dat"));
+
+			std::string font[] = {"Big.fnt",
+								  "Small.fnt"};
+
+			for (int i = 0; i < 2; ++i)
+			{
+				std::stringstream s;
+				s << "Language/" << font[i];
+				if (font[i] == "Big.fnt")
+					_fonts[font[i]] = new Font(16, 16, 0);
+				else if (font[i] == "Small.fnt")
+					_fonts[font[i]] = new Font(8, 9, -1);
+				_fonts[font[i]]->getSurface()->loadScr(CrossPlatform::getDataFile(s.str()));
+				_fonts[font[i]]->load();
+			}
+		}
+
+		// Load TFTD surfaces
+		{
+			std::stringstream s;
+			s << gameFolder << "GEODATA/" << "INTERWIN.DAT";
+			_surfaces["TFTD_INTERWIN.DAT"] = new Surface(160, 556);
+			_surfaces["TFTD_INTERWIN.DAT"]->loadScr(CrossPlatform::getDataFile(s.str()));
+		}
+
+		std::string scrs[] = {"BACK01.SCR",
+							  "BACK02.SCR",
+							  "BACK03.SCR",
+							  "BACK04.SCR",
+							  "BACK05.SCR",
+							  "BACK06.SCR",
+							  "BACK07.SCR",
+							  "BACK08.SCR",
+							  "BACK12.SCR",
+							  "BACK13.SCR",
+							  "BACK14.SCR",
+							  "BACK15.SCR",
+							  "BACK16.SCR",
+							  "BACK17.SCR",
+							  "GEOBORD.SCR",
+							  "UP_BORD2.SCR"};
+
+		for (int i = 0; i < 16; ++i)
+		{
+			std::stringstream s;
+			s << gameFolder << "GEOGRAPH/" << scrs[i];
+			_surfaces["TFTD_" + scrs[i]] = new Surface(320, 200);
+			_surfaces["TFTD_" + scrs[i]]->loadScr(CrossPlatform::getDataFile(s.str()));
+		}
+
+		// here we create an "alternate" background surface for the base info screen.
+		_surfaces["ALTBACK07.SCR"] = new Surface(320, 200);
+		_surfaces["ALTBACK07.SCR"]->loadScr(CrossPlatform::getDataFile(gameFolder + "GEOGRAPH/BACK07.SCR"));
+		for (int y = 172; y >= 152; --y)
+			for (int x = 5; x <= 314; ++x)
+				_surfaces["ALTBACK07.SCR"]->setPixel(x, y+4, _surfaces["ALTBACK07.SCR"]->getPixel(x,y));
+		for (int y = 147; y >= 134; --y)
+			for (int x = 5; x <= 314; ++x)
+				_surfaces["ALTBACK07.SCR"]->setPixel(x, y+9, _surfaces["ALTBACK07.SCR"]->getPixel(x,y));
+		for (int y = 132; y >= 109; --y)
+			for (int x = 5; x <= 314; ++x)
+				_surfaces["ALTBACK07.SCR"]->setPixel(x, y+10, _surfaces["ALTBACK07.SCR"]->getPixel(x,y));
+
+
+		std::string spks[] = {"UP001.BDY",
+							  "UP002.BDY",
+							  "UP003.BDY",
+							  "UP004.BDY",
+							  "UP005.BDY",
+							  "UP006.BDY",
+							  "UP007.BDY",
+							  "UP008.BDY",
+							  "UP009.BDY",
+							  "UP010.BDY",
+							  "UP011.BDY",
+							  "UP012.BDY",
+							  "UP013.BDY",
+							  "UP014.BDY",
+							  "UP015.BDY",
+							  "UP016.BDY",
+							  "UP017.BDY",
+							  "UP018.BDY",
+							  "UP019.BDY",
+							  "UP020.BDY",
+							  "UP021.BDY",
+							  "UP022.BDY",
+							  "UP023.BDY",
+							  "UP024.BDY",
+							  "UP025.BDY",
+							  "UP026.BDY",
+							  "UP027.BDY",
+							  "UP028.BDY",
+							  "UP029.BDY",
+							  "UP030.BDY",
+							  "UP031.BDY",
+							  "UP032.BDY",
+							  "UP033.BDY",
+							  "UP034.BDY",
+							  "UP035.BDY",
+							  "UP036.BDY",
+							  "UP037.BDY",
+							  "UP038.BDY",
+							  "UP039.BDY",
+							  "UP040.BDY",
+							  "UP041.BDY",
+							  "UP042.BDY",
+							  "UP043.BDY",
+							  "UP044.BDY",
+							  "UP045.BDY",
+							  "UP046.BDY",
+							  "UP047.BDY",
+							  "UP048.BDY",
+							  "UP049.BDY",
+							  "UP050.BDY",
+							  "UP051.BDY",
+							  "UP052.BDY",
+							  "UP053.BDY",
+							  "UP054.BDY",
+							  "UP055.BDY",
+							  "UP056.BDY",
+							  "UP057.BDY",
+							  "UP058.BDY",
+							  "UP059.BDY",
+							  "UP060.BDY",
+							  "UP061.BDY",
+							  "UP062.BDY",
+							  "UP063.BDY",
+							  "UP064.BDY",
+							  "UP065.BDY",
+							  "UP066.BDY",
+							  "UP067.BDY",
+							  "UP068.BDY",
+							  "UP069.BDY",
+							  "UP070.BDY",
+							  "UP071.BDY",
+							  "UP072.BDY",
+							  "UP073.BDY",
+							  "UP074.BDY",
+							  "UP075.BDY",
+							  "UP076.BDY",
+							  "UP077.BDY",
+							  "UP078.BDY",
+							  "UP079.BDY",
+							  "UP080.BDY",
+							  "UP081.BDY",
+							  "UP082.BDY",
+							  "UP083.BDY",
+							  "UP084.BDY",
+							  "UP085.BDY",
+							  "UP086.BDY",
+							  "UP087.BDY",
+							  "UP088.BDY",
+							  "UP089.BDY",
+							  "UP090.BDY",
+							  "UP091.BDY",
+							  "UP092.BDY",
+							  "UP093.BDY",
+							  "UP094.BDY",
+							  "UP095.BDY",
+							  "UP096.BDY",
+							  "UP097.BDY",
+							  "UP098.BDY",
+							  "UP099.BDY",
+							  "UP100.BDY",
+							  "UP101.BDY",
+							  "UP102.BDY",
+							  "UP103.BDY",
+							  "UP104.BDY",
+							  "UP105.BDY",
+							  "UP106.BDY",
+							  "UP107.BDY",
+							  "UP108.BDY",
+							  "UP109.BDY",
+							  "UP110.BDY",
+							  "UP111.BDY",
+							  "UP112.BDY",
+							  "GRAPH.BDY",
+							  "GRAPHS.SPK"};
+
+		for (int i = 0; i < 113; ++i)
+		{
+			std::stringstream s;
+			s << gameFolder << "GEOGRAPH/" << spks[i];
+			_surfaces["TFTD_" + spks[i]] = new Surface(320, 200);
+			_surfaces["TFTD_" + spks[i]]->loadBdy(CrossPlatform::getDataFile(s.str()));
+		}
+		std::stringstream s;
+		s << gameFolder << "GEOGRAPH/" << spks[113];
+		_surfaces["TFTD_" + spks[113]] = new Surface(320, 200);
+		_surfaces["TFTD_" + spks[113]]->loadSpk(CrossPlatform::getDataFile(s.str()));
+
+/*
+		std::string lbms[] = {"PICT1.LBM",
+							  "PICT2.LBM",
+							  "PICT3.LBM",
+							  "PICT4.LBM",
+							  "PICT5.LBM",
+							  "PICT6.LBM",
+							  "PICT7.LBM"};
+
+		for (int i = 0; i < 7; ++i)
+		{
+			std::stringstream s;
+			s << gameFolder << "UFOINTRO/" << lbms[i];
+			_surfaces[lbms[i]] = new Surface(320, 200);
+			_surfaces[lbms[i]]->loadImage(CrossPlatform::getDataFile(s.str()));
+		}*/
+		// Load surface sets
+		std::string sets[] = {"BASEBITS.PCK",
+							  "INTICON.PCK",
+							  "TEXTURE.DAT"};
+
+		for (int i = 0; i < 3; ++i)
+		{
+			std::stringstream s;
+			s << gameFolder << "GEOGRAPH/" << sets[i];
+
+			std::string ext = sets[i].substr(sets[i].length()-3, sets[i].length());
+			if (ext == "PCK")
+			{
+				std::string tab = sets[i].substr(0, sets[i].length()-4) + ".TAB";
+				std::stringstream s2;
+				s2 << gameFolder << "GEOGRAPH/" << tab;
+				_sets["TFTD_" + sets[i]] = new SurfaceSet(32, 40);
+				_sets["TFTD_" + sets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+			}
+			else
+			{
+				_sets["TFTD_" + sets[i]] = new SurfaceSet(32, 32);
+				_sets["TFTD_" + sets[i]]->loadDat(CrossPlatform::getDataFile(s.str()));
+			}
+		}
+		_sets["TFTD_SCANG.DAT"] = new SurfaceSet(4, 4);
+		std::stringstream scang;
+		scang << gameFolder << "GEODATA/" << "SCANG.DAT";
+		_sets["TFTD_SCANG.DAT"]->loadDat (CrossPlatform::getDataFile(scang.str()));
+		// Load polygons
+		s.str("");
+		s << gameFolder << "GEODATA/" << "WORLD.DAT";
+		Globe::loadDat(CrossPlatform::getDataFile(s.str()), &_polygons);
+
+		// Load polylines (extract from game somehow)
+
+		// Load sounds and music
+
+		// load 
+		loadExtraResources(extraSprites, extraSounds);
 	}
 }
 
@@ -1024,6 +1177,135 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 			}
 		}
 	}
+}
+
+/**
+ * Adds to the resource pack extra sprites and sounds
+ * defined in ruleset.
+ * @param extraSprites List of additional sprites.
+ * @param ExtraSounds List of additional sounds.
+ */
+void ResourcePack::loadExtraResources(std::map<std::string, ExtraSprites *> extraSprites, std::map<std::string,  ExtraSounds *> extraSounds)
+{
+	Log(LOG_INFO) << "Loading extra resources from ruleset...";
+	bool debugOutput = Options::getBool("debug");
+	std::stringstream s;
+		
+	for (std::map<std::string, ExtraSprites*>::iterator i = extraSprites.begin(); i != extraSprites.end(); ++i)
+	{
+		if (i->second->getSingleImage())
+		{
+			if (_surfaces.find(i->first) == _surfaces.end())
+			{
+				if (debugOutput)
+				{
+					Log(LOG_INFO) << "Creating new single image: " << i->first;
+				}
+				_surfaces[i->first] = new Surface((*i).second->getWidth(), (*i).second->getHeight());
+			}
+			else if (debugOutput)
+			{
+				Log(LOG_INFO) << "Adding/Replacing single image: " << i->first;
+			}
+			s.str("");
+			s << CrossPlatform::getDataFile(i->second->getFolder() + i->second->getSprites()->operator[](0));
+			_surfaces[i->first]->loadImage(s.str());
+		}
+		else
+		{
+			if (_sets.find(i->first) == _sets.end())
+			{
+				if (debugOutput)
+				{
+					Log(LOG_INFO) << "Creating new surface set: " << i->first;
+				}
+				_sets[i->first] = new SurfaceSet((*i).second->getWidth(), (*i).second->getHeight());
+			}
+			else if (debugOutput)
+			{
+				Log(LOG_INFO) << "Adding/Replacing items in surface set: " << i->first;
+			}
+			for (std::map<int, std::string>::iterator j = i->second->getSprites()->begin(); j != i->second->getSprites()->end(); ++j)
+			{
+				s.str("");
+				if ((*j).second.substr((*j).second.length() - 1, 1) == "/")
+				{
+					if (debugOutput)
+					{
+						Log(LOG_INFO) << "Loading surface set from folder: " << j->second << " starting at frame: " << j->first;
+					}
+					int offset = j->first;
+					std::stringstream folder;
+					folder << CrossPlatform::getDataFolder(i->second->getFolder() + j->second);
+					std::vector<std::string> contents = CrossPlatform::getFolderContents(folder.str());
+					for (std::vector<std::string>::iterator k = contents.begin();
+						k != contents.end(); ++k)
+					{
+						s.str("");
+						s << folder.str() << CrossPlatform::getDataFile(*k);
+						_sets[i->first]->getFrame(offset)->loadImage(s.str());
+						offset++;
+					}
+				}
+				else
+				{
+					if (debugOutput)
+					{
+						Log(LOG_INFO) << "Adding/Replacing frame: " << j->first;
+					}
+					s << CrossPlatform::getDataFile(i->second->getFolder() + j->second);
+					_sets[i->first]->getFrame(j->first)->loadImage(s.str());
+				}
+			}
+		}
+	}
+	for (std::map<std::string, ExtraSounds*>::iterator i = extraSounds.begin(); i != extraSounds.end(); ++i)
+	{
+		if (_sounds.find(i->first) == _sounds.end())
+		{
+			if (debugOutput)
+			{
+				Log(LOG_INFO) << "Creating new sound set: " << i->first;
+			}
+			_sounds[i->first] = new SoundSet();
+		}
+		else if (debugOutput)
+		{
+			Log(LOG_INFO) << "Adding/Replacing items in sound set: " << i->first;
+		}
+		for (std::map<int, std::string>::iterator j = i->second->getSounds()->begin(); j != i->second->getSounds()->end(); ++j)
+		{
+			s.str("");
+			if ((*j).second.substr((*j).second.length() - 1, 1) == "/")
+			{
+				if (debugOutput)
+				{
+					Log(LOG_INFO) << "Loading sound set from folder: " << j->second << " starting at index: " << j->first;
+				}
+				int offset = j->first;
+				std::stringstream folder;
+				folder << CrossPlatform::getDataFolder(j->second);
+				std::vector<std::string> contents = CrossPlatform::getFolderContents(folder.str());
+				for (std::vector<std::string>::iterator k = contents.begin();
+					k != contents.end(); ++k)
+				{
+					s.str("");
+					s << folder.str() << CrossPlatform::getDataFile(*k);
+					_sounds[i->first]->getSound(offset)->load(s.str());
+					offset++;
+				}
+			}
+			else
+			{
+				if (debugOutput)
+				{
+					Log(LOG_INFO) << "adding/Replacing index: " << j->first;
+				}
+				s << CrossPlatform::getDataFile(j->second);
+				_sounds[i->first]->getSound(j->first)->load(s.str());
+			}
+		}
+	}	
 }
 
 }
