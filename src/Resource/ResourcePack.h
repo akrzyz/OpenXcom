@@ -40,6 +40,8 @@ class Sound;
 class SavedBattleGame;
 class RuleTerrain;
 class MapBlock;
+class ExtraSprites;
+class ExtraSounds;
 
 /**
  * Packs of external game media.
@@ -92,6 +94,10 @@ public:
 	void setPalette(SDL_Color *colors, int firstcolor, int ncolors);
 	/// Gets list of voxel data.
 	std::vector<Uint16> *getVoxelData();
+	/// Loads geoscape specific resources
+	void loadGeoscapeResources(std::map<std::string, ExtraSprites *> extraSprites, std::map<std::string,  ExtraSounds *> extraSounds, const std::string &gameFolder, const std::string &game);
+	/// Loads battlescape specific resources
+	void loadBattlescapeResources(const std::string &gameFolder);
 };
 
 }

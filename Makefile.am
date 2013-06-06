@@ -525,8 +525,6 @@ openxcom_SOURCES = \
 	src/resource.h \
 	src/Resource/ResourcePack.cpp \
 	src/Resource/ResourcePack.h \
-	src/Resource/XcomResourcePack.cpp \
-	src/Resource/XcomResourcePack.h \
 	src/Ruleset/AlienDeployment.cpp \
 	src/Ruleset/AlienDeployment.h \
 	src/Ruleset/AlienRace.cpp \

@@ -32,6 +32,7 @@
 #include "../Engine/Music.h"
 #include "../Engine/Sound.h"
 #include "../Ruleset/Ruleset.h"
+#include "../Resource/ResourcePack.h"
 #include "TestState.h"
 #include "NoteState.h"
 #include "LanguageState.h"
@@ -433,12 +434,12 @@ void StartState::think()
 			_game->loadRuleset();
 			Log(LOG_INFO) << "Ruleset loaded successfully.";
 			Log(LOG_INFO) << "Loading resources...";
-//			std::map<std::string, OptionsFolders*> folders = Options::getOptionsFolders();
-//			for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
-//			{
-//				if (i->first == "Xcom1Ruleset")
-					_game->setResourcePack( new XcomResourcePack(_game->getRuleset()->getExtraSprites(), _game->getRuleset()->getExtraSounds(), Options::getOptionsFolders().begin()->second->getVanillaFolder()) );
-//			}
+			_game->setResourcePack(new ResourcePack());
+			std::map<std::string, OptionsFolders*> folders = Options::getOptionsFolders();
+			for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
+			{
+				_game->getResourcePack()->loadGeoscapeResources(_game->getRuleset()->getExtraSprites(), _game->getRuleset()->getExtraSounds(), Options::getOptionsFolders().begin()->second->getVanillaFolder(), i->first);
+			}
 			Log(LOG_INFO) << "Resources loaded successfully.";
 			std::vector<std::string> langs = Language::getList(0);
 			if (langs.empty())

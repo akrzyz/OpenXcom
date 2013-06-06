@@ -391,8 +391,6 @@ set ( menu_src
 set ( resource_src
   Resource/ResourcePack.h
   Resource/ResourcePack.cpp
-  Resource/XcomResourcePack.cpp
-  Resource/XcomResourcePack.h
 )
 
 set ( ruleset_src

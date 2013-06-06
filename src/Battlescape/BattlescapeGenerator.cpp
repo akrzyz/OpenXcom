@@ -48,7 +48,6 @@
 #include "../Ruleset/AlienRace.h"
 #include "../Ruleset/AlienDeployment.h"
 #include "../Ruleset/RuleBaseFacility.h"
-#include "../Resource/XcomResourcePack.h"
 #include "../Engine/Game.h"
 #include "../Engine/Language.h"
 #include "../Engine/CrossPlatform.h"
