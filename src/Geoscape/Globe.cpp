@@ -723,7 +723,7 @@ bool Globe::insideLand(double lon, double lat) const
 	double oldLon = _cenLon, oldLat = _cenLat;
 	globe->_cenLon = lon;
 	globe->_cenLat = lat;
-	for (std::list<Polygon*>::iterator i = _game->getResourcePack()->getPolygons()->begin(); i != _game->getResourcePack()->getPolygons()->end() && !inside; ++i)
+	for (std::list<Polygon*>::iterator i = _game->getResourcePack()->getPolygonsLand()->begin(); i != _game->getResourcePack()->getPolygonsLand()->end() && !inside; ++i)
 	{
 		inside = insidePolygon(lon, lat, *i);
 	}
@@ -842,7 +842,7 @@ std::vector<Target*> Globe::getTargets(int x, int y, bool craft) const
  */
 void Globe::cachePolygons()
 {
-	cache(_game->getResourcePack()->getPolygons(), &_cacheLand);
+	cache(&_game->getResourcePack()->getPolygons(), &_cacheLand);
 	_redraw = true;
 }
 
@@ -1716,7 +1716,8 @@ void Globe::getPolygonTextureAndShade(double lon, double lat, int *texture, int 
 	double oldLon = _cenLon, oldLat = _cenLat;
 	globe->_cenLon = lon;
 	globe->_cenLat = lat;
-	for (std::list<Polygon*>::iterator i = _game->getResourcePack()->getPolygons()->begin(); i != _game->getResourcePack()->getPolygons()->end(); ++i)
+	std::list<Polygon*> polygons = _game->getResourcePack()->getPolygons();
+	for (std::list<Polygon*>::iterator i = polygons.begin(); i != polygons.end(); ++i)
 	{
 		if (insidePolygon(lon, lat, *i))
 		{

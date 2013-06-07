@@ -63,7 +63,8 @@ protected:
 	std::map<std::string, Surface*> _surfaces;
 	std::map<std::string, SurfaceSet*> _sets;
 	std::map<std::string, SoundSet*> _sounds;
-	std::list<Polygon*> _polygons;
+	std::list<Polygon*> _polygonsLand;
+	std::list<Polygon*> _polygonsWater;
 	std::list<Polyline*> _polylines;
 	std::map<std::string, Music*> _musics;
 	std::vector<Uint16> _voxelData;
@@ -78,8 +79,12 @@ public:
 	Surface *getSurface(const std::string &name) const;
 	/// Gets a particular surface set.
 	SurfaceSet *getSurfaceSet(const std::string &name) const;
-	/// Gets the list of world polygons.
-	std::list<Polygon*> *getPolygons();
+	/// Gets the list of all world polygons.
+	std::list<Polygon*> getPolygons();
+	/// Gets the list of land polygons.
+	std::list<Polygon*> *getPolygonsLand();
+	/// Gets the list of water polygons.
+	std::list<Polygon*> *getPolygonsWater();
 	/// Gets the list of world polylines.
 	std::list<Polyline*> *getPolylines();
 	/// Gets a particular music.

@@ -68,7 +68,7 @@ struct HairBleach
 /**
  * Initializes a blank resource set pointing to a folder.
  */
-ResourcePack::ResourcePack() : _palettes(), _fonts(), _surfaces(), _sets(), _sounds(), _polygons(), _polylines(), _musics()
+ResourcePack::ResourcePack() : _palettes(), _fonts(), _surfaces(), _sets(), _sounds(), _polygonsLand(), _polygonsWater(), _polylines(), _musics()
 {
 	_muteMusic = new Music();
 	_muteSound = new Sound();
@@ -93,7 +93,11 @@ ResourcePack::~ResourcePack()
 	{
 		delete i->second;
 	}
-	for (std::list<Polygon*>::iterator i = _polygons.begin(); i != _polygons.end(); ++i)
+	for (std::list<Polygon*>::iterator i = _polygonsLand.begin(); i != _polygonsLand.end(); ++i)
+	{
+		delete *i;
+	}
+	for (std::list<Polygon*>::iterator i = _polygonsWater.begin(); i != _polygonsWater.end(); ++i)
 	{
 		delete *i;
 	}
@@ -152,9 +156,30 @@ SurfaceSet *ResourcePack::getSurfaceSet(const std::string &name) const
  * Returns the list of polygons in the resource set.
  * @return Pointer to the list of polygons.
  */
-std::list<Polygon*> *ResourcePack::getPolygons()
+std::list<Polygon*> ResourcePack::getPolygons()
 {
-	return &_polygons;
+	std::list<Polygon*> temp;
+	temp.insert(temp.end(), _polygonsLand.begin(), _polygonsLand.end());
+	temp.insert(temp.end(), _polygonsWater.begin(), _polygonsWater.end());
+	return temp;
+}
+
+/**
+ * Returns the list of land terrain polygons in the resource set.
+ * @return Pointer to the list of land polygons.
+ */
+std::list<Polygon*> *ResourcePack::getPolygonsLand()
+{
+	return &_polygonsLand;
+}
+
+/**
+ * Returns the list of water terrain polygons in the resource set.
+ * @return Pointer to the list of water polygons.
+ */
+std::list<Polygon*> *ResourcePack::getPolygonsWater()
+{
+	return &_polygonsWater;
 }
 
 /**
@@ -472,7 +497,7 @@ void ResourcePack::loadGeoscapeResources(std::map<std::string, ExtraSprites *> e
 		// Load polygons
 		std::stringstream s;
 		s << gameFolder << "GEODATA/" << "WORLD.DAT";
-		Globe::loadDat(CrossPlatform::getDataFile(s.str()), &_polygons);
+		Globe::loadDat(CrossPlatform::getDataFile(s.str()), &_polygonsLand);
 
 		// Load polylines (extracted from game)
 		// -10 = Start of line
@@ -993,13 +1018,12 @@ void ResourcePack::loadGeoscapeResources(std::map<std::string, ExtraSprites *> e
 		// Load polygons
 		s.str("");
 		s << gameFolder << "GEODATA/" << "WORLD.DAT";
-		Globe::loadDat(CrossPlatform::getDataFile(s.str()), &_polygons);
+		Globe::loadDat(CrossPlatform::getDataFile(s.str()), &_polygonsWater);
 
 		// Load polylines (extract from game somehow)
 
 		// Load sounds and music
 
-		// load 
 		loadExtraResources(extraSprites, extraSounds);
 	}
 }
