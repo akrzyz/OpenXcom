@@ -61,7 +61,7 @@ private:
 	Surface *_markers, *_countries, *_radars;
 	bool _blink, _hover;
 	Timer *_blinkTimer, *_rotTimer;
-	std::list<Polygon*> _cacheLand;
+	std::list<Polygon*> _cacheLand, _cacheWater;
 	Surface *_mkXcomBase, *_mkAlienBase, *_mkCraft, *_mkWaypoint, *_mkCity;
 	Surface *_mkFlyingUfo, *_mkLandedUfo, *_mkCrashedUfo, *_mkAlienSite;
 	FastLineClip *_clipper;

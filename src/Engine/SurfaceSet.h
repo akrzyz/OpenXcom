@@ -50,7 +50,7 @@ public:
 	/// Loads an X-Com set of PCK/TAB image files.
 	void loadPck(const std::string &pck, const std::string &tab = "");
 	/// Loads an X-Com DAT image file.
-	void loadDat(const std::string &filename);
+	void loadDat(const std::string &filename, const std::string &game);
 	/// Gets a particular frame from the set.
 	Surface *getFrame(int i);
 	/// Gets the width of all frames.

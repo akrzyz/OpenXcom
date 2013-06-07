@@ -257,7 +257,7 @@ Globe::Globe(Game *game, int cenX, int cenY, int width, int height, int x, int y
 	InteractiveSurface(width, height, x, y),
 	_rotLon(0.0), _rotLat(0.0),
 	_cenX(cenX), _cenY(cenY), _game(game),
-	_blink(true), _hover(false), _cacheLand()
+	_blink(true), _hover(false), _cacheLand(), _cacheWater()
 {
 	_texture = new SurfaceSet(*_game->getResourcePack()->getSurfaceSet("TEXTURE.DAT"));
 
@@ -419,6 +419,11 @@ Globe::~Globe()
 	delete _clipper;
 
 	for (std::list<Polygon*>::iterator i = _cacheLand.begin(); i != _cacheLand.end(); ++i)
+	{
+		delete *i;
+	}
+
+	for (std::list<Polygon*>::iterator i = _cacheWater.begin(); i != _cacheWater.end(); ++i)
 	{
 		delete *i;
 	}
@@ -842,7 +847,8 @@ std::vector<Target*> Globe::getTargets(int x, int y, bool craft) const
  */
 void Globe::cachePolygons()
 {
-	cache(&_game->getResourcePack()->getPolygons(), &_cacheLand);
+	cache(_game->getResourcePack()->getPolygonsLand(), &_cacheLand);
+	cache(_game->getResourcePack()->getPolygonsWater(), &_cacheWater);
 	_redraw = true;
 }
 
@@ -981,14 +987,32 @@ void Globe::draw()
  */
 void Globe::drawOcean()
 {
-	lock();
-	drawCircle(_cenX+1, _cenY, _radius[_zoom]+20, Palette::blockOffset(12)+0);
+	if (_cacheWater.empty())
+	{
+		lock();
+		drawCircle(_cenX+1, _cenY, _radius[_zoom]+20, Palette::blockOffset(12)+0);
 //	ShaderDraw<Ocean>(ShaderSurface(this));
-	unlock();
+		unlock();
+	}
+	else
+	{
+		Sint16 x[4], y[4];
+
+		for (std::list<Polygon*>::iterator i = _cacheWater.begin(); i != _cacheWater.end(); ++i)
+		{
+			// Convert coordinates
+			for (int j = 0; j < (*i)->getPoints(); ++j)
+			{
+				x[j] = (*i)->getX(j);
+				y[j] = (*i)->getY(j);
+			}
+
+			// Apply textures according to zoom and shade
+			int zoom = (2 - (int)floor(_zoom / 2.0)) * NUM_TEXTURES;
+			drawTexturedPolygon(x, y, (*i)->getPoints(), _texture->getFrame((*i)->getTexture() + 39 + zoom), 0, 0);
+		}
+	}
 }
-
-
-
 
 /**
  * Renders the land, taking all the visible world polygons
@@ -1716,15 +1740,26 @@ void Globe::getPolygonTextureAndShade(double lon, double lat, int *texture, int 
 	double oldLon = _cenLon, oldLat = _cenLat;
 	globe->_cenLon = lon;
 	globe->_cenLat = lat;
-	std::list<Polygon*> polygons = _game->getResourcePack()->getPolygons();
-	for (std::list<Polygon*>::iterator i = polygons.begin(); i != polygons.end(); ++i)
-	{
-		if (insidePolygon(lon, lat, *i))
+	std::list<Polygon*> *polygons = _game->getResourcePack()->getPolygonsLand();
+	if (!polygons->empty())
+		for (std::list<Polygon*>::iterator i = polygons->begin(); i != polygons->end(); ++i)
 		{
-			*texture = (*i)->getTexture();
-			break;
+			if (insidePolygon(lon, lat, *i))
+			{
+				*texture = (*i)->getTexture();
+				break;
+			}
 		}
-	}
+	polygons = _game->getResourcePack()->getPolygonsWater();
+	if (!polygons->empty())
+		for (std::list<Polygon*>::iterator i = polygons->begin(); i != polygons->end(); ++i)
+		{
+			if (insidePolygon(lon, lat, *i))
+			{
+				*texture = (*i)->getTexture();
+				break;
+			}
+		}
 	globe->_cenLon = oldLon;
 	globe->_cenLat = oldLat;
 }

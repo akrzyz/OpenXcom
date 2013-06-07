@@ -149,9 +149,10 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
  * image with no offsets so these have to be figured out
  * manually, usually by splitting the image into equal portions.
  * @param filename Filename of the DAT image.
+ * @param game Game to load data from
  * @sa http://www.ufopaedia.org/index.php?title=Image_Formats#SCR_.26_DAT
  */
-void SurfaceSet::loadDat(const std::string &filename)
+void SurfaceSet::loadDat(const std::string &filename, const std::string &game)
 {
 	int nframes = 0;
 
@@ -171,11 +172,25 @@ void SurfaceSet::loadDat(const std::string &filename)
 	for (int i = 0; i < nframes; ++i)
 	{
 		Surface *surface = new Surface(_width, _height);
-		_frames[i] = surface;
+		if (game == "xcom1")
+		{
+			_frames[i] = surface;
+		}
+		else if (game == "xcom2")
+		{
+			_frames[i + nframes] = surface;
+		}
 	}
 
 	Uint8 value;
-	int x = 0, y = 0, frame = 0;
+	int x = 0, y = 0, frame;
+	if (game == "xcom1")
+		frame = 0;
+	else if (game == "xcom2")
+		frame = nframes;
+
+	if (game == "xcom2")
+		nframes = 2 * nframes;
 
 	// Lock the surface
 	_frames[frame]->lock();

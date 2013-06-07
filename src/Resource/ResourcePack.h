@@ -79,8 +79,6 @@ public:
 	Surface *getSurface(const std::string &name) const;
 	/// Gets a particular surface set.
 	SurfaceSet *getSurfaceSet(const std::string &name) const;
-	/// Gets the list of all world polygons.
-	std::list<Polygon*> getPolygons();
 	/// Gets the list of land polygons.
 	std::list<Polygon*> *getPolygonsLand();
 	/// Gets the list of water polygons.

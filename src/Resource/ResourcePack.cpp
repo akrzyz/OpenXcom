@@ -153,18 +153,6 @@ SurfaceSet *ResourcePack::getSurfaceSet(const std::string &name) const
 }
 
 /**
- * Returns the list of polygons in the resource set.
- * @return Pointer to the list of polygons.
- */
-std::list<Polygon*> ResourcePack::getPolygons()
-{
-	std::list<Polygon*> temp;
-	temp.insert(temp.end(), _polygonsLand.begin(), _polygonsLand.end());
-	temp.insert(temp.end(), _polygonsWater.begin(), _polygonsWater.end());
-	return temp;
-}
-
-/**
  * Returns the list of land terrain polygons in the resource set.
  * @return Pointer to the list of land polygons.
  */
@@ -470,32 +458,30 @@ void ResourcePack::loadGeoscapeResources(std::map<std::string, ExtraSprites *> e
 							  "INTICON.PCK",
 							  "TEXTURE.DAT"};
 
-		for (int i = 0; i < 3; ++i)
+		std::stringstream s;
+		for (int i = 0; i < 2; ++i)
 		{
-			std::stringstream s;
+			s.str("");
 			s << gameFolder << "GEOGRAPH/" << sets[i];
 
-			std::string ext = sets[i].substr(sets[i].length()-3, sets[i].length());
-			if (ext == "PCK")
-			{
-				std::string tab = sets[i].substr(0, sets[i].length()-4) + ".TAB";
-				std::stringstream s2;
-				s2 << gameFolder << "GEOGRAPH/" << tab;
-				_sets[sets[i]] = new SurfaceSet(32, 40);
-				_sets[sets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-			}
-			else
-			{
-				_sets[sets[i]] = new SurfaceSet(32, 32);
-				_sets[sets[i]]->loadDat(CrossPlatform::getDataFile(s.str()));
-			}
+			std::string tab = sets[i].substr(0, sets[i].length()-4) + ".TAB";
+			std::stringstream s2;
+			s2 << gameFolder << "GEOGRAPH/" << tab;
+			_sets[sets[i]] = new SurfaceSet(32, 40);
+			_sets[sets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
 		}
+		s.str("");
+		s << gameFolder << "GEOGRAPH/" << sets[2];
+
+		if (_sets.find(sets[2]) == _sets.end())
+			_sets[sets[2]] = new SurfaceSet(32, 32);
+		_sets[sets[2]]->loadDat(CrossPlatform::getDataFile(s.str()), game);
 		_sets["SCANG.DAT"] = new SurfaceSet(4, 4);
 		std::stringstream scang;
 		scang << gameFolder << "GEODATA/" << "SCANG.DAT";
-		_sets["SCANG.DAT"]->loadDat (CrossPlatform::getDataFile(scang.str()));
+		_sets["SCANG.DAT"]->loadDat (CrossPlatform::getDataFile(scang.str()), game);
 		// Load polygons
-		std::stringstream s;
+		s.str("");
 		s << gameFolder << "GEODATA/" << "WORLD.DAT";
 		Globe::loadDat(CrossPlatform::getDataFile(s.str()), &_polygonsLand);
 
@@ -991,30 +977,28 @@ void ResourcePack::loadGeoscapeResources(std::map<std::string, ExtraSprites *> e
 							  "INTICON.PCK",
 							  "TEXTURE.DAT"};
 
-		for (int i = 0; i < 3; ++i)
+		for (int i = 0; i < 2; ++i)
 		{
-			std::stringstream s;
+			s.str("");
 			s << gameFolder << "GEOGRAPH/" << sets[i];
 
-			std::string ext = sets[i].substr(sets[i].length()-3, sets[i].length());
-			if (ext == "PCK")
-			{
-				std::string tab = sets[i].substr(0, sets[i].length()-4) + ".TAB";
-				std::stringstream s2;
-				s2 << gameFolder << "GEOGRAPH/" << tab;
-				_sets["TFTD_" + sets[i]] = new SurfaceSet(32, 40);
-				_sets["TFTD_" + sets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-			}
-			else
-			{
-				_sets["TFTD_" + sets[i]] = new SurfaceSet(32, 32);
-				_sets["TFTD_" + sets[i]]->loadDat(CrossPlatform::getDataFile(s.str()));
-			}
+			std::string tab = sets[i].substr(0, sets[i].length()-4) + ".TAB";
+			std::stringstream s2;
+			s2 << gameFolder << "GEOGRAPH/" << tab;
+			_sets["TFTD_" + sets[i]] = new SurfaceSet(32, 40);
+			_sets["TFTD_" + sets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
 		}
+		if (_sets.find(sets[2]) == _sets.end())
+			_sets[sets[2]] = new SurfaceSet(32, 32);
+		s.str("");			
+		s << gameFolder << "GEOGRAPH/" << sets[2];
+
+		_sets[sets[2]]->loadDat(CrossPlatform::getDataFile(s.str()), game);
+
 		_sets["TFTD_SCANG.DAT"] = new SurfaceSet(4, 4);
 		std::stringstream scang;
 		scang << gameFolder << "GEODATA/" << "SCANG.DAT";
-		_sets["TFTD_SCANG.DAT"]->loadDat (CrossPlatform::getDataFile(scang.str()));
+		_sets["TFTD_SCANG.DAT"]->loadDat (CrossPlatform::getDataFile(scang.str()), game);
 		// Load polygons
 		s.str("");
 		s << gameFolder << "GEODATA/" << "WORLD.DAT";
@@ -1034,7 +1018,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 	std::stringstream s;
 	s << gameFolder << "UFOGRAPH/" << "SPICONS.DAT";
 	_sets["SPICONS.DAT"] = new SurfaceSet(32, 24);
-	_sets["SPICONS.DAT"]->loadDat(CrossPlatform::getDataFile(s.str()));
+	_sets["SPICONS.DAT"]->loadDat(CrossPlatform::getDataFile(s.str()), "xcom1");
 
 	s.str("");
 	std::stringstream s2;
@@ -1067,12 +1051,12 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 	s.str("");
 	_sets["MEDIBITS.DAT"] = new SurfaceSet(52, 58);
 	s << gameFolder << "UFOGRAPH/" << "MEDIBITS.DAT";
-	_sets["MEDIBITS.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()));
+	_sets["MEDIBITS.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()), "xcom1");
 
 	s.str("");
 	_sets["DETBLOB.DAT"] = new SurfaceSet(16, 16);
 	s << gameFolder << "UFOGRAPH/" << "DETBLOB.DAT";
-	_sets["DETBLOB.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()));
+	_sets["DETBLOB.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()), "xcom1");
 
 	// Load Battlescape Terrain (only blacks are loaded, others are loaded just in time)
 	std::string bsets[] = {"BLANKS.PCK"};
