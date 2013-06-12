@@ -75,8 +75,6 @@ namespace Options
 	void setInt(const std::string& id, int value);
 	/// Sets a boolean option.
 	void setBool(const std::string& id, bool value);
-	/// Gets the list of rulesets to use.
-//	std::map<std::string, std::string> getRulesets();
 	/// Gets the list of items that can't be purchased after technological breakthrough.
 	std::vector<std::string> getPurchaseExclusions();
 	/// Gets the list of OptionsFolders class items.
