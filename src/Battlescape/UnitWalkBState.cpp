@@ -183,7 +183,7 @@ void UnitWalkBState::think()
 			{
 				_terrain->calculateFOV(_unit);
 			}
-			unitSpotted = (_numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
+			unitSpotted = (_parent->getPanicHandled() && _numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
 
 			BattleAction action;
 			
@@ -223,10 +223,12 @@ void UnitWalkBState::think()
 			// check for reaction fire
 			if (!_falling && !_action.reckless && _terrain->checkReactionFire(_unit, &action))
 			{
-				postPathProcedures();
 				action.cameraPosition = _parent->getMap()->getCamera()->getMapOffset();
 				_parent->statePushBack(new ProjectileFlyBState(_parent, action));
+				_parent->popState();
 				// unit got fired upon - stop walking
+				_unit->setCache(0);
+				_parent->getMap()->cacheUnit(_unit);
 				_pf->abortPath();
 				return;
 			}
@@ -305,7 +307,7 @@ void UnitWalkBState::think()
 
 			if (tu > _unit->getTimeUnits())
 			{
-				if (tu < 255)
+				if (_parent->getPanicHandled() && tu < 255)
 				{
 					_action.result = "STR_NOT_ENOUGH_TIME_UNITS";
 				}
@@ -318,7 +320,10 @@ void UnitWalkBState::think()
 
 			if (energy / 2 > _unit->getEnergy())
 			{
-				_action.result = "STR_NOT_ENOUGH_ENERGY";
+				if (_parent->getPanicHandled())
+				{
+					_action.result = "STR_NOT_ENOUGH_ENERGY";
+				}
 				_pf->abortPath();
 				_unit->setCache(0);
 				_parent->getMap()->cacheUnit(_unit);
@@ -326,7 +331,7 @@ void UnitWalkBState::think()
 				return;
 			}
 
-			if (_parent->checkReservedTU(_unit, tu) == false)
+			if (_parent->getPanicHandled() && _parent->checkReservedTU(_unit, tu) == false)
 			{
 				_pf->abortPath();
 				_unit->setCache(0);
@@ -427,7 +432,7 @@ void UnitWalkBState::think()
 		// calculateFOV is unreliable for setting the unitSpotted bool, as it can be called from various other places
 		// in the code, ie: doors opening, and this messes up the result.
 		_terrain->calculateFOV(_unit);
-		unitSpotted = (_numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
+		unitSpotted = (_parent->getPanicHandled() && _numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
 
 		// make sure the unit sprites are up to date
 		if (onScreen)

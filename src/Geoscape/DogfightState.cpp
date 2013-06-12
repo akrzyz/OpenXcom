@@ -53,6 +53,8 @@
 namespace OpenXcom
 {
 
+const int DogfightState::_timeScale = 75;
+
 // UFO blobs graphics ...
 const int DogfightState::_ufoBlobs[8][13][13] = 
 {
@@ -295,7 +297,8 @@ DogfightState::DogfightState(Game *game, Globe *globe, Craft *craft, Ufo *ufo) :
 	add(_txtInterceptionNumber);
 
 	// Set up objects
-	Surface *graphic = _game->getResourcePack()->getSurface("INTERWIN.DAT");
+	Surface *graphic;
+	graphic = _game->getResourcePack()->getSurface("INTERWIN.DAT");
 	graphic->setX(0);
 	graphic->setY(0);
 	graphic->getCrop()->x = 0;
@@ -313,9 +316,18 @@ DogfightState::DogfightState(Game *game, Globe *globe, Craft *craft, Ufo *ufo) :
 	graphic->getCrop()->y = 111;
 	graphic->getCrop()->h = 29;
 	graphic->blit(_preview);
-	graphic->setY(15);
-	graphic->getCrop()->y = 140 + 52 * _ufo->getRules()->getSprite();
-	graphic->getCrop()->h = 52;
+	if (ufo->getRules()->getModSprite() == "")
+	{
+		graphic->setY(15);
+		graphic->getCrop()->y = 140 + 52 * _ufo->getRules()->getSprite();
+		graphic->getCrop()->h = 52;
+	}
+	else
+	{
+		graphic = _game->getResourcePack()->getSurface(ufo->getRules()->getModSprite());
+		graphic->setX(0);
+		graphic->setY(0);
+	}
 	graphic->blit(_preview);
 	_preview->setVisible(false);
 	_preview->onMouseClick((ActionHandler)&DogfightState::previewClick);
@@ -478,12 +490,12 @@ DogfightState::DogfightState(Game *game, Globe *globe, Craft *craft, Ufo *ufo) :
 	_w2Timer->onTimer((StateHandler)&DogfightState::fireWeapon2);
 
 	_ufoWtimer->onTimer((StateHandler)&DogfightState::ufoFireWeapon);
-	_ufoFireInterval = (_ufo->getRules()->getWeaponReload() - 2 * (int)(_game->getSavedGame()->getDifficulty())) * 75;
+	_ufoFireInterval = (_ufo->getRules()->getWeaponReload() - 2 * (int)(_game->getSavedGame()->getDifficulty())) * _timeScale;
 	_ufoFireInterval = RNG::generate(0, _ufoFireInterval) + _ufoFireInterval;
 	_ufoWtimer->setInterval(_ufoFireInterval);
 
 	_ufoEscapeTimer->onTimer((StateHandler)&DogfightState::ufoBreakOff);
-	int ufoBreakOffInterval = (_ufo->getRules()->getBreakOffTime() + RNG::generate(1, _ufo->getRules()->getBreakOffTime()) - 30 * (int)(_game->getSavedGame()->getDifficulty())) * 20;
+	int ufoBreakOffInterval = (_ufo->getRules()->getBreakOffTime() + RNG::generate(0, _ufo->getRules()->getBreakOffTime()) - 30 * (int)(_game->getSavedGame()->getDifficulty())) * _timeScale;
 	_ufoEscapeTimer->setInterval(ufoBreakOffInterval);
 
 	_craftDamageAnimTimer->onTimer((StateHandler)&DogfightState::animateCraftDamage);
@@ -1158,7 +1170,7 @@ void DogfightState::fireWeapon2()
  */
 void DogfightState::ufoFireWeapon()
 {
-	_ufoFireInterval = (_ufo->getRules()->getWeaponReload() - 2 * (int)(_game->getSavedGame()->getDifficulty())) * 75;
+	_ufoFireInterval = (_ufo->getRules()->getWeaponReload() - 2 * (int)(_game->getSavedGame()->getDifficulty())) * _timeScale;
 	_ufoFireInterval = RNG::generate(0, _ufoFireInterval) + _ufoFireInterval;
 	_ufoWtimer->setInterval(_ufoFireInterval);
 
@@ -1305,11 +1317,11 @@ void DogfightState::btnCautiousClick(Action *)
 		setStatus("STR_CAUTIOUS_ATTACK");
 		if (_craft->getNumWeapons() > 0 && _craft->getWeapons()->at(0) != 0)
 		{
-			_w1Timer->setInterval(_craft->getWeapons()->at(0)->getRules()->getCautiousReload() * 75);
+			_w1Timer->setInterval(_craft->getWeapons()->at(0)->getRules()->getCautiousReload() * _timeScale);
 		}
 		if (_craft->getNumWeapons() > 1 && _craft->getWeapons()->at(1) != 0)
 		{
-			_w2Timer->setInterval(_craft->getWeapons()->at(1)->getRules()->getCautiousReload() * 75);
+			_w2Timer->setInterval(_craft->getWeapons()->at(1)->getRules()->getCautiousReload() * _timeScale);
 		}
 		minimumDistance();
 		_ufoEscapeTimer->start();
@@ -1328,11 +1340,11 @@ void DogfightState::btnStandardClick(Action *)
 		setStatus("STR_STANDARD_ATTACK");
 		if (_craft->getNumWeapons() > 0 && _craft->getWeapons()->at(0) != 0)
 		{
-			_w1Timer->setInterval(_craft->getWeapons()->at(0)->getRules()->getStandardReload() * 75);
+			_w1Timer->setInterval(_craft->getWeapons()->at(0)->getRules()->getStandardReload() * _timeScale);
 		}
 		if (_craft->getNumWeapons() > 1 && _craft->getWeapons()->at(1) != 0)
 		{
-			_w2Timer->setInterval(_craft->getWeapons()->at(1)->getRules()->getStandardReload() * 75);
+			_w2Timer->setInterval(_craft->getWeapons()->at(1)->getRules()->getStandardReload() * _timeScale);
 		}
 		maximumDistance();
 		_ufoEscapeTimer->start();
@@ -1351,11 +1363,11 @@ void DogfightState::btnAggressiveClick(Action *)
 		setStatus("STR_AGGRESSIVE_ATTACK");
 		if (_craft->getNumWeapons() > 0 && _craft->getWeapons()->at(0) != 0)
 		{
-			_w1Timer->setInterval(_craft->getWeapons()->at(0)->getRules()->getAggressiveReload() * 75);
+			_w1Timer->setInterval(_craft->getWeapons()->at(0)->getRules()->getAggressiveReload() * _timeScale);
 		}
 		if (_craft->getNumWeapons() > 1 && _craft->getWeapons()->at(1) != 0)
 		{
-			_w2Timer->setInterval(_craft->getWeapons()->at(1)->getRules()->getAggressiveReload() * 75);
+			_w2Timer->setInterval(_craft->getWeapons()->at(1)->getRules()->getAggressiveReload() * _timeScale);
 		}
 		_targetDist = 64;
 		_ufoEscapeTimer->start();

@@ -76,7 +76,7 @@ struct HairBleach
  * @param extraSprites List of additional sprites.
  * @param game GameFolder folder currently loaded.
  */
-XcomResourcePack::XcomResourcePack(std::map<std::string, ExtraSprites *> extraSprites, std::map<std::string, ExtraSounds *> extraSounds, const std::string &gameFolder) : ResourcePack()
+XcomResourcePack::XcomResourcePack(std::vector<std::pair<std::string, ExtraSprites *> > extraSprites, std::vector<std::pair<std::string, ExtraSounds *> > extraSounds, const std::string &gameFolder) : ResourcePack()
 {
 	// Load palettes
 	for (int i = 0; i < 5; ++i)
@@ -522,7 +522,7 @@ XcomResourcePack::XcomResourcePack(std::map<std::string, ExtraSprites *> extraSp
 	Log(LOG_INFO) << "Loading extra resources from ruleset...";
 	bool debugOutput = Options::getBool("debug");
 	
-	for (std::map<std::string, ExtraSprites*>::iterator i = extraSprites.begin(); i != extraSprites.end(); ++i)
+	for (std::vector<std::pair<std::string, ExtraSprites *> >::const_iterator i = extraSprites.begin(); i != extraSprites.end(); ++i)
 	{
 		if (i->second->getSingleImage())
 		{
@@ -534,9 +534,14 @@ XcomResourcePack::XcomResourcePack(std::map<std::string, ExtraSprites *> extraSp
 				}
 				_surfaces[i->first] = new Surface((*i).second->getWidth(), (*i).second->getHeight());
 			}
-			else if (debugOutput)
+			else
 			{
-				Log(LOG_INFO) << "Adding/Replacing single image: " << i->first;
+				if (debugOutput)
+				{
+					Log(LOG_INFO) << "Adding/Replacing single image: " << i->first;
+				}
+				delete _surfaces[i->first];
+				_surfaces[i->first] = new Surface((*i).second->getWidth(), (*i).second->getHeight());
 			}
 			s.str("");
 			s << CrossPlatform::getDataFile(i->second->getFolder() + i->second->getSprites()->operator[](0));
@@ -544,12 +549,14 @@ XcomResourcePack::XcomResourcePack(std::map<std::string, ExtraSprites *> extraSp
 		}
 		else
 		{
+			bool adding = false;
 			if (_sets.find(i->first) == _sets.end())
 			{
 				if (debugOutput)
 				{
 					Log(LOG_INFO) << "Creating new surface set: " << i->first;
 				}
+				adding = true;
 				_sets[i->first] = new SurfaceSet((*i).second->getWidth(), (*i).second->getHeight());
 			}
 			else if (debugOutput)
@@ -574,23 +581,66 @@ XcomResourcePack::XcomResourcePack(std::map<std::string, ExtraSprites *> extraSp
 					{
 						s.str("");
 						s << folder.str() << CrossPlatform::getDataFile(*k);
-						_sets[i->first]->getFrame(offset)->loadImage(s.str());
+						if (_sets[i->first]->getFrame(offset))
+						{
+							if (debugOutput)
+							{
+								Log(LOG_INFO) << "Replacing frame: " << offset;
+							}
+							_sets[i->first]->getFrame(offset)->loadImage(s.str());
+						}
+						else
+						{
+							if (adding)
+							{
+								_sets[i->first]->addFrame(offset)->loadImage(s.str());
+							}
+							else
+							{
+								if (debugOutput)
+								{
+									Log(LOG_INFO) << "Adding frame: " << offset + i->second->getModIndex();
+								}
+								_sets[i->first]->addFrame(offset + i->second->getModIndex())->loadImage(s.str());
+							}
+						}
 						offset++;
 					}
 				}
 				else
 				{
-					if (debugOutput)
-					{
-						Log(LOG_INFO) << "Adding/Replacing frame: " << j->first;
-					}
 					s << CrossPlatform::getDataFile(i->second->getFolder() + j->second);
-					_sets[i->first]->getFrame(j->first)->loadImage(s.str());
+					if (_sets[i->first]->getFrame(j->first))
+					{
+						if (debugOutput)
+						{
+							Log(LOG_INFO) << "Replacing frame: " << j->first;
+						}
+						_sets[i->first]->getFrame(j->first)->loadImage(s.str());
+					}
+					else
+					{
+						if (debugOutput)
+						{
+							Log(LOG_INFO) << "Adding frame: " << j->first << ", using index: " << j->first + i->second->getModIndex();
+						}
+						_sets[i->first]->addFrame(j->first + i->second->getModIndex())->loadImage(s.str());
+					}
 				}
 			}
 		}
 	}
-	for (std::map<std::string, ExtraSounds*>::iterator i = extraSounds.begin(); i != extraSounds.end(); ++i)
+
+	// copy constructor doesn't like doing this directly, so let's make a second handobs file the old fashioned way.
+	// handob2 is used for all the left handed sprites.
+	_sets["HANDOB2.PCK"] = new SurfaceSet(_sets["HANDOB.PCK"]->getWidth(), _sets["HANDOB.PCK"]->getHeight());
+	std::map<int, Surface*> *handob = _sets["HANDOB.PCK"]->getFrames();
+	for (std::map<int, Surface*>::const_iterator i = handob->begin(); i != handob->end(); ++i)
+	{
+		(i->second)->blit(_sets["HANDOB2.PCK"]->addFrame(i->first));
+	}
+
+	for (std::vector<std::pair<std::string, ExtraSounds *> >::const_iterator i = extraSounds.begin(); i != extraSounds.end(); ++i)
 	{
 		if (_sounds.find(i->first) == _sounds.end())
 		{
@@ -622,18 +672,36 @@ XcomResourcePack::XcomResourcePack(std::map<std::string, ExtraSprites *> extraSp
 				{
 					s.str("");
 					s << folder.str() << CrossPlatform::getDataFile(*k);
-					_sounds[i->first]->getSound(offset)->load(s.str());
+					if (_sounds[i->first]->getSound(offset))
+					{
+						_sounds[i->first]->getSound(offset)->load(s.str());
+					}
+					else
+					{
+						_sounds[i->first]->addSound(offset + i->second->getModIndex())->load(s.str());
+					}
 					offset++;
 				}
 			}
 			else
 			{
-				if (debugOutput)
-				{
-					Log(LOG_INFO) << "adding/Replacing index: " << j->first;
-				}
 				s << CrossPlatform::getDataFile(j->second);
-				_sounds[i->first]->getSound(j->first)->load(s.str());
+				if (_sounds[i->first]->getSound(j->first))
+				{
+					if (debugOutput)
+					{
+						Log(LOG_INFO) << "Replacing index: " << j->first;
+					}
+					_sounds[i->first]->getSound(j->first)->load(s.str());
+				}
+				else
+				{
+					if (debugOutput)
+					{
+						Log(LOG_INFO) << "Adding index: " << j->first;
+					}
+					_sounds[i->first]->addSound(j->first + i->second->getModIndex())->load(s.str());
+				}
 			}
 		}
 	}
@@ -740,9 +808,6 @@ void XcomResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 		_sets[usets[i]] = new SurfaceSet(32, 40);
 		_sets[usets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
 	}
-
-	_sets["HANDOB2.PCK"] = new SurfaceSet(32, 40);
-	_sets["HANDOB2.PCK"]->loadPck(CrossPlatform::getDataFile(gameFolder + "UNITS/HANDOB.PCK"), CrossPlatform::getDataFile(gameFolder + "UNITS/HANDOB.TAB"));
 
 	s.str("");
 	s << gameFolder << "UNITS/" << "BIGOBS.PCK";
