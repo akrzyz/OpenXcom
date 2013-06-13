@@ -80,7 +80,7 @@ void ProjectileFlyBState::init()
 	if (!_parent->getSave()->getTile(_action.target)) // invalid target position
 		return;
 
-	if (_action.actor->getTimeUnits() < _action.TU)
+	if (_parent->getPanicHandled() && _action.actor->getTimeUnits() < _action.TU)
 	{
 		_action.result = "STR_NOT_ENOUGH_TIME_UNITS";
 		_parent->popState();
@@ -88,6 +88,7 @@ void ProjectileFlyBState::init()
 	}
 
 	_unit = _action.actor;
+
 	_ammo = weapon->getAmmoItem();
 	if (_unit->isOut())
 	{
@@ -201,6 +202,11 @@ bool ProjectileFlyBState::createNewProjectile()
 			// and we have a lift-off
 			if (_action.weapon->getRules()->getFireSound() != -1)
 				_parent->getResourcePack()->getSound("BATTLE.CAT", _action.weapon->getRules()->getFireSound())->play();
+			if (!_parent->getSave()->getDebugMode() && _action.type != BA_LAUNCH && _ammo->spendBullet() == false)
+			{
+				_parent->getSave()->removeItem(_ammo);
+				_action.weapon->setAmmoItem(0);
+			}
 		}
 		else
 		{
@@ -263,17 +269,21 @@ void ProjectileFlyBState::think()
 			{
 				_parent->getMap()->getCamera()->setMapOffset(_action.cameraPosition);
 			}
-			BattleAction action;
-			BattleUnit *potentialVictim = _parent->getSave()->getTile(_action.target)->getUnit();
-			if (potentialVictim && potentialVictim->getFaction() != _unit->getFaction() && !potentialVictim->isOut())
+			if (_action.type != BA_PANIC && _action.type != BA_MINDCONTROL)
 			{
-				if (_action.type != BA_PANIC && _action.type != BA_MINDCONTROL)
+				BattleAction action;
+				action.cameraPosition = _action.cameraPosition;
+				BattleUnit *potentialVictim = _parent->getSave()->getTile(_action.target)->getUnit();
+				if (potentialVictim && potentialVictim->getFaction() == FACTION_HOSTILE && !potentialVictim->isOut())
 				{
 					if (_parent->getSave()->getTileEngine()->checkReactionFire(_unit, &action, potentialVictim, false))
 					{
-						action.cameraPosition = _action.cameraPosition;
 						_parent->statePushBack(new ProjectileFlyBState(_parent, action));
 					}
+				}
+				else if (_parent->getSave()->getTileEngine()->checkReactionFire(_unit, &action))
+				{
+					_parent->statePushBack(new ProjectileFlyBState(_parent, action));
 				}
 			}
 			_parent->popState();
@@ -293,7 +303,7 @@ void ProjectileFlyBState::think()
 				BattleItem *item = _parent->getMap()->getProjectile()->getItem();
 				_parent->getResourcePack()->getSound("BATTLE.CAT", 38)->play();
 
-				if (Options::getBool("battleInstantGrenade") && item->getRules()->getBattleType() == BT_GRENADE && item->getExplodeTurn() <= _parent->getSave()->getTurn())
+				if (Options::getBool("battleInstantGrenade") && item->getRules()->getBattleType() == BT_GRENADE && item->getExplodeTurn() != 0 && item->getExplodeTurn() <= _parent->getSave()->getTurn())
 				{
 					// it's a hot grenade to explode immediately
 					_parent->statePushFront(new ExplosionBState(_parent, _parent->getMap()->getProjectile()->getPosition(-1), item, _action.actor));

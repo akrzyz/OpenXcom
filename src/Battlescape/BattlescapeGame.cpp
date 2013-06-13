@@ -252,7 +252,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		ai = unit->getCurrentAIState();
 		unit->think(&action);	
 	}
-	action.TU = 0;
+
 	if (!unit->getMainHandWeapon() || !unit->getMainHandWeapon()->getAmmoItem())
 	{
 		if (unit->getOriginalFaction() == FACTION_HOSTILE && unit->getVisibleUnits()->size() == 0)
@@ -406,6 +406,10 @@ void BattlescapeGame::endTurn()
 	_tuReserved = _playerTUReserved;
 	_debugPlay = false;
 	_currentAction.type = BA_NONE;
+	getMap()->getWaypoints()->clear();
+	_currentAction.waypoints.clear();
+	_parentState->showLaunchButton(false);
+	_currentAction.targeting = false;
 
 	if (_save->getTileEngine()->closeUfoDoors())
 	{
@@ -916,7 +920,7 @@ void BattlescapeGame::popState()
 						getMap()->cacheUnit(_save->getSelectedUnit());
 					}
 					_AIActionCounter = 0;
-					if (_save->selectNextPlayerUnit(true, true) == 0)
+					if (_save->selectNextPlayerUnit(true, true) == 0 && _states.empty())
 					{
 						if (!_save->getDebugMode())
 						{
@@ -1112,6 +1116,7 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 		}
 		break;
 	case STATUS_BERSERK: // berserk - do some weird turning around and then aggro towards an enemy unit or shoot towards random place
+		ba.type = BA_TURN;
 		for (int i= 0; i < 4; i++)
 		{
 			ba.target = Position(unit->getPosition().x + RNG::generate(-5,5), unit->getPosition().y + RNG::generate(-5,5), unit->getPosition().z);
@@ -1150,8 +1155,8 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 				}
 			}
 		}
-		// Add some time units for the turning
-		unit->setTimeUnits(15);
+		// replace the TUs from shooting
+		unit->setTimeUnits(unit->getStats()->tu);
 		ba.type = BA_NONE;
 		break;
 	default: break;

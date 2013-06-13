@@ -922,6 +922,15 @@ bool TileEngine::checkReactionFire(BattleUnit *unit, BattleAction *action, Battl
 			potentialVictim->setAIState(aggro);
 		}
 		aggro->setAggroTarget(unit);
+		if (action->weapon && action->weapon->getRules()->getBattleType() != BT_MELEE && distance(potentialVictim->getPosition(), unit->getPosition()) <= 19)
+		{
+			potentialVictim->lookAt(unit->getPosition());
+			while (potentialVictim->getStatus() == STATUS_TURNING)
+			{
+				potentialVictim->turn();
+			}
+			calculateFOV(potentialVictim);
+		}
 	}
 
 	// we reset the unit to false here - if it is seen by any unit in range below the unit becomes visible again
@@ -929,7 +938,7 @@ bool TileEngine::checkReactionFire(BattleUnit *unit, BattleAction *action, Battl
 
 	for (std::vector<BattleUnit*>::iterator i = _save->getUnits()->begin(); i != _save->getUnits()->end(); ++i)
 	{
-		if (distance(unit->getPosition(), (*i)->getPosition()) < 19 &&
+		if (distance(unit->getPosition(), (*i)->getPosition()) <= 19 &&
 			(*i)->getFaction() != _save->getSide() &&
 			!(*i)->isOut())
 		{
@@ -962,21 +971,28 @@ bool TileEngine::checkReactionFire(BattleUnit *unit, BattleAction *action, Battl
 
 	if (action->actor)
 	{
-		action->actor->addReactionExp();
+		BattleUnit *reactor = action->actor;
+		reactor->addReactionExp();
 		// lets try and shoot: we need a weapon, ammo and enough time units
-		action->weapon = action->actor->getMainHandWeapon();
+		action->weapon = reactor->getMainHandWeapon();
 
-		if (action->weapon->getRules()->getTUAuto() && RNG::generate(0,3) < 3 && action->actor->getTimeUnits() >= action->actor->getActionTUs(BA_AUTOSHOT, action->weapon))
+		if (reactor->getFaction() != FACTION_PLAYER &&
+			action->weapon->getRules()->getTUAuto() &&
+			RNG::generate(0,4) >= 3 &&
+			reactor->getTimeUnits() >= reactor->getActionTUs(BA_AUTOSHOT, action->weapon))
 			action->type = BA_AUTOSHOT;
 		else
 			action->type = BA_SNAPSHOT;
 
 		action->target = unit->getPosition();
 
-		int tu = action->actor->getActionTUs(action->type, action->weapon);
+		int tu = reactor->getActionTUs(action->type, action->weapon);
 		action->TU = tu;
-		if (action->weapon && action->weapon->getAmmoItem() && action->weapon->getAmmoItem()->getAmmoQuantity() && action->actor->getTimeUnits() >= tu)
+		if (action->weapon && action->weapon->getAmmoItem() && action->weapon->getAmmoItem()->getAmmoQuantity() && reactor->getTimeUnits() >= tu)
 		{
+			reactor->lookAt(action->target, reactor->getTurretType() != -1);
+			while (reactor->getStatus() == STATUS_TURNING)
+				reactor->turn(reactor->getTurretType() != -1);
 			action->targeting = true;
 			// if the target is hostile, it will aggro
 			if (unit->getFaction() == FACTION_HOSTILE)
@@ -987,7 +1003,7 @@ bool TileEngine::checkReactionFire(BattleUnit *unit, BattleAction *action, Battl
 					aggro = new AggroBAIState(_save, unit);
 					unit->setAIState(aggro);
 				}
-				aggro->setAggroTarget(action->actor);
+				aggro->setAggroTarget(reactor);
 			}
 			return true;
 		}
@@ -1443,23 +1459,23 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 		if (type == DT_NONE) //this is two-way diagonal visiblity check, used in original game
 		{
 			block = blockage(startTile, MapData::O_NORTHWALL, type) + blockage(endTile, MapData::O_WESTWALL, type); //up+right
-			block += blockage(_save->getTile(startTile->getPosition() + oneTileNorth), MapData::O_OBJECT, type, direction);
+			block += blockage(_save->getTile(startTile->getPosition() + oneTileNorth), MapData::O_OBJECT, type, 2);
 			if (block == 0) break; //this way is opened
 			block = blockage(_save->getTile(startTile->getPosition() + oneTileEast), MapData::O_NORTHWALL, type)
 				+ blockage(_save->getTile(startTile->getPosition() + oneTileEast), MapData::O_WESTWALL, type); //right+up
-			block += blockage(_save->getTile(startTile->getPosition() + oneTileEast), MapData::O_OBJECT, type, direction);
-}
+			block += blockage(_save->getTile(startTile->getPosition() + oneTileEast), MapData::O_OBJECT, type, 0);
+		}
 		else
 		{
 			block = (blockage(startTile,MapData::O_NORTHWALL, type) + blockage(endTile,MapData::O_WESTWALL, type))/2
 				+ (blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_WESTWALL, type)
 				+ blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_NORTHWALL, type))/2;
 			if (type == DT_HE)
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),MapData::O_OBJECT, type, direction) +
-				blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_OBJECT, type, direction))/2;
+			block += (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),MapData::O_OBJECT, type, 4) +
+				blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_OBJECT, type, 6))/2;
 			else
-			block = (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),MapData::O_OBJECT, type, direction) +
-				  blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_OBJECT, type, direction)) < 510?0:255;
+			block = (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),MapData::O_OBJECT, type, 4) +
+				  blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_OBJECT, type, 6)) < 510?0:255;
 		}
 		break;
 	case 2: // east
@@ -1470,11 +1486,11 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 		{
 			block = blockage(_save->getTile(startTile->getPosition() + oneTileSouth), MapData::O_NORTHWALL, type)
 				+ blockage(endTile, MapData::O_WESTWALL, type); //down+right
-			block += blockage(_save->getTile(startTile->getPosition() + oneTileSouth), MapData::O_OBJECT, type, direction);
+			block += blockage(_save->getTile(startTile->getPosition() + oneTileSouth), MapData::O_OBJECT, type, 2);
 			if (block == 0) break; //this way is opened
 			block = blockage(_save->getTile(startTile->getPosition() + oneTileEast), MapData::O_WESTWALL, type)
 				+ blockage(endTile, MapData::O_NORTHWALL, type); //right+down
-			block += blockage(_save->getTile(startTile->getPosition() + oneTileEast), MapData::O_OBJECT, type, direction);
+			block += blockage(_save->getTile(startTile->getPosition() + oneTileEast), MapData::O_OBJECT, type, 4);
 		}
 		else
 		{
@@ -1482,11 +1498,11 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 				+ (blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_WESTWALL, type)
 				+ blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_NORTHWALL, type))/2;
 			if (type == DT_HE)
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_OBJECT, type, direction) +
-					  blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_OBJECT, type, direction))/2;
+			block += (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_OBJECT, type, 0) +
+					  blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_OBJECT, type, 6))/2;
 			else
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_OBJECT, type, direction) +
-					  blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_OBJECT, type, direction)) < 510?0:255;
+			block += (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_OBJECT, type, 0) +
+					  blockage(_save->getTile(startTile->getPosition() + oneTileEast),MapData::O_OBJECT, type, 6)) < 510?0:255;
 		}
 		break;
 	case 4: // south
@@ -1497,10 +1513,10 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 		{
 			block = blockage(_save->getTile(startTile->getPosition() + oneTileSouth), MapData::O_NORTHWALL, type)
 				+ blockage(_save->getTile(startTile->getPosition() + oneTileSouth), MapData::O_WESTWALL, type); //down+left
-			block += blockage(_save->getTile(startTile->getPosition() + oneTileSouth), MapData::O_OBJECT, type, direction);
+			block += blockage(_save->getTile(startTile->getPosition() + oneTileSouth), MapData::O_OBJECT, type, 6);
 			if (block == 0) break; //this way is opened
 			block = blockage(startTile, MapData::O_WESTWALL, type) + blockage(endTile, MapData::O_NORTHWALL, type); //left+down
-			block += blockage(_save->getTile(startTile->getPosition() + oneTileWest), MapData::O_OBJECT, type, direction);
+			block += blockage(_save->getTile(startTile->getPosition() + oneTileWest), MapData::O_OBJECT, type, 4);
 		}
 		else
 		{
@@ -1508,11 +1524,11 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 				+ (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_WESTWALL, type)
 				+ blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_NORTHWALL, type))/2;
 			if (type == DT_HE)
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_OBJECT, type, direction) +
-					  blockage(_save->getTile(startTile->getPosition() + oneTileWest),MapData::O_OBJECT, type, direction))/2;
+			block += (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_OBJECT, type, 0) +
+					  blockage(_save->getTile(startTile->getPosition() + oneTileWest),MapData::O_OBJECT, type, 2))/2;
 			else
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_OBJECT, type, direction) +
-					  blockage(_save->getTile(startTile->getPosition() + oneTileWest),MapData::O_OBJECT, type, direction)) < 510?0:255;
+			block += (blockage(_save->getTile(startTile->getPosition() + oneTileSouth),MapData::O_OBJECT, type, 0) +
+					  blockage(_save->getTile(startTile->getPosition() + oneTileWest),MapData::O_OBJECT, type, 2)) < 510?0:255;
 		}
 		break;
 	case 6: // west
@@ -1524,11 +1540,11 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 		{
 			block = blockage(startTile, MapData::O_NORTHWALL, type)
 				+ blockage(_save->getTile(startTile->getPosition() + oneTileNorth), MapData::O_WESTWALL, type); //up+left
-			block += blockage(_save->getTile(startTile->getPosition() + oneTileNorth), MapData::O_OBJECT, type, direction);
+			block += blockage(_save->getTile(startTile->getPosition() + oneTileNorth), MapData::O_OBJECT, type, 6);
 			if (block == 0) break; //this way is opened
 			block = blockage(startTile, MapData::O_WESTWALL, type)
 				+ blockage(_save->getTile(startTile->getPosition() + oneTileWest), MapData::O_NORTHWALL, type); //left+up
-			block += blockage(_save->getTile(startTile->getPosition() + oneTileWest), MapData::O_OBJECT, type, direction);
+			block += blockage(_save->getTile(startTile->getPosition() + oneTileWest), MapData::O_OBJECT, type, 0);
 		}
 		else
 		{
@@ -1536,17 +1552,20 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 				+ (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),MapData::O_WESTWALL, type)
 				+ blockage(_save->getTile(startTile->getPosition() + oneTileWest),MapData::O_NORTHWALL, type))/2;
 			if (type == DT_HE)
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),MapData::O_OBJECT, type, direction) +
-					  blockage(_save->getTile(startTile->getPosition() + oneTileWest),MapData::O_OBJECT, type, direction))/2;
+			block += (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),MapData::O_OBJECT, type, 4) +
+					  blockage(_save->getTile(startTile->getPosition() + oneTileWest),MapData::O_OBJECT, type, 2))/2;
 			else
-			block += (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),MapData::O_OBJECT, type, direction) +
-					  blockage(_save->getTile(startTile->getPosition() + oneTileWest),MapData::O_OBJECT, type, direction)) < 510?0:255;
+			block += (blockage(_save->getTile(startTile->getPosition() + oneTileNorth),MapData::O_OBJECT, type, 4) +
+					  blockage(_save->getTile(startTile->getPosition() + oneTileWest),MapData::O_OBJECT, type, 2)) < 510?0:255;
 		}
 		break;
 	}
 
 	if (type != DT_NONE)
 	{
+		direction += 4;
+		if (direction > 7)
+			direction -= 8;
 		block += blockage(endTile,MapData::O_OBJECT, type, direction);
 	}
 	else
@@ -2243,7 +2262,8 @@ bool TileEngine::psiAttack(BattleAction *action)
 {
 	BattleUnit *victim = _save->getTile(action->target)->getUnit();
 	double attackStrength = static_cast<double>(action->actor->getStats()->psiStrength) * action->actor->getStats()->psiSkill / 50;
-	double defenseStrength = static_cast<double>(victim->getStats()->psiStrength) + 10.0 + (static_cast<double>(victim->getStats()->psiSkill) / 5);
+	double defenseStrength = static_cast<double>(victim->getStats()->psiStrength)
+		+ (victim->getStats()->psiSkill > 0) ? 10.0 + static_cast<double>(victim->getStats()->psiSkill) / 5 : 10.0;
 	int d = distance(action->actor->getPosition(), action->target);
 	attackStrength -= static_cast<double>(d)/2;
 	attackStrength += RNG::generate(0,55);
