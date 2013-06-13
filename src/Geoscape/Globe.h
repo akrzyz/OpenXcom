@@ -56,7 +56,7 @@ private:
 	double _cenLon, _cenLat, _rotLon, _rotLat, _hoverLon, _hoverLat;
 	Sint16 _cenX, _cenY;
 	size_t _zoom;
-	SurfaceSet *_texture;
+	SurfaceSet *_textureLand, *_textureWater;
 	Game *_game;
 	Surface *_markers, *_countries, *_radars;
 	bool _blink, _hover;
@@ -97,8 +97,10 @@ public:
 	void polarToCart(double lon, double lat, double *x, double *y) const;
 	/// Converts cartesian coordinates to polar coordinates.
 	void cartToPolar(Sint16 x, Sint16 y, double *lon, double *lat) const;
-	/// Sets the texture set for the globe's polygons.
-	void setTexture(SurfaceSet *texture);
+	/// Sets the texture set for the globe's land polygons.
+	void setTextureLand(SurfaceSet *textureLand);
+	/// Sets the texture set for the globe's water polygons.
+	void setTextureWater(SurfaceSet *textureWater);
 	/// Starts rotating the globe left.
 	void rotateLeft();
 	/// Starts rotating the globe right.
@@ -159,7 +161,7 @@ public:
 	void mouseClick(Action *action, State *state);
 	/// Special handling for key presses.
 	void keyboardPress(Action *action, State *state);
-	/// Get the polygons texture and shade at the given point.
+	/// Get the polygons land texture and shade at the given point for.
 	void getPolygonTextureAndShade(double lon, double lat, int *texture, int *shade) const;
 	/// Checks if current globe zoom level is at maximum.
 	bool isZoomedInToMax() const;

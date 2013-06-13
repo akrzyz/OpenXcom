@@ -98,11 +98,11 @@ public:
 	/// Gets list of voxel data.
 	std::vector<Uint16> *getVoxelData();
 	/// Loads geoscape specific resources
-	void loadGeoscapeResources(std::map<std::string, ExtraSprites *> extraSprites, std::map<std::string,  ExtraSounds *> extraSounds, const std::string &gameFolder, const std::string &game);
+	void loadGeoscapeResources(std::vector<std::pair<std::string, ExtraSprites *> > extraSprites, std::vector<std::pair<std::string, ExtraSounds *> > extraSounds, const std::string &gameFolder, const std::string &game);
 	/// Loads battlescape specific resources
 	void loadBattlescapeResources(const std::string &gameFolder);
 	/// Loads extra resources specified in ruleset
-	void loadExtraResources(std::map<std::string, ExtraSprites *> extraSprites, std::map<std::string,  ExtraSounds *> extraSounds);
+	void loadExtraResources(std::vector<std::pair<std::string, ExtraSprites *> > extraSprites, std::vector<std::pair<std::string, ExtraSounds *> > extraSounds);
 };
 
 }

@@ -237,7 +237,7 @@ struct CreateShadow
 			dest = getShadowValue(dest, earth, sun, noise);
 		else
 			dest = 0;
-	}
+	}	
 };
 
 }//namespace
@@ -259,7 +259,15 @@ Globe::Globe(Game *game, int cenX, int cenY, int width, int height, int x, int y
 	_cenX(cenX), _cenY(cenY), _game(game),
 	_blink(true), _hover(false), _cacheLand(), _cacheWater()
 {
-	_texture = new SurfaceSet(*_game->getResourcePack()->getSurfaceSet("TEXTURE.DAT"));
+	if (_game->getResourcePack()->getSurfaceSet("TEXTURE.DAT") != 0)
+	{
+		_textureLand = new SurfaceSet(*_game->getResourcePack()->getSurfaceSet("TEXTURE.DAT"));
+	}
+	if (_game->getResourcePack()->getSurfaceSet("TFTD_TEXTURE.DAT") != 0)
+	{
+		_textureWater = new SurfaceSet(*_game->getResourcePack()->getSurfaceSet("TFTD_TEXTURE.DAT"));
+		_textureWater->setPalette(_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0")->getColors());
+	}
 
 	_countries = new Surface(width, height, x, y);
 	_markers = new Surface(width, height, x, y);
@@ -400,7 +408,8 @@ Globe::Globe(Game *game, int cenX, int cenY, int width, int height, int x, int y
  */
 Globe::~Globe()
 {
-	delete _texture;
+	delete _textureLand;
+	delete _textureWater;
 
 	delete _blinkTimer;
 	delete _rotTimer;
@@ -901,7 +910,7 @@ void Globe::cache(std::list<Polygon*> *polygons, std::list<Polygon*> *cache)
  */
 void Globe::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
-	_texture->setPalette(colors, firstcolor, ncolors);
+//	_textureLand->setPalette(colors, firstcolor, ncolors);
 	
 	_countries->setPalette(colors, firstcolor, ncolors);
 	_markers->setPalette(colors, firstcolor, ncolors);
@@ -974,7 +983,7 @@ void Globe::draw()
 	drawOcean();
 	drawLand();
 	drawRadars();
-	drawShadow();
+//	drawShadow();
 	drawMarkers();
 	drawDetail();
 }
@@ -1007,7 +1016,7 @@ void Globe::drawOcean()
 
 			// Apply textures according to zoom and shade
 			int zoom = (2 - (int)floor(_zoom / 2.0)) * NUM_TEXTURES;
-			drawTexturedPolygon(x, y, (*i)->getPoints(), _texture->getFrame((*i)->getTexture() + 39 + zoom), 0, 0);
+			drawTexturedPolygon(x, y, (*i)->getPoints(), _textureWater->getFrame((*i)->getTexture() + zoom), 0, 0);
 		}
 	}
 }
@@ -1031,7 +1040,7 @@ void Globe::drawLand()
 
 		// Apply textures according to zoom and shade
 		int zoom = (2 - (int)floor(_zoom / 2.0)) * NUM_TEXTURES;
-		drawTexturedPolygon(x, y, (*i)->getPoints(), _texture->getFrame((*i)->getTexture() + zoom), 0, 0);
+		drawTexturedPolygon(x, y, (*i)->getPoints(), _textureLand->getFrame((*i)->getTexture() + zoom), 0, 0);
 	}
 }
 

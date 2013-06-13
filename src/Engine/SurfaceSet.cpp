@@ -152,7 +152,7 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
  * @param game Game to load data from
  * @sa http://www.ufopaedia.org/index.php?title=Image_Formats#SCR_.26_DAT
  */
-void SurfaceSet::loadDat(const std::string &filename, const std::string &game)
+void SurfaceSet::loadDat(const std::string &filename)
 {
 	int nframes = 0;
 
@@ -172,25 +172,11 @@ void SurfaceSet::loadDat(const std::string &filename, const std::string &game)
 	for (int i = 0; i < nframes; ++i)
 	{
 		Surface *surface = new Surface(_width, _height);
-		if (game == "xcom1")
-		{
-			_frames[i] = surface;
-		}
-		else if (game == "xcom2")
-		{
-			_frames[i + nframes] = surface;
-		}
+		_frames[i] = surface;
 	}
 
 	Uint8 value;
-	int x = 0, y = 0, frame;
-	if (game == "xcom1")
-		frame = 0;
-	else if (game == "xcom2")
-		frame = nframes;
-
-	if (game == "xcom2")
-		nframes = 2 * nframes;
+	int x = 0, y = 0, frame = 0;
 
 	// Lock the surface
 	_frames[frame]->lock();
