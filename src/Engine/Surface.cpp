@@ -501,6 +501,18 @@ void Surface::drawCircle(Sint16 x, Sint16 y, Sint16 r, Uint8 color)
 }
 
 /**
+ * Draws a filled circle on the 32bit surface.
+ * @param x X coordinate in pixels.
+ * @param y Y coordinate in pixels.
+ * @param r Radius in pixels.
+ * @param color Color of the circle.
+ */
+void Surface::drawCircle32bit(Sint16 x, Sint16 y, Sint16 r, Uint32 color)
+{
+	filledCircleColor(_surface, x, y, r, color);
+}
+
+/**
  * Draws a filled polygon on the surface.
  * @param x Array of x coordinates.
  * @param y Array of y coordinates.

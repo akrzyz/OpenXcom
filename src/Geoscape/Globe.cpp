@@ -254,7 +254,7 @@ struct CreateShadow
  * @param y Y position in pixels.
  */
 Globe::Globe(Game *game, int cenX, int cenY, int width, int height, int x, int y):
-	InteractiveSurface(width, height, x, y),
+	InteractiveSurface(width, height, x, y, 32),
 	_rotLon(0.0), _rotLat(0.0),
 	_cenX(cenX), _cenY(cenY), _game(game),
 	_blink(true), _hover(false), _cacheLand(), _cacheWater()
@@ -901,8 +901,6 @@ void Globe::cache(std::list<Polygon*> *polygons, std::list<Polygon*> *cache)
  */
 void Globe::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
-	Surface::setPalette(colors, firstcolor, ncolors);
-	
 	_texture->setPalette(colors, firstcolor, ncolors);
 	
 	_countries->setPalette(colors, firstcolor, ncolors);
@@ -990,7 +988,7 @@ void Globe::drawOcean()
 	if (_cacheWater.empty())
 	{
 		lock();
-		drawCircle(_cenX+1, _cenY, _radius[_zoom]+20, Palette::blockOffset(12)+0);
+		drawCircle32bit(_cenX+1, _cenY, _radius[_zoom]+20, Palette::getRGBA(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors(), Palette::blockOffset(12)+0));
 //	ShaderDraw<Ocean>(ShaderSurface(this));
 		unlock();
 	}
@@ -1395,7 +1393,7 @@ void Globe::drawDetail()
 	if (_zoom >= 2)
 	{
 		Text *label = new Text(100, 9, 0, 0);
-		label->setPalette(getPalette());
+		label->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
 		label->setFonts(_game->getResourcePack()->getFont("Big.fnt"), _game->getResourcePack()->getFont("Small.fnt"));
 		label->setAlign(ALIGN_CENTER);
 		label->setColor(Palette::blockOffset(15)-1);
@@ -1423,7 +1421,7 @@ void Globe::drawDetail()
 	if (_zoom >= 3)
 	{
 		Text *label = new Text(80, 9, 0, 0);
-		label->setPalette(getPalette());
+		label->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
 		label->setFonts(_game->getResourcePack()->getFont("Big.fnt"), _game->getResourcePack()->getFont("Small.fnt"));
 		label->setAlign(ALIGN_CENTER);
 		label->setColor(Palette::blockOffset(8)+10);
@@ -1442,7 +1440,7 @@ void Globe::drawDetail()
 
 				_mkCity->setX(x - 1);
 				_mkCity->setY(y - 1);
-				_mkCity->setPalette(getPalette());
+				_mkCity->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
 				_mkCity->blit(_countries);
 
 				label->setX(x - 40);

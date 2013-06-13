@@ -41,7 +41,7 @@ int Screen::BASE_HEIGHT = 200;
 /// Sets the _flags and _bpp variables based on game options; needed in more than one place now
 void Screen::makeVideoFlags()
 {
-	_flags = SDL_SWSURFACE|SDL_HWPALETTE;
+	_flags = SDL_SWSURFACE;
 	if (Options::getBool("asyncBlit")) _flags |= SDL_ASYNCBLIT;
 	if (isOpenGLEnabled()) _flags = SDL_OPENGL;
 	if (Options::getBool("allowResize")) _flags |= SDL_RESIZABLE;
@@ -51,7 +51,7 @@ void Screen::makeVideoFlags()
 		_flags |= SDL_FULLSCREEN;
 	}
 
-	_bpp = (Screen::isHQXEnabled() || Screen::isOpenGLEnabled()) ? 32 : 8;
+	_bpp = 32;
 }
 
 
@@ -163,18 +163,6 @@ void Screen::flip()
 		SDL_BlitSurface(_surface->getSurface(), 0, _screen, 0);
 	}
 
-	// perform any requested palette update
-	if (_pushPalette && _numColors && _screen->format->BitsPerPixel == 8)
-	{
-		if (_screen->format->BitsPerPixel == 8 && SDL_SetColors(_screen, &(deferredPalette[_firstColor]), _firstColor, _numColors) == 0)
-		{
-			Log(LOG_DEBUG) << "Display palette doesn't match requested palette";
-		}
-		_numColors = 0;
-		_pushPalette = false;
-	}
-
-
 	
 	if (SDL_Flip(_screen) == -1)
 	{
@@ -210,14 +198,6 @@ void Screen::setPalette(SDL_Color* colors, int firstcolor, int ncolors, bool imm
 		memmove(&(deferredPalette[firstcolor]), colors, sizeof(SDL_Color) * ncolors);
 		_numColors = ncolors;
 		_firstColor = firstcolor;
-	}
-
-	_surface->setPalette(colors, firstcolor, ncolors);
-
-	// defer actual update of screen until SDL_Flip()
-	if (immediately && _screen->format->BitsPerPixel == 8 && SDL_SetColors(_screen, colors, firstcolor, ncolors) == 0)
-	{
-		Log(LOG_DEBUG) << "Display palette doesn't match requested palette";
 	}
 
 	// Sanity check
@@ -281,8 +261,7 @@ void Screen::setResolution(int width, int height)
 		_surface->getSurface()->h != BASE_HEIGHT))) // don't reallocate _surface if not necessary, it's a waste of CPU cycles
 	{
 		if (_surface) delete _surface;
-		_surface = new Surface((int)BASE_WIDTH, (int)BASE_HEIGHT, 0, 0, Screen::isHQXEnabled() ? 32 : 8); // only HQX needs 32bpp for this surface; the OpenGL class has its own 32bpp buffer
-		if (_surface->getSurface()->format->BitsPerPixel == 8) _surface->setPalette(deferredPalette);
+		_surface = new Surface((int)BASE_WIDTH, (int)BASE_HEIGHT, 0, 0, 32); // only HQX needs 32bpp for this surface; the OpenGL class has its own 32bpp buffer
 	}
 	SDL_SetColorKey(_surface->getSurface(), 0, 0); // turn off color key! 
 
@@ -305,10 +284,6 @@ void Screen::setResolution(int width, int height)
 	}
 
 	Log(LOG_INFO) << "Display set to " << getWidth() << "x" << getHeight() << "x" << (int)_screen->format->BitsPerPixel << ".";
-	if (_screen->format->BitsPerPixel == 8)
-	{
-		setPalette(getPalette());
-	}
 }
 
 /**

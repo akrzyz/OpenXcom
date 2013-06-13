@@ -26,6 +26,7 @@
 #include "Logger.h"
 #include "Options.h"
 #include "Screen.h"
+#include "Palette.h"
 
 #include "OpenGL.h"
 
@@ -634,9 +635,8 @@ int Zoom::_zoomSurfaceY(SDL_Surface * src, SDL_Surface * dst, int flipx, int fli
 {
 	int x, y;
 	static Uint32 *sax, *say;
-	Uint32 *csax, *csay;
+	Uint32 *csax, *csay, *dp, *sp, *csp;
 	int csx, csy;
-	Uint8 *sp, *dp, *csp;
 	int dgap;
 	static bool proclaimed = false;
 
@@ -765,12 +765,12 @@ int Zoom::_zoomSurfaceY(SDL_Surface * src, SDL_Surface * dst, int flipx, int fli
 	/*
 	* Pointer setup
 	*/
-	sp = csp = (Uint8 *) src->pixels;
-	dp = (Uint8 *) dst->pixels;
-	dgap = dst->pitch - dst->w;
+	sp = csp = (Uint32 *) src->pixels;
+	dp = (Uint32 *) dst->pixels;
+	dgap = dst->pitch / dst->format->BytesPerPixel - dst->w;
 
 	if (flipx) csp += (src->w-1);
-	if (flipy) csp  = ( (Uint8*)csp + src->pitch*(src->h-1) );
+	if (flipy) csp  = ( (Uint32*)csp + src->pitch*(src->h-1) );
 
 	/*
 	* Precalculate row increments
@@ -796,7 +796,7 @@ int Zoom::_zoomSurfaceY(SDL_Surface * src, SDL_Surface * dst, int flipx, int fli
 			csy -= dst->h;
 			(*csay)++;
 		}
-		(*csay) *= src->pitch * (flipy ? -1 : 1);
+		(*csay) *= src->pitch / dst->format->BytesPerPixel * (flipy ? -1 : 1);
 		csay++;
 	}
 	/*
