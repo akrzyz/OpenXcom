@@ -237,7 +237,7 @@ struct CreateShadow
 			dest = getShadowValue(dest, earth, sun, noise);
 		else
 			dest = 0;
-	}	
+	}
 };
 
 }//namespace

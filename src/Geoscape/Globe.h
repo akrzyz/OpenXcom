@@ -161,7 +161,7 @@ public:
 	void mouseClick(Action *action, State *state);
 	/// Special handling for key presses.
 	void keyboardPress(Action *action, State *state);
-	/// Get the polygons land texture and shade at the given point for.
+	/// Get the polygons texture and shade at the given point.
 	void getPolygonTextureAndShade(double lon, double lat, int *texture, int *shade) const;
 	/// Checks if current globe zoom level is at maximum.
 	bool isZoomedInToMax() const;
