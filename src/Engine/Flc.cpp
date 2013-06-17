@@ -184,7 +184,7 @@ void COLORS256()
       flc.colors[i].b=*(pSrc++);
       i++;
     }
-	flc.realscreen->setPalette(flc.colors, NumColorsSkip, i);
+//	flc.realscreen->setPalette(flc.colors, NumColorsSkip, i);
 	SDL_SetColors(flc.mainscreen, flc.colors, NumColorsSkip, i);
 	flc.realscreen->getSurface(); // force palette update to really happen
   }
@@ -344,7 +344,7 @@ void DECODE_COLOR()
       flc.colors[i].b=*(pSrc++)<<2;
       i++;
     }
-	flc.realscreen->setPalette(flc.colors, NumColorsSkip, i);
+//	flc.realscreen->setPalette(flc.colors, NumColorsSkip, i);
     SDL_SetColors(flc.mainscreen, flc.colors, NumColorsSkip, i);
 	flc.realscreen->getSurface(); // force palette update to really happen
   }

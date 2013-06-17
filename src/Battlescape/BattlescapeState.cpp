@@ -104,7 +104,7 @@ BattlescapeState::BattlescapeState(Game *game) : State(game), _popups()
 	// Create the battlemap view
 	// the actual map height is the total height minus the height of the buttonbar
 	int visibleMapHeight = screenHeight - iconsHeight;
-	_map = new Map(_game, screenWidth, screenHeight, 0, 0, visibleMapHeight);
+	_map = new Map(_game, screenWidth, screenHeight, 0, 0, visibleMapHeight, 8);
 
 	_numLayers = new NumberText(3, 5, _icons->getX() + 232, _icons->getY() + 6);
 	_rank = new Surface(26, 23, _icons->getX() + 107, _icons->getY() + 33);

@@ -634,7 +634,10 @@ SDL_Rect *Surface::getCrop()
  */
 void Surface::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
-	SDL_SetColors(_surface, colors, firstcolor, ncolors);
+	if (_surface->format->BitsPerPixel != 32)
+		SDL_SetColors(_surface, colors, firstcolor, ncolors);
+	else
+		_originalColors = colors;
 }
 
 /**
@@ -643,7 +646,10 @@ void Surface::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
  */
 SDL_Color *Surface::getPalette() const
 {
-	return _surface->format->palette->colors;
+	if (_surface->format->BitsPerPixel != 32)
+		return _surface->format->palette->colors;
+	else
+		return _originalColors;
 }
 
 /**

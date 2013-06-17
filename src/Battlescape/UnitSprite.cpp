@@ -44,7 +44,7 @@ namespace OpenXcom
  * @param x X position in pixels.
  * @param y Y position in pixels.
  */
-UnitSprite::UnitSprite(int width, int height, int x, int y) : Surface(width, height, x, y), _unit(0), _itemA(0), _itemB(0), _unitSurface(0), _itemSurfaceA(0), _itemSurfaceB(0), _part(0), _animationFrame(0)
+UnitSprite::UnitSprite(int width, int height, int x, int y, int bpp) : Surface(width, height, x, y, bpp), _unit(0), _itemA(0), _itemB(0), _unitSurface(0), _itemSurfaceA(0), _itemSurfaceB(0), _part(0), _animationFrame(0)
 {
 
 

@@ -57,9 +57,6 @@ ResearchState::ResearchState(Game *game, Base *base) : State(game), _base(base)
 	_txtProgress = new Text(80, 9, 230, 44);
 	_lstResearch = new TextList(288, 112, 8, 62);
 	
-	// back up palette in case we're being called from Geoscape!
-	memcpy(_oldPalette, _game->getScreen()->getPalette(), 256*sizeof(SDL_Color));
-
 	// Set palette
 	_game->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_1")->getColors());
 	_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(1)), Palette::backPos, 16);

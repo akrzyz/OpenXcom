@@ -55,7 +55,7 @@ private:
 	void sortRifles();
 public:
 	/// Creates a new UnitSprite at the specified position and size.
-	UnitSprite(int width, int height, int x, int y);
+	UnitSprite(int width, int height, int x, int y, int bpp);
 	/// Cleans up the UnitSprite.
 	~UnitSprite();
 	/// Sets surfacesets for rendering.

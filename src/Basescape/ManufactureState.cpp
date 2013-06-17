@@ -63,9 +63,6 @@ ManufactureState::ManufactureState(Game *game, Base *base) : State(game), _base(
 	_txtTimeLeft = new Text(55, 18, 260, 44);
 	_lstManufacture = new TextList(307, 90, 8, 80);
 
-	// back up palette in case we're being called from Geoscape!
-	memcpy(_oldPalette, _game->getScreen()->getPalette(), 256*sizeof(SDL_Color));
-
 	// Set palette
 	_game->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_1")->getColors());
 	_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(6)), Palette::backPos, 16);
