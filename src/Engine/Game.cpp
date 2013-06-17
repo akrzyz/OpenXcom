@@ -398,20 +398,26 @@ Language *Game::getLanguage() const
 void Game::loadLanguage(const std::string &filename)
 {
 	std::stringstream ss, ss2;
+	std::string background;
 	ss << "Language/" << filename << ".lng";
 	ss2 << "Language/" << filename << ".geo";
+
+	if (_res->getSurface("GEOBORD.SCR"))
+		background = "GEOBORD.SCR";
+	else
+		background = "TFTD_GEOBORD.SCR";
 
 	_lang->loadLng(CrossPlatform::getDataFile(ss.str()), _rules->getExtraStrings()[filename]);
 
 	std::auto_ptr<Surface> sidebar(new Surface(64, 154));
 	if (CrossPlatform::getDataFile(ss2.str()) != "")
 	{
-		sidebar->setPalette(_res->getSurface("GEOBORD.SCR")->getPalette());
+		sidebar->setPalette(_res->getSurface(background)->getPalette());
 		sidebar->loadScr(CrossPlatform::getDataFile(ss2.str()));
 	}
 	sidebar->setX(256);
 	sidebar->setY(0);
-	sidebar->blit(_res->getSurface("GEOBORD.SCR"));
+	sidebar->blit(_res->getSurface(background));
 
 	Options::setString("language", filename);
 }

@@ -236,11 +236,6 @@ void createDefault()
 	setInt("keyBattleCenterEnemy8", SDLK_8);
 	setInt("keyBattleCenterEnemy9", SDLK_9);
 	setInt("keyBattleCenterEnemy10", SDLK_0);
-
-	
-	_folders.clear();
-	OptionsFolders *temporary = new OptionsFolders("xcom1", "Xcom1Ruleset", "Pathfinding");
-	_folders["xcom1"] = temporary;
 }
 
 /**
