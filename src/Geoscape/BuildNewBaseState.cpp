@@ -28,6 +28,7 @@
 #include "../Engine/Timer.h"
 #include "../Interface/Window.h"
 #include "Globe.h"
+#include "GlobeLand.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Savegame/Base.h"
@@ -84,8 +85,8 @@ BuildNewBaseState::BuildNewBaseState(Game *game, Base *base, Globe *globe, bool 
 	add(_txtTitle);
 
 	// Set up objects
-	_globe->onMouseClick((ActionHandler)&BuildNewBaseState::globeClick);
-	_globe->onMouseOver((ActionHandler)&BuildNewBaseState::globeHover);
+	_globe->getGlobeLand()->onMouseClick((ActionHandler)&BuildNewBaseState::globeClick);
+	_globe->getGlobeLand()->onMouseOver((ActionHandler)&BuildNewBaseState::globeHover);
 
 	_btnRotateLeft->onMousePress((ActionHandler)&BuildNewBaseState::btnRotateLeftPress);
 	_btnRotateLeft->onMouseRelease((ActionHandler)&BuildNewBaseState::btnRotateLeftRelease);
@@ -172,7 +173,7 @@ void BuildNewBaseState::think()
 void BuildNewBaseState::handle(Action *action)
 {
 	State::handle(action);
-	_globe->handle(action, this);
+	_globe->getGlobeLand()->handle(action, this);
 }
 
 /**
