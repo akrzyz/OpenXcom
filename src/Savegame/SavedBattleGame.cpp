@@ -18,6 +18,7 @@
  */
  
  
+#include <assert.h>
 #include <vector>
 #include <deque>
 #include <queue>
@@ -206,7 +207,7 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 			(*i)["genUnitType"] >> type;
 			(*i)["genUnitArmor"] >> armor;
 			// create a new Unit.
-			b = new BattleUnit(rule->getUnit(type), faction, a, rule->getArmor(armor));
+			b = new BattleUnit(rule->getUnit(type), faction, a, rule->getArmor(armor), savedGame->getDifficulty());
 		}
 		b->load(*i);
 		_units.push_back(b);
@@ -303,7 +304,10 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 			}
 		}
 	}
-
+	if (node.FindValue("objectiveDestroyed"))
+	{
+		node["objectiveDestroyed"] >> _objectiveDestroyed;
+	}
 }
 
 /**
@@ -353,7 +357,10 @@ void SavedBattleGame::loadMapResources(Game *game)
 void SavedBattleGame::save(YAML::Emitter &out) const
 {
 	out << YAML::BeginMap;
-
+	if (_objectiveDestroyed)
+	{
+		out << YAML::Key << "objectiveDestroyed" << YAML::Value << _objectiveDestroyed;
+	}
 	out << YAML::Key << "width" << YAML::Value << _mapsize_x;
 	out << YAML::Key << "length" << YAML::Value << _mapsize_y;
 	out << YAML::Key << "height" << YAML::Value << _mapsize_z;
@@ -1213,12 +1220,20 @@ void SavedBattleGame::prepareNewTurn()
 	{
 		if ((*i)->getUnit())
 		{
-			// units on a flaming tile suffer damage
-			(*i)->getUnit()->damage(Position(0,0,0), RNG::generate(1,12), DT_IN, true);
-			// units on a flaming tile can catch fire 33% chance
-			if (RNG::generate(0,2) == 1)
+			float resistance = (*i)->getUnit()->getArmor()->getDamageModifier(DT_IN);
+			if (resistance > 0.0)
 			{
-				(*i)->getUnit()->setFire(RNG::generate(1,5));
+				// units on a flaming tile suffer damage
+				(*i)->getUnit()->damage(Position(8, 8, 12 - (*i)->getTerrainLevel()), RNG::generate(0, 5) + 5, DT_IN, true);
+				// units on a flaming tile can catch fire 33% chance
+				if (RNG::generate(0,2) == 1)
+				{
+					int burnTime = RNG::generate(0, int(5 * resistance));
+					if ((*i)->getUnit()->getFire() < burnTime)
+					{
+						(*i)->getUnit()->setFire(burnTime); // catch fire and burn
+					}
+				}
 			}
 		}
 

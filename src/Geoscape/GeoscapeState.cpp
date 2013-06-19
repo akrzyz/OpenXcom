@@ -303,6 +303,12 @@ GeoscapeState::GeoscapeState(Game *game) : State(game), _pause(false), _music(fa
 	_btnZoomOut->onMouseClick((ActionHandler)&GeoscapeState::btnZoomOutLeftClick, SDL_BUTTON_LEFT);
 	_btnZoomOut->onMouseClick((ActionHandler)&GeoscapeState::btnZoomOutRightClick, SDL_BUTTON_RIGHT);
 	_btnZoomOut->onKeyboardPress((ActionHandler)&GeoscapeState::btnZoomOutLeftClick, (SDLKey)Options::getInt("keyGeoZoomOut"));
+	
+	// dirty hacks to get the rotate buttons to work in "classic" style
+	_btnRotateLeft->setListButton();
+	_btnRotateRight->setListButton();
+	_btnRotateUp->setListButton();
+	_btnRotateDown->setListButton();
 
 	if (_showFundsOnGeoscape)
 	{
@@ -466,6 +472,7 @@ void GeoscapeState::think()
 	{
 		_game->getSavedGame()->addMonth();
 		determineAlienMissions(true);
+		_game->getSavedGame()->setFunds(_game->getSavedGame()->getFunds() - _game->getSavedGame()->getBaseMaintenance());
 	}
 	if(_popups.empty() && _dogfights.empty() && (!_zoomInEffectTimer->isRunning() || _zoomInEffectDone) && (!_zoomOutEffectTimer->isRunning() || _zoomOutEffectDone))
 	{
@@ -1544,7 +1551,7 @@ void GeoscapeState::time1Month()
 				}
 			}
 		}
-		if (!psi && (*b)->getAvailablePsiLabs() > 0 && !Options::getBool("anytimePsiTraining"))
+		if ((*b)->getAvailablePsiLabs() > 0 && !Options::getBool("anytimePsiTraining"))
 		{
 			psi = true;
 			for(std::vector<Soldier*>::const_iterator s = (*b)->getSoldiers()->begin(); s != (*b)->getSoldiers()->end(); ++s)

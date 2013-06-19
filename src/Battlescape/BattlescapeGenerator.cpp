@@ -16,6 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include <assert.h>
 #include <fstream>
 #include <sstream>
 #include "BattlescapeGenerator.h"
@@ -39,6 +40,7 @@
 #include "../Ruleset/RuleUfo.h"
 #include "../Ruleset/RuleCraft.h"
 #include "../Ruleset/RuleTerrain.h"
+#include "../Ruleset/RuleInventory.h"
 #include "../Ruleset/Ruleset.h"
 #include "../Ruleset/MapDataSet.h"
 #include "../Ruleset/MapData.h"
@@ -335,7 +337,7 @@ void BattlescapeGenerator::run()
 				(_craft == 0 && (*i)->getWoundRecovery() == 0 && ((*i)->getCraft() == 0 || (*i)->getCraft()->getStatus() != "STR_OUT")))
 			{
 				unit = addXCOMUnit(new BattleUnit(*i, FACTION_PLAYER));
-				if (!_save->getSelectedUnit())
+				if (unit && !_save->getSelectedUnit())
 					_save->setSelectedUnit(unit);
 			}
 		}
@@ -481,14 +483,17 @@ void BattlescapeGenerator::addXCOMVehicle(Vehicle *v)
 {
 	std::string vehicle = v->getRules()->getType();
 	Unit *rule = _game->getRuleset()->getUnit(vehicle);
-	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, _game->getRuleset()->getArmor(rule->getArmor())));
-	addItem(_game->getRuleset()->getItem(vehicle), unit);
-	if(v->getRules()->getClipSize() != -1)
+	BattleUnit *unit = addXCOMUnit(new BattleUnit(rule, FACTION_PLAYER, _unitSequence++, _game->getRuleset()->getArmor(rule->getArmor()), 0));
+	if (unit)
 	{
-		std::string ammo = v->getRules()->getCompatibleAmmo()->front();
-		addItem(_game->getRuleset()->getItem(ammo), unit)->setAmmoQuantity(v->getAmmo());
+		addItem(_game->getRuleset()->getItem(vehicle), unit);
+		if(v->getRules()->getClipSize() != -1)
+		{
+			std::string ammo = v->getRules()->getCompatibleAmmo()->front();
+			addItem(_game->getRuleset()->getItem(ammo), unit)->setAmmoQuantity(v->getAmmo());
+		}
+		unit->setTurretType(v->getRules()->getTurretType());
 	}
-	unit->setTurretType(v->getRules()->getTurretType());
 }
 
 
@@ -515,6 +520,7 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 			_save->getUnits()->push_back(unit);
 			_save->getTileEngine()->calculateFOV(unit);
 			unit->deriveRank();
+			return unit;
 		}
 		else if (_save->getMissionType() != "STR_BASE_DEFENSE")
 		{
@@ -525,6 +531,7 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 				_save->getUnits()->push_back(unit);
 				_save->getTileEngine()->calculateFOV(unit);
 				unit->deriveRank();
+				return unit;
 			}
 		}
 	}
@@ -550,13 +557,14 @@ BattleUnit *BattlescapeGenerator::addXCOMUnit(BattleUnit *unit)
 						_save->getUnits()->push_back(unit);
 						_save->getTileEngine()->calculateFOV(unit);
 						unit->deriveRank();
-						break;
+						return unit;
 					}
 				}
 			}
 		}
 	}
-	return unit;
+	delete unit;
+	return 0;
 }
 
 /**
@@ -583,23 +591,26 @@ void BattlescapeGenerator::deployAliens(AlienRace *race, AlienDeployment *deploy
 				outside = false;
 			Unit *rule = _game->getRuleset()->getUnit(alienName);
 			BattleUnit *unit = addAlien(rule, (*d).alienRank, outside);
-			for (std::vector<std::string>::iterator it = (*d).itemSets.at(_alienItemLevel).items.begin(); it != (*d).itemSets.at(_alienItemLevel).items.end(); ++it)
+			if (unit)
 			{
-				RuleItem *ruleItem = _game->getRuleset()->getItem((*it));
-				if (ruleItem)
+				for (std::vector<std::string>::iterator it = (*d).itemSets.at(_alienItemLevel).items.begin(); it != (*d).itemSets.at(_alienItemLevel).items.end(); ++it)
 				{
-					addItem(ruleItem, unit);
+					RuleItem *ruleItem = _game->getRuleset()->getItem((*it));
+					if (ruleItem)
+					{
+						addItem(ruleItem, unit);
+					}
 				}
-			}
-			// terrorist alien's equipment is a special case - they are fitted with a weapon which is the alien's name with suffix _WEAPON
-			if ((*d).alienRank == AR_TERRORIST || (*d).alienRank == AR_TERRORIST2)
-			{
-				std::string terroristWeapon = rule->getRace().substr(4);
-				terroristWeapon += "_WEAPON";
-				RuleItem *ruleItem = _game->getRuleset()->getItem(terroristWeapon);
-				if (ruleItem)
+				// terrorist alien's equipment is a special case - they are fitted with a weapon which is the alien's name with suffix _WEAPON
+				if ((*d).alienRank == AR_TERRORIST || (*d).alienRank == AR_TERRORIST2)
 				{
-					addItem(ruleItem, unit);
+					std::string terroristWeapon = rule->getRace().substr(4);
+					terroristWeapon += "_WEAPON";
+					RuleItem *ruleItem = _game->getRuleset()->getItem(terroristWeapon);
+					if (ruleItem)
+					{
+						addItem(ruleItem, unit);
+					}
 				}
 			}
 		}
@@ -618,8 +629,7 @@ void BattlescapeGenerator::deployAliens(AlienRace *race, AlienDeployment *deploy
 BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outside)
 {
 	int difficulty = (int)(_game->getSavedGame()->getDifficulty());
-	int divider = difficulty > 0 ? 1 : 2;
-	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()));
+	BattleUnit *unit = new BattleUnit(rules, FACTION_HOSTILE, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()), difficulty);
 	Node *node = 0;
 
 	/* following data is the order in which certain alien ranks spawn on certain node ranks */
@@ -640,34 +650,28 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
 		unit->setRankInt(alienRank);
 		int dir = _save->getTileEngine()->faceWindow(node->getPosition());
 		Position craft = _game->getSavedGame()->getBattleGame()->getUnits()->at(0)->getPosition();
-		if (_save->getTileEngine()->distance(node->getPosition(), craft) <= 20 && RNG::generate(0,100) < 20 * (int)(_game->getSavedGame()->getDifficulty()))
+		if (_save->getTileEngine()->distance(node->getPosition(), craft) <= 20 && RNG::generate(0,100) < 20 * difficulty)
 			dir = unit->getDirectionTo(craft);
 		if (dir != -1)
 			unit->setDirection(dir);
 		else
 			unit->setDirection(RNG::generate(0,7));
 
-		UnitStats *stats = unit->getStats();
-
-		// adjust the unit's stats according to the difficulty level.
-		stats->tu += 4 * difficulty * stats->tu / 100;
-		unit->setTimeUnits(stats->tu);
-		stats->stamina += 4 * difficulty * stats->stamina / 100;
-		unit->setEnergy(stats->stamina);
-		stats->reactions += 6 * difficulty * stats->reactions / 100;
-		stats->strength += 2 * difficulty * stats->strength / 100;
-		stats->firing = (stats->firing + 6 * difficulty * stats->firing / 100) / divider;
-		stats->strength += 2 * difficulty * stats->strength / 100;
-		stats->melee += 4 * difficulty * stats->melee / 100;
-		stats->psiSkill += 4 * difficulty * stats->psiSkill / 100;
-		stats->psiStrength += 4 * difficulty * stats->psiStrength / 100;
-		if (divider > 1)
+		if (!difficulty)
+		{
 			unit->halveArmor();
+		}
 
 		// we only add a unit if it has a node to spawn on.
 		// (stops them spawning at 0,0,0)
 		_save->getUnits()->push_back(unit);
 	}
+	else
+	{
+		delete unit;
+		unit = 0;
+	}
+
 	return unit;
 }
 
@@ -678,7 +682,7 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
  */
 BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
 {
-	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()));
+	BattleUnit *unit = new BattleUnit(rules, FACTION_NEUTRAL, _unitSequence++, _game->getRuleset()->getArmor(rules->getArmor()), 0);
 	Node *node = _save->getSpawnNode(0, unit);
 
 	if (node)
@@ -696,6 +700,11 @@ BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
 		unit->setAIState(new PatrolBAIState(_game->getSavedGame()->getBattleGame(), unit, node));
 		unit->setDirection(RNG::generate(0,7));
 		_save->getUnits()->push_back(unit);
+	}
+	else
+	{
+		delete unit;
+		unit = 0;
 	}
 
 	return unit;
@@ -914,13 +923,27 @@ BattleItem* BattlescapeGenerator::addItem(RuleItem *item, BattleUnit *unit)
 		{	
 			for (int i = 0; i != 4; ++i)
 			{
-				if (!unit->getItem("STR_BELT", i))
+				if (!unit->getItem("STR_BELT", i) && _game->getRuleset()->getInventory("STR_BELT")->fitItemInSlot(item, i, 0))
 				{
 					bi->moveToOwner(unit);
 					bi->setSlot(_game->getRuleset()->getInventory("STR_BELT"));
 					bi->setSlotX(i);
 					placed = true;
 					break;
+				}
+			}
+			if (!placed)
+			{
+				for (int i = 0; i != 3; ++i)
+				{
+					if (!unit->getItem("STR_BACK_PACK", i) && _game->getRuleset()->getInventory("STR_BACK_PACK")->fitItemInSlot(item, i, 0))
+					{
+						bi->moveToOwner(unit);
+						bi->setSlot(_game->getRuleset()->getInventory("STR_BACK_PACK"));
+						bi->setSlotX(i);
+						placed = true;
+						break;
+					}
 				}
 			}
 		}
