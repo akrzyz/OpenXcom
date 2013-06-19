@@ -199,8 +199,8 @@ void Ruleset::load()
 	const std::map<std::string, OptionsFolders*> folders = Options::getOptionsFolders();
 	for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
 	{
-		std::map<std::string, std::string> rulesets = i->second->getRulesets();
-		for (std::map<std::string, std::string>::const_iterator j = rulesets.begin(); j != rulesets.end(); ++j)
+		std::vector<std::pair<std::string, std::string> > rulesets = i->second->getRulesets();
+		for (std::vector<std::pair<std::string, std::string> >::const_iterator j = rulesets.begin(); j != rulesets.end(); ++j)
 		{
 			std::string dirname = CrossPlatform::getDataFolder(Options::getOpenxcomFolder(i->first) + "Ruleset/" + j->first + '/');
 			if (!CrossPlatform::folderExists(dirname))
