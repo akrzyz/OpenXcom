@@ -30,6 +30,7 @@ namespace OpenXcom
 
 class Game;
 class GlobeLand;
+class Polygon;
 class SurfaceSet;
 class Timer;
 class Target;
@@ -41,26 +42,27 @@ class LocalizedText;
  * polar coordinates and renders it as a 3D-looking globe
  * with cartesian coordinates that the player can interact with.
  */
-class Globe
+class Globe : public InteractiveSurface
 {
 private:
-	static const int NUM_TEXTURES = 13;
+/*	static const int NUM_TEXTURES = 13;
 	static const int NUM_LANDSHADES = 48;
-	static const int NUM_SEASHADES = 72;
+	static const int NUM_SEASHADES = 72;*/
 	static const int NEAR_RADIUS = 25;
-	static const double QUAD_LONGITUDE;
-	static const double QUAD_LATITUDE;
+/*	static const double QUAD_LONGITUDE;
+	static const double QUAD_LATITUDE;*/
 	static const double ROTATE_LONGITUDE;
 	static const double ROTATE_LATITUDE;
 
 	GlobeLand *_globeLand;
-	double _cenLon, _cenLat, _rotLon, _rotLat, _hoverLon, _hoverLat;
+	double _cenLon, _cenLat, _hoverLon, _hoverLat, _rotLon, _rotLat;
 	Sint16 _cenX, _cenY;
 	size_t _zoom;
 	Game *_game;
 	Surface *_markers, *_countries, *_radars;
 	bool _blink, _hover;
-	Timer *_blinkTimer;
+	Timer *_blinkTimer, *_rotTimer;
+	std::list<Polygon*> _cacheLand;
 	Surface *_mkXcomBase, *_mkAlienBase, *_mkCraft, *_mkWaypoint, *_mkCity;
 	Surface *_mkFlyingUfo, *_mkLandedUfo, *_mkCrashedUfo, *_mkAlienSite;
 	FastLineClip *_clipper;
@@ -71,8 +73,12 @@ private:
 	bool pointBack(double lon, double lat) const;
 	/// Return latitude of last visible to player point on given longitude.
 	double lastVisibleLat(double lon) const;
+	/// Checks if a point is inside a polygon.
+	bool insidePolygon(double lon, double lat, Polygon *poly) const;
 	/// Checks if a target is near a point.
 	bool targetNear(Target* target, int x, int y) const;
+	/// Caches a set of polygons.
+	void cache(std::list<Polygon*> *polygons, std::list<Polygon*> *cache);
 	/// Get position of sun relative to given position in polar cords and date.
 	Cord getSunDirection(double lon, double lat) const;
 public:
@@ -151,8 +157,6 @@ public:
 	LocalizedText tr(const std::string &id, unsigned n) const;
 	/// Draw globe range circle.
 	void drawGlobeCircle(double lat, double lon, double radius, int segments);
-	/// Special "transparent" line.
-	void XuLine(Surface* surface, Surface* src, double x1, double y1, double x2, double y2, Sint16 Color);
 	/// Sets hover base position.
 	void setNewBaseHoverPos(double lon, double lat);
 	/// Turns on new base hover mode.
@@ -166,11 +170,8 @@ public:
 	/// set the _radarLines variable
 	void toggleRadarLines();
 
-	/// Processes any pending events.
-	virtual void handle(Action *action, State *state);
 	GlobeLand *getGlobeLand();
 	void drawVHLine(double lon1, double lat1, double lon2, double lat2, int colour);
-
 };
 
 }

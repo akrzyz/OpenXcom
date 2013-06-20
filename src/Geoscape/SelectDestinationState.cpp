@@ -26,7 +26,6 @@
 #include "../Engine/Surface.h"
 #include "../Interface/Window.h"
 #include "Globe.h"
-#include "GlobeLand.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Savegame/Waypoint.h"
@@ -80,7 +79,7 @@ SelectDestinationState::SelectDestinationState(Game *game, Craft *craft, Globe *
 
 
 	// Set up objects
-	_globe->getGlobeLand()->onMouseClick((ActionHandler)&SelectDestinationState::globeClick);
+	_globe->onMouseClick((ActionHandler)&SelectDestinationState::globeClick);
 
 	_btnRotateLeft->onMousePress((ActionHandler)&SelectDestinationState::btnRotateLeftPress);
 	_btnRotateLeft->onMouseRelease((ActionHandler)&SelectDestinationState::btnRotateLeftRelease);
@@ -167,7 +166,7 @@ void SelectDestinationState::think()
 void SelectDestinationState::handle(Action *action)
 {
 	State::handle(action);
-	_globe->getGlobeLand()->handle(action, this);
+	_globe->handle(action, this);
 }
 
 /**

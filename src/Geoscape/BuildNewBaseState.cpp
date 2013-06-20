@@ -85,8 +85,8 @@ BuildNewBaseState::BuildNewBaseState(Game *game, Base *base, Globe *globe, bool 
 	add(_txtTitle);
 
 	// Set up objects
-	_globe->getGlobeLand()->onMouseClick((ActionHandler)&BuildNewBaseState::globeClick);
-	_globe->getGlobeLand()->onMouseOver((ActionHandler)&BuildNewBaseState::globeHover);
+	_globe->onMouseClick((ActionHandler)&BuildNewBaseState::globeClick);
+	_globe->onMouseOver((ActionHandler)&BuildNewBaseState::globeHover);
 
 	_btnRotateLeft->onMousePress((ActionHandler)&BuildNewBaseState::btnRotateLeftPress);
 	_btnRotateLeft->onMouseRelease((ActionHandler)&BuildNewBaseState::btnRotateLeftRelease);
@@ -173,7 +173,7 @@ void BuildNewBaseState::think()
 void BuildNewBaseState::handle(Action *action)
 {
 	State::handle(action);
-	_globe->getGlobeLand()->handle(action, this);
+	_globe->handle(action, this);
 }
 
 /**

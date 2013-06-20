@@ -178,7 +178,7 @@ GeoscapeState::GeoscapeState(Game *game) : State(game), _pause(false), _music(fa
 	_game->getFpsCounter()->setColor(Palette::blockOffset(15)+12);
 
 	add(_bg);
-	add(_globe->getGlobeLand());
+	add(_globe);
 
 	add(_btnIntercept);
 	add(_btnBases);
@@ -438,9 +438,9 @@ void GeoscapeState::init()
 
 	timeDisplay();
 
-	_globe->getGlobeLand()->onMouseClick((ActionHandler)&GeoscapeState::globeClick);
-	_globe->getGlobeLand()->onMouseOver(0);
-	_globe->getGlobeLand()->focus();
+	_globe->onMouseClick((ActionHandler)&GeoscapeState::globeClick);
+	_globe->onMouseOver(0);
+	_globe->focus();
 	_globe->draw();
 
 	// Set music if it's not already playing
