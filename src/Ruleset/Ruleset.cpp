@@ -199,8 +199,8 @@ void Ruleset::load()
 	const std::map<std::string, OptionsFolders*> folders = Options::getOptionsFolders();
 	for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
 	{
-		std::map<std::string, std::string> rulesets = i->second->getRulesets();
-		for (std::map<std::string, std::string>::const_iterator j = rulesets.begin(); j != rulesets.end(); ++j)
+		std::vector<std::pair<std::string, std::string> > rulesets = i->second->getRulesets();
+		for (std::vector<std::pair<std::string, std::string> >::const_iterator j = rulesets.begin(); j != rulesets.end(); ++j)
 		{
 			std::string dirname = CrossPlatform::getDataFolder(Options::getOpenxcomFolder(i->first) + "Ruleset/" + j->first + '/');
 			if (!CrossPlatform::folderExists(dirname))
@@ -688,7 +688,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder)
 				(*j)["type"] >> type;
 				std::auto_ptr<ExtraSprites> extraSprites(new ExtraSprites(folder));
 				extraSprites->load(*j, _modIndex);
-				_extraSprites.push_back(std::make_pair<std::string, ExtraSprites*> (type, extraSprites.release()));
+				_extraSprites.push_back(std::make_pair(type, extraSprites.release()));
 				_extraSpritesIndex.push_back(type);
 			}
 		}
@@ -700,7 +700,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder)
 				(*j)["type"] >> type;
 				std::auto_ptr<ExtraSounds> extraSounds(new ExtraSounds());
 				extraSounds->load(*j, _modIndex);
-				_extraSounds.push_back(std::make_pair<std::string, ExtraSounds*> (type, extraSounds.release()));
+				_extraSounds.push_back(std::make_pair(type, extraSounds.release()));
 				_extraSoundsIndex.push_back(type);
 			}
 		}

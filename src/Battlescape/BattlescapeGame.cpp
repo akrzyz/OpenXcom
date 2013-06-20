@@ -262,16 +262,21 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		}
 	}
 
-	if (action.type == BA_WALK)
+	if (dynamic_cast<AggroBAIState*>(ai) != 0)
 	{
-		ss << L"Walking to " << action.target.x << " "<< action.target.y << " "<< action.target.z;
-		_parentState->debug(ss.str());
-		if (unit->getAggroSound() && unit->getCharging() && !_playedAggroSound)
+		_tuReserved = BA_NONE;
+		if (unit->getAggroSound() != -1 && !_playedAggroSound)
 		{
 			getResourcePack()->getSound("BATTLE.CAT", unit->getAggroSound())->play();
 			_playedAggroSound = true;
 		}
-    if (_save->getTile(action.target)) {
+	}
+	if (action.type == BA_WALK)
+	{
+		ss << L"Walking to " << action.target.x << " "<< action.target.y << " "<< action.target.z;
+		_parentState->debug(ss.str());
+
+		if (_save->getTile(action.target)) {
       _save->getPathfinding()->calculate(action.actor, action.target, _save->getTile(action.target)->getUnit());
 		}
     if (_save->getPathfinding()->getStartDirection() == -1)
@@ -379,12 +384,7 @@ bool BattlescapeGame::kneel(BattleUnit *bu)
 			getTileEngine()->calculateFOV(bu);
 			getMap()->cacheUnits();
 			_parentState->updateSoldierInfo();
-			BattleAction action;
-			if (getTileEngine()->checkReactionFire(bu, &action, 0, false))
-			{
-				action.cameraPosition = getMap()->getCamera()->getMapOffset();
-				statePushBack(new ProjectileFlyBState(this, action));
-			}
+			getTileEngine()->checkReactionFire(bu);
 			return true;
 		}
 		else
@@ -528,7 +528,7 @@ void BattlescapeGame::checkForCasualties(BattleItem *murderweapon, BattleUnit *m
 					murderer->moraleChange(20 * modifier / 100);
 				}
 				// murderer will get a penalty with friendly fire
-				if (victim->getOriginalFaction() == murderer->getFaction())
+				if (victim->getOriginalFaction() == murderer->getOriginalFaction())
 				{
 					murderer->moraleChange(-(2000 / modifier));
 				}
@@ -1500,6 +1500,7 @@ void BattlescapeGame::dropItem(const Position &position, BattleItem *item, bool 
 	if (item->getRules()->getBattleType() == BT_FLARE)
 	{
 		getTileEngine()->calculateTerrainLighting();
+		getTileEngine()->calculateFOV(position);
 	}
 
 }
@@ -1538,30 +1539,14 @@ BattleUnit *BattlescapeGame::convertUnit(BattleUnit *unit, std::string newType)
 	std::string terroristWeapon = getRuleset()->getUnit(newType)->getRace().substr(4);
 	terroristWeapon += "_WEAPON";
 	RuleItem *newItem = getRuleset()->getItem(terroristWeapon);
-
-	BattleUnit *newUnit = new BattleUnit(getRuleset()->getUnit(newType), FACTION_HOSTILE, _save->getUnits()->back()->getId() + 1, getRuleset()->getArmor(newArmor.str()));
-	
 	int difficulty = (int)(_parentState->getGame()->getSavedGame()->getDifficulty());
-	int divider = 1;
-	if (!difficulty)
-		divider = 2;
-	
-	UnitStats *stats = newUnit->getStats();
 
-	// adjust the unit's stats according to the difficulty level.
-	stats->tu += 4 * difficulty * stats->tu / 100;
-	newUnit->setTimeUnits(0);
-	stats->stamina += 4 * difficulty * stats->stamina / 100;
-	newUnit->setEnergy(stats->stamina);
-	stats->reactions += 6 * difficulty * stats->reactions / 100;
-	stats->strength += 2 * difficulty * stats->strength / 100;
-	stats->firing = (stats->firing + 6 * difficulty * stats->firing / 100) / divider;
-	stats->strength += 2 * difficulty * stats->strength / 100;
-	stats->melee += 4 * difficulty * stats->melee / 100;
-	stats->psiSkill += 4 * difficulty * stats->psiSkill / 100;
-	stats->psiStrength += 4 * difficulty * stats->psiStrength / 100;
-	if (divider > 1)
-		unit->halveArmor();
+	BattleUnit *newUnit = new BattleUnit(getRuleset()->getUnit(newType), FACTION_HOSTILE, _save->getUnits()->back()->getId() + 1, getRuleset()->getArmor(newArmor.str()), difficulty);
+	
+	if (!difficulty)
+	{
+		newUnit->halveArmor();
+	}
 
 	getSave()->getTile(unit->getPosition())->setUnit(newUnit, _save->getTile(unit->getPosition() + Position(0,0,-1)));
 	newUnit->setPosition(unit->getPosition());
