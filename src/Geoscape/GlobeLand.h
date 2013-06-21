@@ -58,6 +58,8 @@ public:
 	GlobeLand(Game *game, int cenX, int cenY, int width, int height, std::vector<double> radius, int x = 0, int y = 0);
 	/// Cleans up the land.
 	~GlobeLand();
+	/// Sets the palette of the land.
+	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 	/// Draws the whole land.
 	void draw(double cenLon, double cenLat, Sint16 cenX, Sint16 cenY, size_t zoom, std::list<Polygon*> cacheLand, std::vector<double> radius);
 	/// Draws the ocean of the globe (if no water textures are given).

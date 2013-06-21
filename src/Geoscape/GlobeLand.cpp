@@ -261,6 +261,19 @@ GlobeLand::~GlobeLand()
 }
 
 /**
+ * Replaces a certain amount of colors in the palette of the globe.
+ * @param colors Pointer to the set of colors.
+ * @param firstcolor Offset of the first color to replace.
+ * @param ncolors Amount of colors to replace.
+ */
+void GlobeLand::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+{
+	Surface::setPalette(colors, firstcolor, ncolors); 
+
+	_texture->setPalette(colors, firstcolor, ncolors);
+}
+
+/**
  * Draws the whole globe, part by part.
  */
 void GlobeLand::draw(double cenLon, double cenLat, Sint16 cenX, Sint16 cenY, size_t zoom, std::list<Polygon*> cacheLand, std::vector<double> radius)
