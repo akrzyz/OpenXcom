@@ -45,12 +45,9 @@ class LocalizedText;
 class Globe : public InteractiveSurface
 {
 private:
-/*	static const int NUM_TEXTURES = 13;
-	static const int NUM_LANDSHADES = 48;
-	static const int NUM_SEASHADES = 72;*/
 	static const int NEAR_RADIUS = 25;
-/*	static const double QUAD_LONGITUDE;
-	static const double QUAD_LATITUDE;*/
+	static const double QUAD_LONGITUDE;
+	static const double QUAD_LATITUDE;
 	static const double ROTATE_LONGITUDE;
 	static const double ROTATE_LATITUDE;
 
@@ -79,8 +76,6 @@ private:
 	bool targetNear(Target* target, int x, int y) const;
 	/// Caches a set of polygons.
 	void cache(std::list<Polygon*> *polygons, std::list<Polygon*> *cache);
-	/// Get position of sun relative to given position in polar cords and date.
-	Cord getSunDirection(double lon, double lat) const;
 public:
 	/// Creates a new globe at the specified position and size.
 	Globe(Game *game, int cenX, int cenY, int width, int height, int x = 0, int y = 0);
@@ -167,6 +162,8 @@ public:
 	bool getNewBaseHover(void);
 	/// Gets _detail variable
 	bool getShowRadar(void);
+	/// Special "transparent" line.
+	void XuLine(Surface* surface, Surface* src, double x1, double y1, double x2, double y2, Sint16 Color);
 	/// set the _radarLines variable
 	void toggleRadarLines();
 

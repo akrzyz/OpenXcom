@@ -61,6 +61,8 @@
 namespace OpenXcom
 {
 
+const double Globe::QUAD_LONGITUDE = 0.05;
+const double Globe::QUAD_LATITUDE = 0.2;
 const double Globe::ROTATE_LONGITUDE = 0.25;
 const double Globe::ROTATE_LATITUDE = 0.15;
 
@@ -411,7 +413,7 @@ void Globe::zoomIn()
 	if (_zoom < _radius.size() - 1)
 	{
 		_zoom++;
-		_globeLand->zoomIn(_zoom);
+		_game->getSavedGame()->setGlobeZoom(_zoom);
 		cachePolygons();
 	}
 }
@@ -424,7 +426,7 @@ void Globe::zoomOut()
 	if (_zoom > 0)
 	{
 		_zoom--;
-		_globeLand->zoomIn(_zoom);
+		_game->getSavedGame()->setGlobeZoom(_zoom);
 		cachePolygons();
 	}
 }
@@ -435,7 +437,7 @@ void Globe::zoomOut()
 void Globe::zoomMin()
 {
 	_zoom = 0;
-	_globeLand->zoomMin(_zoom);
+		_game->getSavedGame()->setGlobeZoom(_zoom);
 	cachePolygons();
 }
 
@@ -445,7 +447,7 @@ void Globe::zoomMin()
 void Globe::zoomMax()
 {
 	_zoom = _radius.size() - 1;
-	_globeLand->zoomMax(_zoom);
+	_game->getSavedGame()->setGlobeZoom(_zoom);
 	cachePolygons();
 }
 
@@ -725,62 +727,6 @@ void Globe::draw()
 	drawDetail();
 }
 
-/**
- * Get position of sun from point on globe
- * @param lon lontidue of position
- * @param lat latitude of position 
- * @return position of sun
- */
-Cord Globe::getSunDirection(double lon, double lat) const
-{
-	const double curTime = _game->getSavedGame()->getTime()->getDaylight();
-	const double rot = curTime * 2*M_PI;
-	double sun;
-
-	if (Options::getBool("globeSeasons"))
-	{
-		const int MonthDays1[] = {0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365};
-		const int MonthDays2[] = {0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366};
-
-		int year=_game->getSavedGame()->getTime()->getYear();
-		int month=_game->getSavedGame()->getTime()->getMonth()-1;
-		int day=_game->getSavedGame()->getTime()->getDay()-1;
-
-		double tm = (double)(( _game->getSavedGame()->getTime()->getHour() * 60
-			+ _game->getSavedGame()->getTime()->getMinute() ) * 60
-			+ _game->getSavedGame()->getTime()->getSecond() ) / 86400; //day fraction is also taken into account
-
-		double CurDay;
-		if (year%4 == 0 && !(year%100 == 0 && year%400 != 0))
-			CurDay = (MonthDays2[month] + day + tm )/366 - 0.219; //spring equinox (start of astronomic year)
-		else
-			CurDay = (MonthDays1[month] + day + tm )/365 - 0.219;
-		if (CurDay<0) CurDay += 1.;
-
-		sun = -0.261 * sin(CurDay*2*M_PI);
-	}
-	else
-		sun = 0;
-
-	Cord sun_direction(cos(rot+lon), sin(rot+lon)*-sin(lat), sin(rot+lon)*cos(lat));
-
-	Cord pole(0, cos(lat), sin(lat));
-
-	if (sun>0)
-		 sun_direction *= 1. - sun;
-	else
-		 sun_direction *= 1. + sun;
-
-	pole *= sun;
-	sun_direction += pole;
-	double norm = sun_direction.norm();
-	//norm should be always greater than 0
-	norm = 1./norm;
-	sun_direction *= norm;
-	return sun_direction;
-}
-
-
 void Globe::drawRadars()
 {
 	_radars->clear();
@@ -886,7 +832,7 @@ void Globe::drawGlobeCircle(double lat, double lon, double radius, int segments)
 			continue;
 		}
 		if (!pointBack(lon1,lat1))
-			_globeLand->XuLine(_radars, _globeLand, x, y, x2, y2, 249);
+			XuLine(_radars, this, x, y, x2, y2, 249);
 		x2=x; y2=y;
 	}
 }
@@ -1417,6 +1363,77 @@ const LocalizedText &Globe::tr(const std::string &id) const
 LocalizedText Globe::tr(const std::string &id, unsigned n) const
 {
 	return _game->getLanguage()->getString(id, n);
+}
+
+
+void Globe::XuLine(Surface* surface, Surface* src, double x1, double y1, double x2, double y2, Sint16)
+{
+	if (_clipper->LineClip(&x1,&y1,&x2,&y2) != 1) return; //empty line
+	x1+=0.5;
+	y1+=0.5;
+	x2+=0.5;
+	y2+=0.5;
+	double deltax = x2-x1, deltay = y2-y1;
+	bool inv;
+	Sint16 tcol;
+	double len,x0,y0,SX,SY;
+	if (abs((int)y2-(int)y1) > abs((int)x2-(int)x1)) 
+	{
+		len=abs((int)y2-(int)y1);
+		inv=false;
+	}
+	else
+	{
+		len=abs((int)x2-(int)x1);
+		inv=true;
+	}
+
+	if (y2<y1) { 
+    SY=-1;
+  } else if ( AreSame(deltay, 0.0) ) {
+    SY=0;
+  } else {
+    SY=1;
+  }
+
+	if (x2<x1) {
+    SX=-1;
+  } else if ( AreSame(deltax, 0.0) ) {
+    SX=0;
+  } else {
+    SX=1;
+  }
+
+	x0=x1;  y0=y1;
+	if (inv)
+		SY=(deltay/len);
+	else
+		SX=(deltax/len);
+
+	while(len>0)
+	{
+		if (x0>0 && y0>0 && x0<surface->getWidth() && y0<surface->getHeight())
+		{
+			tcol=src->getPixel((int)x0,(int)y0);
+			const int d = tcol & helper::ColorGroup;
+			if(d ==  Palette::blockOffset(12) || d ==  Palette::blockOffset(13))
+			{
+				//this pixel is ocean
+				tcol = Palette::blockOffset(12) + 12;
+			}
+			else
+			{
+				const int e = tcol+4;
+				if(e > d + helper::ColorShade)
+					tcol = d + helper::ColorShade;
+				else tcol = e;
+			}
+			surface->setPixel((int)x0,(int)y0,tcol);
+		}
+		x0+=SX;
+		y0+=SY;
+		len-=1.0;
+	}
 }
 
 void Globe::toggleRadarLines()

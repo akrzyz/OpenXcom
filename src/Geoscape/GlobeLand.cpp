@@ -21,12 +21,9 @@
 #include <cmath>
 #include <fstream>
 #include "../aresame.h"
-#include "../Engine/Action.h"
 #include "../Engine/SurfaceSet.h"
-#include "../Engine/Timer.h"
 #include "../Resource/ResourcePack.h"
 #include "Polygon.h"
-#include "Polyline.h"
 #include "../Engine/FastLineClip.h"
 #include "../Engine/Palette.h"
 #include "../Engine/Game.h"
@@ -51,7 +48,6 @@
 #include "../Engine/Options.h"
 #include "../Savegame/TerrorSite.h"
 #include "../Savegame/AlienBase.h"
-#include "../Engine/LocalizedText.h"
 #include "../Savegame/BaseFacility.h"
 #include "../Ruleset/RuleBaseFacility.h"
 #include "../Ruleset/RuleCraft.h"
@@ -60,8 +56,6 @@
 namespace OpenXcom
 {
 
-const double GlobeLand::QUAD_LONGITUDE = 0.05;
-const double GlobeLand::QUAD_LATITUDE = 0.2;
 
 namespace
 {
@@ -347,38 +341,6 @@ void GlobeLand::loadDat(const std::string &filename, std::list<Polygon*> *polygo
 }
 
 /**
- * Increases the zoom level on the globe.
- */
-void GlobeLand::zoomIn(size_t zoom)
-{
-	_game->getSavedGame()->setGlobeZoom(zoom);
-}
-
-/**
- * Decreases the zoom level on the globe.
- */
-void GlobeLand::zoomOut(size_t zoom)
-{
-	_game->getSavedGame()->setGlobeZoom(zoom);
-}
-
-/**
- * Zooms the globe out as far as possible.
- */
-void GlobeLand::zoomMin(size_t zoom)
-{
-	_game->getSavedGame()->setGlobeZoom(zoom);
-}
-
-/**
- * Zooms the globe in as close as possible.
- */
-void GlobeLand::zoomMax(size_t zoom)
-{
-	_game->getSavedGame()->setGlobeZoom(zoom);
-}
-
-/**
  * Replaces a certain amount of colors in the palette of the globe.
  * @param colors Pointer to the set of colors.
  * @param firstcolor Offset of the first color to replace.
@@ -404,7 +366,7 @@ void GlobeLand::draw(double cenLon, double cenLat, Sint16 cenX, Sint16 cenY, siz
 
 
 /**
- * Renders the ocean, shading it according to the time of day.
+ * Renders the ocean, shading it according to the time of day (if no water textures are given).
  */
 void GlobeLand::drawOcean(Sint16 cenX, Sint16 cenY, size_t zoom, std::vector<double> radius)
 {
@@ -509,77 +471,6 @@ void GlobeLand::drawShadow(double cenLon, double cenLat, Sint16 cenX, Sint16 cen
 		
 }
 
-
-void GlobeLand::XuLine(Surface* surface, Surface* src, double x1, double y1, double x2, double y2, Sint16)
-{
-	if (_clipper->LineClip(&x1,&y1,&x2,&y2) != 1) return; //empty line
-	x1+=0.5;
-	y1+=0.5;
-	x2+=0.5;
-	y2+=0.5;
-	double deltax = x2-x1, deltay = y2-y1;
-	bool inv;
-	Sint16 tcol;
-	double len,x0,y0,SX,SY;
-	if (abs((int)y2-(int)y1) > abs((int)x2-(int)x1)) 
-	{
-		len=abs((int)y2-(int)y1);
-		inv=false;
-	}
-	else
-	{
-		len=abs((int)x2-(int)x1);
-		inv=true;
-	}
-
-	if (y2<y1) { 
-    SY=-1;
-  } else if ( AreSame(deltay, 0.0) ) {
-    SY=0;
-  } else {
-    SY=1;
-  }
-
-	if (x2<x1) {
-    SX=-1;
-  } else if ( AreSame(deltax, 0.0) ) {
-    SX=0;
-  } else {
-    SX=1;
-  }
-
-	x0=x1;  y0=y1;
-	if (inv)
-		SY=(deltay/len);
-	else
-		SX=(deltax/len);
-
-	while(len>0)
-	{
-		if (x0>0 && y0>0 && x0<surface->getWidth() && y0<surface->getHeight())
-		{
-			tcol=src->getPixel((int)x0,(int)y0);
-			const int d = tcol & helper::ColorGroup;
-			if(d ==  Palette::blockOffset(12) || d ==  Palette::blockOffset(13))
-			{
-				//this pixel is ocean
-				tcol = Palette::blockOffset(12) + 12;
-			}
-			else
-			{
-				const int e = tcol+4;
-				if(e > d + helper::ColorShade)
-					tcol = d + helper::ColorShade;
-				else tcol = e;
-			}
-			surface->setPixel((int)x0,(int)y0,tcol);
-		}
-		x0+=SX;
-		y0+=SY;
-		len-=1.0;
-	}
-}
-
 /**
  * Blits the globe onto another surface.
  * @param surface Pointer to another surface.
@@ -605,29 +496,6 @@ void GlobeLand::getPolygonShade(double lon, double lat, int *texture, int *shade
 							11,12,12,13,13,14,15,15};
 
 	*shade = worldshades[ CreateShadow::getShadowValue(0, Cord(0.,0.,1.), getSunDirection(lon, lat), 0) ];
-}
-
-/**
- * Get the localized text for dictionary key @a id.
- * This function forwards the call to Language::getString(const std::string &).
- * @param id The dictionary key to search for.
- * @return A reference to the localized text.
- */
-const LocalizedText &GlobeLand::tr(const std::string &id) const
-{
-	return _game->getLanguage()->getString(id);
-}
-
-/**
- * Get a modifiable copy of the localized text for dictionary key @a id.
- * This function forwards the call to Language::getString(const std::string &, unsigned).
- * @param id The dictionary key to search for.
- * @param n The number to use for the proper version.
- * @return A copy of the localized text.
- */
-LocalizedText GlobeLand::tr(const std::string &id, unsigned n) const
-{
-	return _game->getLanguage()->getString(id, n);
 }
 
 }//namespace OpenXcom
