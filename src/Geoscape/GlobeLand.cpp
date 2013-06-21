@@ -16,9 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
-#define _USE_MATH_DEFINES
 #include "GlobeLand.h"
-#include <cmath>
 #include <fstream>
 #include "../aresame.h"
 #include "../Engine/SurfaceSet.h"
@@ -29,29 +27,9 @@
 #include "../Engine/Game.h"
 #include "../Savegame/SavedGame.h"
 #include "../Savegame/GameTime.h"
-#include "../Savegame/Base.h"
-#include "../Savegame/Country.h"
-#include "../Ruleset/RuleCountry.h"
-#include "../Interface/Text.h"
-#include "../Engine/Font.h"
-#include "../Engine/Language.h"
-#include "../Engine/Exception.h"
-#include "../Ruleset/RuleRegion.h"
-#include "../Savegame/Region.h"
-#include "../Ruleset/City.h"
-#include "../Savegame/Target.h"
-#include "../Savegame/Ufo.h"
-#include "../Savegame/Craft.h"
-#include "../Savegame/Waypoint.h"
 #include "../Engine/ShaderMove.h"
 #include "../Engine/ShaderRepeat.h"
 #include "../Engine/Options.h"
-#include "../Savegame/TerrorSite.h"
-#include "../Savegame/AlienBase.h"
-#include "../Savegame/BaseFacility.h"
-#include "../Ruleset/RuleBaseFacility.h"
-#include "../Ruleset/RuleCraft.h"
-#include "../Ruleset/Ruleset.h"
 
 namespace OpenXcom
 {
@@ -249,10 +227,7 @@ GlobeLand::GlobeLand(Game *game, int cenX, int cenY, int width, int height, std:
 	InteractiveSurface(width, height, x, y, 8),
 	 _game(game)
 {
-	if (_game->getResourcePack()->getSurfaceSet("TEXTURE.DAT") != 0)
-	{
-		_textureLand = new SurfaceSet(*_game->getResourcePack()->getSurfaceSet("TEXTURE.DAT"));
-	}
+	_texture = new SurfaceSet(*_game->getResourcePack()->getSurfaceSet("TEXTURE.DAT"));
 
 	_clipper = new FastLineClip(x, x+width, y, y+height);
 
@@ -280,77 +255,9 @@ GlobeLand::GlobeLand(Game *game, int cenX, int cenY, int width, int height, std:
  */
 GlobeLand::~GlobeLand()
 {
-	delete _textureLand;
+	delete _texture;
 
 	delete _clipper;
-}
-
-/**
- * Loads a series of map polar coordinates in X-Com format,
- * converts them and stores them in a set of polygons.
- * @param filename Filename of the DAT file.
- * @param polygons Pointer to the polygon set.
- * @sa http://www.ufopaedia.org/index.php?title=WORLD.DAT
- */
-void GlobeLand::loadDat(const std::string &filename, std::list<Polygon*> *polygons)
-{
-	// Load file
-	std::ifstream mapFile (filename.c_str(), std::ios::in | std::ios::binary);
-	if (!mapFile)
-	{
-		throw Exception(filename + " not found");
-	}
-
-	short value[10];
-
-	while (mapFile.read((char*)&value, sizeof(value)))
-	{
-		Polygon* poly;
-		int points;
-
-		if (value[6] != -1)
-		{
-			points = 4;
-		}
-		else
-		{
-			points = 3;
-		}
-		poly = new Polygon(points);
-
-		for (int i = 0, j = 0; i < points; ++i)
-		{
-			// Correct X-Com degrees and convert to radians
-			double lonRad = value[j++] * 0.125f * M_PI / 180;
-			double latRad = value[j++] * 0.125f * M_PI / 180;
-
-			poly->setLongitude(i, lonRad);
-			poly->setLatitude(i, latRad);
-		}
-		poly->setTexture(value[8]);
-
-		polygons->push_back(poly);
-	}
-
-	if (!mapFile.eof())
-	{
-		throw Exception("Invalid globe map");
-	}
-
-	mapFile.close();
-}
-
-/**
- * Replaces a certain amount of colors in the palette of the globe.
- * @param colors Pointer to the set of colors.
- * @param firstcolor Offset of the first color to replace.
- * @param ncolors Amount of colors to replace.
- */
-void GlobeLand::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
-{
-	Surface::setPalette(colors, firstcolor, ncolors); 
-
-	_textureLand->setPalette(colors, firstcolor, ncolors);
 }
 
 /**
@@ -398,7 +305,7 @@ void GlobeLand::drawLand(size_t zoom, std::list<Polygon*> cacheLand)
 
 		// Apply textures according to zoom and shade
 		int zoomInt = (2 - (int)floor(zoom / 2.0)) * NUM_TEXTURES;
-		drawTexturedPolygon(x, y, (*i)->getPoints(), _textureLand->getFrame((*i)->getTexture() + zoomInt), 0, 0);
+		drawTexturedPolygon(x, y, (*i)->getPoints(), _texture->getFrame((*i)->getTexture() + zoomInt), 0, 0);
 	}
 }
 
@@ -487,7 +394,7 @@ void GlobeLand::blit(Surface *surface)
  * @param texture pointer to texture ID returns -1 when polygon not found
  * @param shade pointer to shade
  */
-void GlobeLand::getPolygonShade(double lon, double lat, int *texture, int *shade) const
+void GlobeLand::getPolygonShade(double lon, double lat, int *shade) const
 {
 	///this is shade conversion from 0..31 levels of geoscape to battlescape levels 0..15
 	int worldshades[32] = {  0, 0, 0, 0, 1, 1, 2, 2,

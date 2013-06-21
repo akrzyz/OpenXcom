@@ -42,7 +42,7 @@ private:
 	static const int NUM_LANDSHADES = 48;
 	static const int NUM_SEASHADES = 72;
 
-	SurfaceSet *_textureLand;
+	SurfaceSet *_texture;
 	Game *_game;
 	FastLineClip *_clipper;
 	///normal of each pixel in earth globe per zoom level
@@ -58,12 +58,6 @@ public:
 	GlobeLand(Game *game, int cenX, int cenY, int width, int height, std::vector<double> radius, int x = 0, int y = 0);
 	/// Cleans up the land.
 	~GlobeLand();
-	/// Loads a set of polygons from a DAT file.
-	static void loadDat(const std::string &filename, std::list<Polygon*> *polygons);
-	/// Sets the texture set for the globe's land polygons.
-	void setTextureLand(SurfaceSet *textureLand);
-	/// Sets the palette of the land.
-	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 	/// Draws the whole land.
 	void draw(double cenLon, double cenLat, Sint16 cenX, Sint16 cenY, size_t zoom, std::list<Polygon*> cacheLand, std::vector<double> radius);
 	/// Draws the ocean of the globe (if no water textures are given).
@@ -75,7 +69,7 @@ public:
 	/// Blits the land onto another surface.
 	void blit(Surface *surface);
 	/// Get the polygons shade at the given point.
-	void getPolygonShade(double lon, double lat, int *texture, int *shade) const;
+	void getPolygonShade(double lon, double lat, int *shade) const;
 };
 
 }

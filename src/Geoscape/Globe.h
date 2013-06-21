@@ -30,6 +30,7 @@ namespace OpenXcom
 
 class Game;
 class GlobeLand;
+class GlobeWater;
 class Polygon;
 class SurfaceSet;
 class Timer;
@@ -52,6 +53,7 @@ private:
 	static const double ROTATE_LATITUDE;
 
 	GlobeLand *_globeLand;
+	GlobeWater *_globeWater;
 	double _cenLon, _cenLat, _hoverLon, _hoverLat, _rotLon, _rotLat;
 	Sint16 _cenX, _cenY;
 	size_t _zoom;
@@ -59,7 +61,7 @@ private:
 	Surface *_markers, *_countries, *_radars;
 	bool _blink, _hover;
 	Timer *_blinkTimer, *_rotTimer;
-	std::list<Polygon*> _cacheLand;
+	std::list<Polygon*> _cacheLand, _cacheWater;
 	Surface *_mkXcomBase, *_mkAlienBase, *_mkCraft, *_mkWaypoint, *_mkCity;
 	Surface *_mkFlyingUfo, *_mkLandedUfo, *_mkCrashedUfo, *_mkAlienSite;
 	FastLineClip *_clipper;
@@ -122,6 +124,8 @@ public:
 	void blink();
 	/// Rotates the globe.
 	void rotate();
+	/// Loads a set of polygons from  DAT file.
+	static void loadDat(const std::string &filename, std::list<Polygon*> *polygons);
 	/// Draws the whole globe.
 	void draw();
 	/// Draws the country details of the globe.
@@ -167,7 +171,6 @@ public:
 	/// set the _radarLines variable
 	void toggleRadarLines();
 
-	GlobeLand *getGlobeLand();
 	void drawVHLine(double lon1, double lat1, double lon2, double lat2, int colour);
 };
 

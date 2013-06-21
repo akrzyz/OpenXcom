@@ -22,7 +22,7 @@
 #include "../Engine/Surface.h"
 #include "../Engine/SurfaceSet.h"
 #include "../Engine/Music.h"
-#include "../Geoscape/GlobeLand.h"
+#include "../Geoscape/Globe.h"
 #include "../Geoscape/Polygon.h"
 #include "../Geoscape/Polyline.h"
 #include "../Engine/SoundSet.h"
@@ -486,7 +486,7 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 		std::stringstream s;
 		s.str("");
 		s << gameFolder << "GEODATA/" << "WORLD.DAT";
-		GlobeLand::loadDat(CrossPlatform::getDataFile(s.str()), &_polygonsLand);
+		Globe::loadDat(CrossPlatform::getDataFile(s.str()), &_polygonsLand);
 
 		// Load polylines (extracted from game)
 		// -10 = Start of line
@@ -1016,7 +1016,7 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 		// Load polygons
 		s.str("");
 		s << gameFolder << "GEODATA/" << "WORLD.DAT";
-		GlobeLand::loadDat(CrossPlatform::getDataFile(s.str()), &_polygonsWater);
+		Globe::loadDat(CrossPlatform::getDataFile(s.str()), &_polygonsWater);
 
 		// Load polylines (extract from game somehow)
 

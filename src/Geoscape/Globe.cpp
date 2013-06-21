@@ -28,6 +28,7 @@
 #include "Polygon.h"
 #include "Polyline.h"
 #include "GlobeLand.h"
+#include "GlobeWater.h"
 #include "../Engine/FastLineClip.h"
 #include "../Engine/Palette.h"
 #include "../Engine/Game.h"
@@ -200,9 +201,18 @@ Globe::Globe(Game *game, int cenX, int cenY, int width, int height, int x, int y
 	{
 		_globeLand = new GlobeLand(_game, cenX, cenY, width, height, _radius, 0, 0);
 	}
+	else
+	{
+		_globeLand = 0;
+	}
+
 	if (_game->getResourcePack()->getSurfaceSet("TFTD_TEXTURE.DAT") != 0)
 	{
-//		_globeWater = new GlobeWater(_game, (screenWidth-64)/2, screenHeight/2, screenWidth-64, screenHeight, 0, 0);
+		_globeWater = new GlobeWater(_game, cenX, cenY, width, height, _radius, 0, 0);
+	}
+	else
+	{
+		_globeWater = 0;
 	}
 
 	cachePolygons();
@@ -214,6 +224,7 @@ Globe::Globe(Game *game, int cenX, int cenY, int width, int height, int x, int y
 Globe::~Globe()
 {
 	delete _globeLand;
+	delete _globeWater;
 
 	delete _blinkTimer;
 	delete _countries;
@@ -231,6 +242,11 @@ Globe::~Globe()
 	delete _clipper;
 
 	for (std::list<Polygon*>::iterator i = _cacheLand.begin(); i != _cacheLand.end(); ++i)
+	{
+		delete *i;
+	}
+
+	for (std::list<Polygon*>::iterator i = _cacheWater.begin(); i != _cacheWater.end(); ++i)
 	{
 		delete *i;
 	}
@@ -599,8 +615,16 @@ std::vector<Target*> Globe::getTargets(int x, int y, bool craft) const
  */
 void Globe::cachePolygons()
 {
-	cache(_game->getResourcePack()->getPolygonsLand(), &_cacheLand);
-	_globeLand->invalidate();
+	if (_globeLand != 0)
+	{
+		cache(_game->getResourcePack()->getPolygonsLand(), &_cacheLand);
+		_globeLand->invalidate();
+	}
+	if (_globeWater != 0)
+	{
+		cache(_game->getResourcePack()->getPolygonsWater(), &_cacheWater);
+		_globeWater->invalidate();
+	}
 }
 
 /**
@@ -652,8 +676,15 @@ void Globe::cache(std::list<Polygon*> *polygons, std::list<Polygon*> *cache)
  */
 void Globe::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
-	_globeLand->setPalette(colors, firstcolor, ncolors);
-	
+	if (_globeLand != 0)
+	{
+		_globeLand->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
+	}
+	if (_globeWater != 0)
+	{
+		_globeWater->setPalette(_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0")->getColors());
+	}
+
 	_countries->setPalette(colors, firstcolor, ncolors);
 	_markers->setPalette(colors, firstcolor, ncolors);
 	_mkXcomBase->setPalette(colors, firstcolor, ncolors);
@@ -717,11 +748,73 @@ void Globe::rotate()
 }
 
 /**
+ * Loads a series of map polar coordinates in X-Com format,
+ * converts them and stores them in a set of polygons.
+ * @param filename Filename of the DAT file.
+ * @param polygons Pointer to the polygon set.
+ * @sa http://www.ufopaedia.org/index.php?title=WORLD.DAT
+ */
+void Globe::loadDat(const std::string &filename, std::list<Polygon*> *polygons)
+{
+	// Load file
+	std::ifstream mapFile (filename.c_str(), std::ios::in | std::ios::binary);
+	if (!mapFile)
+	{
+		throw Exception(filename + " not found");
+	}
+
+	short value[10];
+
+	while (mapFile.read((char*)&value, sizeof(value)))
+	{
+		Polygon* poly;
+		int points;
+
+		if (value[6] != -1)
+		{
+			points = 4;
+		}
+		else
+		{
+			points = 3;
+		}
+		poly = new Polygon(points);
+
+		for (int i = 0, j = 0; i < points; ++i)
+		{
+			// Correct X-Com degrees and convert to radians
+			double lonRad = value[j++] * 0.125f * M_PI / 180;
+			double latRad = value[j++] * 0.125f * M_PI / 180;
+
+			poly->setLongitude(i, lonRad);
+			poly->setLatitude(i, latRad);
+		}
+		poly->setTexture(value[8]);
+
+		polygons->push_back(poly);
+	}
+
+	if (!mapFile.eof())
+	{
+		throw Exception("Invalid globe map");
+	}
+
+	mapFile.close();
+}
+
+/**
  * Draws the whole globe, part by part.
  */
 void Globe::draw()
 {
-	_globeLand->draw(_cenLon, _cenLat, _cenX, _cenY, _zoom, _cacheLand, _radius);
+	if (_globeLand != 0)
+	{
+		_globeLand->draw(_cenLon, _cenLat, _cenX, _cenY, _zoom, _cacheLand, _radius);
+	}
+	if (_globeWater != 0)
+	{
+		_globeWater->draw(_cenLon, _cenLat, _cenX, _cenY, _zoom, _cacheWater, _radius);
+	}
 	drawRadars();
 	drawMarkers();
 	drawDetail();
@@ -857,10 +950,6 @@ void Globe::setNewBaseHoverPos(double lon, double lat)
 bool Globe::getShowRadar(void)
 {
 	return _game->getSavedGame()->getRadarLines();
-}
-GlobeLand *Globe::getGlobeLand()
-{
-	return _globeLand;
 }
 
 
@@ -1183,7 +1272,10 @@ void Globe::drawMarkers()
  */
 void Globe::blit(Surface *surface)
 {
-	_globeLand->blit(surface);
+	if (_globeLand != 0)
+		_globeLand->blit(surface);
+	if (_globeWater != 0)	
+		_globeWater->blit(surface);
 	_radars->blit(surface);
 	_countries->blit(surface);
 	_markers->blit(surface);
@@ -1201,7 +1293,12 @@ void Globe::mousePress(Action *action, State *state)
 
 	// Check for errors
 	if (lat == lat && lon == lon)
-		_globeLand->mousePress(action, state);
+	{
+		if (_globeLand != 0)
+			_globeLand->mousePress(action, state);
+		if (_globeWater != 0)
+			_globeWater->mousePress(action, state);
+	}
 }
 
 /**
@@ -1216,7 +1313,12 @@ void Globe::mouseRelease(Action *action, State *state)
 
 	// Check for errors
 	if (lat == lat && lon == lon)
-		_globeLand->mouseRelease(action, state);
+	{
+		if (_globeLand != 0)
+			_globeLand->mouseRelease(action, state);
+		if (_globeWater != 0)
+			_globeWater->mouseRelease(action, state);
+	}
 }
 
 /**
@@ -1258,7 +1360,10 @@ void Globe::mouseClick(Action *action, State *state)
  */
 void Globe::keyboardPress(Action *action, State *state)
 {
-	_globeLand->keyboardPress(action, state);
+	if (_globeLand != 0)
+		_globeLand->keyboardPress(action, state);
+	if (_globeWater != 0)
+		_globeWater->keyboardPress(action, state);
 	if (action->getDetails()->key.keysym.sym == Options::getInt("keyGeoToggleDetail"))
 	{
 		toggleDetail();
@@ -1278,7 +1383,6 @@ void Globe::keyboardPress(Action *action, State *state)
  */
 void Globe::getPolygonTextureAndShade(double lon, double lat, int *texture, int *shade) const
 {
-	_globeLand->getPolygonShade(lon, lat, texture, shade);
 	*texture = -1;
 
 	// We're only temporarily changing cenLon/cenLat so the "const" is actually preserved
@@ -1293,6 +1397,7 @@ void Globe::getPolygonTextureAndShade(double lon, double lat, int *texture, int 
 			if (insidePolygon(lon, lat, *i))
 			{
 				*texture = (*i)->getTexture();
+				_globeLand->getPolygonShade(lon, lat, shade);
 				break;
 			}
 		}
@@ -1303,6 +1408,7 @@ void Globe::getPolygonTextureAndShade(double lon, double lat, int *texture, int 
 			if (insidePolygon(lon, lat, *i))
 			{
 				*texture = (*i)->getTexture();
+				_globeWater->getPolygonShade(lon, lat, shade);
 				break;
 			}
 		}

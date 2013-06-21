@@ -264,6 +264,8 @@ set ( geoscape_src
   Geoscape/Globe.h
   Geoscape/GlobeLand.cpp
   Geoscape/GlobeLand.h
+  Geoscape/GlobeWater.cpp
+  Geoscape/GlobeWater.h
   Geoscape/SelectDestinationState.cpp
   Geoscape/SelectDestinationState.h
   Geoscape/FundingState.h
