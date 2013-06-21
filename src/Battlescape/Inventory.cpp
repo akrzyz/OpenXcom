@@ -203,6 +203,7 @@ void Inventory::drawItems()
 	_items->clear();
 	if (_selUnit != 0)
 	{
+		_game->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
 		SurfaceSet *texture = _game->getResourcePack()->getSurfaceSet("BIGOBS.PCK");
 		// Soldier items
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getInventory()->begin(); i != _selUnit->getInventory()->end(); ++i)

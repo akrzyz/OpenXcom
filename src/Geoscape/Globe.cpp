@@ -807,13 +807,13 @@ void Globe::loadDat(const std::string &filename, std::list<Polygon*> *polygons)
  */
 void Globe::draw()
 {
-	if (_globeLand != 0)
-	{
-		_globeLand->draw(_cenLon, _cenLat, _cenX, _cenY, _zoom, _cacheLand, _radius);
-	}
 	if (_globeWater != 0)
 	{
 		_globeWater->draw(_cenLon, _cenLat, _cenX, _cenY, _zoom, _cacheWater, _radius);
+	}
+	if (_globeLand != 0)
+	{
+		_globeLand->draw(_cenLon, _cenLat, _cenX, _cenY, _zoom, _cacheLand, _radius);
 	}
 	drawRadars();
 	drawMarkers();
@@ -1272,10 +1272,10 @@ void Globe::drawMarkers()
  */
 void Globe::blit(Surface *surface)
 {
-	if (_globeLand != 0)
-		_globeLand->blit(surface);
 	if (_globeWater != 0)	
 		_globeWater->blit(surface);
+	if (_globeLand != 0)
+		_globeLand->blit(surface);
 	_radars->blit(surface);
 	_countries->blit(surface);
 	_markers->blit(surface);
