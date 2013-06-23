@@ -126,6 +126,7 @@ void createDefault()
 	setBool("battleAutoEnd", false);
 	setBool("allowPsionicCapture", false);
 	setBool("borderless", false);
+	setString("GUIstyle", "ufo");
 
 	// new battle mode data
 	setInt("NewBattleMission", 0);
@@ -630,21 +631,6 @@ void setBool(const std::string& id, bool value)
 	ss << std::boolalpha << value;
 	_options[id] = ss.str();
 }
-
-/**
- * Returns the list of rulesets to be used by the game.
- * @return Ruleset list.
- */
-/*std::map<std::string, std::string> getRulesets()
-{
-	std::map<std::string, std::string> result;
-	for (std::map<std::string, OptionsFolders*>::const_iterator i = _folders.begin(); i != _folders.end(); ++i)
-	{
-		std::map<std::string, std::string> currentFolder = i->second->getRulesets();
-		result.insert( currentFolder.begin(), currentFolder.end() );
-	}
-	return result;
-}*/
 
 std::vector<std::string> getPurchaseExclusions()
 {

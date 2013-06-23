@@ -24,6 +24,7 @@
 #include "../Engine/Language.h"
 #include "../Engine/Font.h"
 #include "../Engine/Palette.h"
+#include "../Engine/Options.h"
 #include "../Interface/TextButton.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
@@ -54,7 +55,16 @@ MainMenuState::MainMenuState(Game *game) : State(game)
 	_btnQuit = new TextButton(192, 20, 64, 146);
 	_txtTitle = new Text(256, 30, 32, 45);
 
-	if (_game->getResourcePack()->getPalette("PALETTES.DAT_0"))
+	if ( ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_game->getResourcePack()->getPalette("PALETTES.DAT_0") == 0) ) || ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "tftd") ) )
+	{
+		// Basic properties for display in TFTD style
+		palette = "TFTD_PALETTES.DAT_0";
+		backpalette = "TFTD_BACKPALS.DAT";
+		colors[0] = colors[1] = Palette::blockOffset(0)+1;
+		colors[2] = Palette::blockOffset(4);
+		background = "TFTD_BACK01.SCR";
+	}
+	else
 	{
 		// Basic properties for display in UFO style
 		palette = "PALETTES.DAT_0";
@@ -63,15 +73,6 @@ MainMenuState::MainMenuState(Game *game) : State(game)
 		colors[1] = Palette::blockOffset(8)+10;
 		colors[2] = Palette::blockOffset(0);
 		background = "BACK01.SCR";
-	}
-	else
-	{
-		// Basic properties for display in TFTD style
-		palette = "TFTD_PALETTES.DAT_0";
-		backpalette = "TFTD_BACKPALS.DAT";
-		colors[0] = colors[1] = Palette::blockOffset(0)+1;
-		colors[2] = Palette::blockOffset(4);
-		background = "TFTD_BACK01.SCR";
 	}
 
 	// Set palette
