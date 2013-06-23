@@ -43,7 +43,7 @@ class RuleTerrain
 private:
 	std::vector<MapDataSet*> _mapDataSets;
 	std::vector<MapBlock*> _mapBlocks;
-	std::string _name, _folder;
+	std::string _name, _folder, _paletteName;
 	int _largeBlockLimit;
 	std::vector<int> _textures;
 	int _hemisphere;

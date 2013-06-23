@@ -267,15 +267,6 @@ void ResourcePack::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 	{
 		i->second->getSurface()->setPalette(colors, firstcolor, ncolors);
 	}
-	for (std::map<std::string, Surface*>::iterator i = _surfaces.begin(); i != _surfaces.end(); ++i)
-	{
-		if(i->first.substr(i->first.length()-3, i->first.length()) != "LBM")
-			i->second->setPalette(colors, firstcolor, ncolors);
-	}
-	for (std::map<std::string, SurfaceSet*>::iterator i = _sets.begin(); i != _sets.end(); ++i)
-	{
-		i->second->setPalette(colors, firstcolor, ncolors);
-	}
 }
 
 /**
@@ -307,6 +298,32 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 			s2 << "PALETTES.DAT_" << i;
 			_palettes[s2.str()] = new Palette();
 			_palettes[s2.str()]->loadDat(CrossPlatform::getDataFile(s1.str()), 256, Palette::palOffset(i));
+		}
+
+		// Last 16 colors are a greyish gradient
+		SDL_Color color[] = {{140, 152, 148, 0},
+							 {132, 136, 140, 0},
+							 {116, 124, 132, 0},
+							 {108, 116, 124, 0},
+							 {92, 104, 108, 0},
+							 {84, 92, 100, 0},
+							 {76, 80, 92, 0},
+							 {56, 68, 84, 0},
+							 {48, 56, 68, 0},
+							 {40, 48, 56, 0},
+							 {32, 36, 48, 0},
+							 {24, 28, 32, 0},
+							 {16, 20, 24, 0},
+							 {8, 12, 16, 0},
+							 {3, 4, 8, 0},
+							 {3, 3, 6, 0}};
+		Uint8 firstcolor = Palette::blockOffset(15);
+		SDL_Color *tacticalPalette = _palettes["PALETTES.DAT_4"]->getColors();
+		for (int i = 0; i < 16; ++i)
+		{
+			tacticalPalette[i + firstcolor].r = color[i].r;
+			tacticalPalette[i + firstcolor].g = color[i].g;
+			tacticalPalette[i + firstcolor].b = color[i].b;
 		}
 
 		std::stringstream s1, s2;
@@ -342,6 +359,7 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 			s << gameFolder << "GEODATA/" << "INTERWIN.DAT";
 			_surfaces["INTERWIN.DAT"] = new Surface(160, 556);
 			_surfaces["INTERWIN.DAT"]->loadScr(CrossPlatform::getDataFile(s.str()));
+			_surfaces["INTERWIN.DAT"]->setPalette(_palettes["PALETTES.DAT_0"]->getColors());
 		}
 
 		std::string scrs[] = {"BACK01.SCR",
@@ -370,6 +388,24 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 			s << gameFolder << "GEOGRAPH/" << scrs[i];
 			_surfaces[scrs[i]] = new Surface(320, 200);
 			_surfaces[scrs[i]]->loadScr(CrossPlatform::getDataFile(s.str()));
+			switch (i)
+			{
+				case 0: case 2: case 3: case 11: case 14: case 15: case 17:
+				{
+					_surfaces[scrs[i]]->setPalette(_palettes["PALETTES.DAT_0"]->getColors());
+					break;
+				}
+				case 1: case 5: case 6: case 12: case 13: case 16:
+				{
+					_surfaces[scrs[i]]->setPalette(_palettes["PALETTES.DAT_1"]->getColors());
+					break;
+				}
+				case 4: case 7: case 8: case 9: case 10: case 18:
+				{
+					_surfaces[scrs[i]]->setPalette(_palettes["PALETTES.DAT_3"]->getColors());
+					break;
+				}
+			}
 		}
 
 		// here we create an "alternate" background surface for the base info screen.
@@ -436,6 +472,10 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 			s << gameFolder << "GEOGRAPH/" << spks[i];
 			_surfaces[spks[i]] = new Surface(320, 200);
 			_surfaces[spks[i]]->loadSpk(CrossPlatform::getDataFile(s.str()));
+			if (i != 43)
+				_surfaces[spks[i]]->setPalette(_palettes["PALETTES.DAT_3"]->getColors());
+			else
+				_surfaces[spks[i]]->setPalette(_palettes["PALETTES.DAT_2"]->getColors());
 		}
 
 		std::string lbms[] = {"PICT1.LBM",
@@ -471,17 +511,20 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 				s2 << gameFolder << "GEOGRAPH/" << tab;
 				_sets[sets[i]] = new SurfaceSet(32, 40);
 				_sets[sets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+				_sets[sets[i]]->setPalette(_palettes["PALETTES.DAT_0"]->getColors());
 			}
 			else
 			{
 				_sets[sets[i]] = new SurfaceSet(32, 32);
 				_sets[sets[i]]->loadDat(CrossPlatform::getDataFile(s.str()));
+				_sets[sets[i]]->setPalette(_palettes["PALETTES.DAT_0"]->getColors());
 			}
 		}
 		_sets["SCANG.DAT"] = new SurfaceSet(4, 4);
 		std::stringstream scang;
 		scang << gameFolder << "GEODATA/" << "SCANG.DAT";
 		_sets["SCANG.DAT"]->loadDat (CrossPlatform::getDataFile(scang.str()));
+		_sets["SCANG.DAT"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 		// Load polygons
 		std::stringstream s;
 		s.str("");
@@ -800,6 +843,7 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 			s << gameFolder << "GEODATA/" << "INTERWIN.DAT";
 			_surfaces["TFTD_INTERWIN.DAT"] = new Surface(160, 556);
 			_surfaces["TFTD_INTERWIN.DAT"]->loadScr(CrossPlatform::getDataFile(s.str()));
+			_surfaces["TFTD_INTERWIN.DAT"]->setPalette(_palettes["TFTD_PALETTES.DAT_0"]->getColors());
 		}
 
 		std::string scrs[] = {"BACK01.SCR",
@@ -962,11 +1006,13 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 			s << gameFolder << "GEOGRAPH/" << spks[i];
 			_surfaces["TFTD_" + spks[i]] = new Surface(320, 200);
 			_surfaces["TFTD_" + spks[i]]->loadBdy(CrossPlatform::getDataFile(s.str()));
+			_surfaces["TFTD_" + spks[i]]->setPalette(_palettes["TFTD_PALETTES.DAT_1"]->getColors());
 		}
 		std::stringstream s;
 		s << gameFolder << "GEOGRAPH/" << spks[113];
 		_surfaces["TFTD_" + spks[113]] = new Surface(320, 200);
 		_surfaces["TFTD_" + spks[113]]->loadSpk(CrossPlatform::getDataFile(s.str()));
+		_surfaces["TFTD_" + spks[113]]->setPalette(_palettes["TFTD_PALETTES.DAT_2"]->getColors());
 
 /*
 		std::string lbms[] = {"PICT1.LBM",
@@ -1002,11 +1048,13 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 				s2 << gameFolder << "GEOGRAPH/" << tab;
 				_sets["TFTD_" + sets[i]] = new SurfaceSet(32, 40);
 				_sets["TFTD_" + sets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+				_sets["TFTD_" + sets[i]]->setPalette(_palettes["TFTD_PALETTES.DAT_0"]->getColors());
 			}
 			else
 			{
 				_sets["TFTD_" + sets[i]] = new SurfaceSet(32, 32);
 				_sets["TFTD_" + sets[i]]->loadDat(CrossPlatform::getDataFile(s.str()));
+				_sets["TFTD_" + sets[i]]->setPalette(_palettes["PALETTES.DAT_0"]->getColors());
 			}
 		}
 		_sets["TFTD_SCANG.DAT"] = new SurfaceSet(4, 4);
@@ -1033,6 +1081,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 	s << gameFolder << "UFOGRAPH/" << "SPICONS.DAT";
 	_sets["SPICONS.DAT"] = new SurfaceSet(32, 24);
 	_sets["SPICONS.DAT"]->loadDat(CrossPlatform::getDataFile(s.str()));
+	_sets["SPICONS.DAT"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
 	s.str("");
 	std::stringstream s2;
@@ -1040,6 +1089,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 	s2 << gameFolder << "UFOGRAPH/" << "CURSOR.TAB";
 	_sets["CURSOR.PCK"] = new SurfaceSet(32, 40);
 	_sets["CURSOR.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+	_sets["CURSOR.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
 	s.str("");
 	s2.str("");
@@ -1047,6 +1097,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 	s2 << gameFolder << "UFOGRAPH/" << "SMOKE.TAB";
 	_sets["SMOKE.PCK"] = new SurfaceSet(32, 40);
 	_sets["SMOKE.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+	_sets["SMOKE.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 	
 	s.str("");
 	s2.str("");
@@ -1054,6 +1105,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 	s2 << gameFolder << "UFOGRAPH/" << "HIT.TAB";
 	_sets["HIT.PCK"] = new SurfaceSet(32, 40);
 	_sets["HIT.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+	_sets["HIT.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
 	s.str("");
 	s2.str("");
@@ -1061,16 +1113,19 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 	s2 << gameFolder << "UFOGRAPH/" << "X1.TAB";
 	_sets["X1.PCK"] = new SurfaceSet(128, 64);
 	_sets["X1.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+	_sets["X1.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
 	s.str("");
 	_sets["MEDIBITS.DAT"] = new SurfaceSet(52, 58);
 	s << gameFolder << "UFOGRAPH/" << "MEDIBITS.DAT";
 	_sets["MEDIBITS.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()));
+	_sets["MEDIBITS.DAT"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
 	s.str("");
 	_sets["DETBLOB.DAT"] = new SurfaceSet(16, 16);
 	s << gameFolder << "UFOGRAPH/" << "DETBLOB.DAT";
 	_sets["DETBLOB.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()));
+	_sets["DETBLOB.DAT"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
 	// Load Battlescape Terrain (only blacks are loaded, others are loaded just in time)
 	std::string bsets[] = {"BLANKS.PCK"};
@@ -1084,6 +1139,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 		s2 << gameFolder << "TERRAIN/" << tab;
 		_sets[bsets[i]] = new SurfaceSet(32, 40);
 		_sets[bsets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets[bsets[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 	}
 
 	// Load Battlescape units
@@ -1118,6 +1174,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 		s2 << gameFolder + "UNITS/" << tab;
 		_sets[usets[i]] = new SurfaceSet(32, 40);
 		_sets[usets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets[usets[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 	}
 
 	s.str("");
@@ -1126,6 +1183,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 	s2 << gameFolder << "UNITS/" << "BIGOBS.TAB";
 	_sets["BIGOBS.PCK"] = new SurfaceSet(32, 48);
 	_sets["BIGOBS.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+	_sets["BIGOBS.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
 	s.str("");
 	s << gameFolder << "GEODATA/" << "LOFTEMPS.DAT";
@@ -1139,6 +1197,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 		s << gameFolder << "UFOGRAPH/" << scrs[i];
 		_surfaces[scrs[i]] = new Surface(320, 200);
 		_surfaces[scrs[i]]->loadScr(CrossPlatform::getDataFile(s.str()));
+		_surfaces[scrs[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 	}
 
 	std::string spks[] = {"TAC01.SCR",
@@ -1155,6 +1214,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 		s << gameFolder << "UFOGRAPH/" << spks[i];
 		_surfaces[spks[i]] = new Surface(320, 200);
 		_surfaces[spks[i]]->loadSpk(CrossPlatform::getDataFile(s.str()));
+		_surfaces[spks[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 	}
 
 	std::string invs[] = {"MAN_0",
@@ -1182,6 +1242,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 		{
 			_surfaces[s1.str()] = new Surface(320, 200);
 			_surfaces[s1.str()]->loadSpk(CrossPlatform::getDataFile(s1full.str()));
+			_surfaces[s1.str()]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 		}
 		// Load gender-based inventory image
 		if (CrossPlatform::fileExists(CrossPlatform::getDataFile(s2full.str())))
@@ -1193,6 +1254,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
 				s3full << gameFolder << "UFOGRAPH/" << s3.str();
 				_surfaces[s3.str()] = new Surface(320, 200);
 				_surfaces[s3.str()]->loadSpk(CrossPlatform::getDataFile(s3full.str()));
+				_surfaces[s3.str()]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 			}
 		}
 	}

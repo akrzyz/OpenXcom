@@ -35,7 +35,7 @@ MapData *MapDataSet::_scorchedTile = 0;
 /**
 * MapDataSet construction.
 */
-MapDataSet::MapDataSet(const std::string &name, const std::string &dataFolder) : _name(name), _dataFolder(dataFolder), _objects(), _surfaceSet(0), _loaded(false)
+MapDataSet::MapDataSet(const std::string &name, const std::string &dataFolder, const std::string &paletteName) : _name(name), _dataFolder(dataFolder), _paletteName(paletteName), _objects(), _surfaceSet(0), _loaded(false)
 {
 }
 
@@ -115,8 +115,9 @@ SurfaceSet *MapDataSet::getSurfaceset() const
 /**
  * Loads terraindata in X-Com format (MCD & PCK files)
  * @sa http://www.ufopaedia.org/index.php?title=MCD
+ * @palette Palette to use with this data.
  */
-void MapDataSet::loadData()
+void MapDataSet::loadData(SDL_Color *palette)
 {
 	// prevents loading twice
 	if (_loaded) return;
@@ -255,7 +256,7 @@ void MapDataSet::loadData()
 	s2 << _dataFolder + "TERRAIN/" << _name << ".TAB";
 	_surfaceSet = new SurfaceSet(32, 40);
 	_surfaceSet->loadPck(CrossPlatform::getDataFile(s1.str()), CrossPlatform::getDataFile(s2.str()));
-
+	_surfaceSet->setPalette(palette);
 }
 
 void MapDataSet::unloadData()
@@ -298,6 +299,11 @@ void MapDataSet::loadLOFTEMPS(const std::string &filename, std::vector<Uint16> *
 	}
 
 	mapFile.close();
+}
+
+std::string MapDataSet::getPaletteName() const
+{
+	return _paletteName;
 }
 
 MapData *MapDataSet::getBlankFloorTile()

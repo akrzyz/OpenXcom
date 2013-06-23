@@ -53,7 +53,7 @@ protected:
 	void setButtonPressed(Uint8 button, bool pressed);
 public:
 	/// Creates a new interactive surface with the specified size and position.
-	InteractiveSurface(int width, int height, int x = 0, int y = 0, int bpp = 8);
+	InteractiveSurface(int width, int height, int x = 0, int y = 0, int bpp = 8, const std::string &paletteName = "PALETTES.DAT_");
 	/// Cleans up the interactive surface.
 	virtual ~InteractiveSurface();
 	/// Sets the surface's visibility.

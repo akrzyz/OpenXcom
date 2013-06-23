@@ -1169,12 +1169,12 @@ RuleTerrain *Ruleset::getTerrain(const std::string &name) const
  * @param name datafile name.
  * @return Rules for the datafile.
  */
-MapDataSet *Ruleset::getMapDataSet(const std::string &name, const std::string &dataFolder)
+MapDataSet *Ruleset::getMapDataSet(const std::string &name, const std::string &dataFolder, const std::string &paletteName)
 {
 	std::map<std::string, MapDataSet*>::iterator map = _mapDataSets.find(name);
 	if (map == _mapDataSets.end())
 	{
-		MapDataSet *set = new MapDataSet(name, dataFolder);
+		MapDataSet *set = new MapDataSet(name, dataFolder, paletteName);
 		_mapDataSets[name] = set;
 		return set;
 	}

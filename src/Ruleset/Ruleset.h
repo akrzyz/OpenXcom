@@ -148,7 +148,7 @@ public:
 	/// Gets terrains for battlescape games.
 	RuleTerrain *getTerrain(const std::string &name) const;
 	/// Gets mapdatafile for battlescape games.
-	MapDataSet *getMapDataSet(const std::string &name, const std::string &dataFolder);
+	MapDataSet *getMapDataSet(const std::string &name, const std::string &dataFolder, const std::string &paletteName);
 	/// Gets soldier unit rules.
 	RuleSoldier *getSoldier(const std::string &name) const;
 	/// Gets generated unit rules.

@@ -95,97 +95,6 @@ Globe::Globe(Game *game, int cenX, int cenY, int width, int height, int x, int y
 	_rotTimer = new Timer(50);
 	_rotTimer->onTimer((SurfaceHandler)&Globe::rotate);
 
-	// Globe markers
-	_mkXcomBase = new Surface(3, 3);
-	_mkXcomBase->lock();
-	_mkXcomBase->setPixel(0, 0, 9);
-	_mkXcomBase->setPixel(1, 0, 9);
-	_mkXcomBase->setPixel(2, 0, 9);
-	_mkXcomBase->setPixel(0, 1, 9);
-	_mkXcomBase->setPixel(2, 1, 9);
-	_mkXcomBase->setPixel(0, 2, 9);
-	_mkXcomBase->setPixel(1, 2, 9);
-	_mkXcomBase->setPixel(2, 2, 9);
-	_mkXcomBase->unlock();
-
-	_mkAlienBase = new Surface(3, 3);
-	_mkAlienBase->lock();
-	_mkAlienBase->setPixel(0, 0, 1);
-	_mkAlienBase->setPixel(1, 0, 1);
-	_mkAlienBase->setPixel(2, 0, 1);
-	_mkAlienBase->setPixel(0, 1, 1);
-	_mkAlienBase->setPixel(2, 1, 1);
-	_mkAlienBase->setPixel(0, 2, 1);
-	_mkAlienBase->setPixel(1, 2, 1);
-	_mkAlienBase->setPixel(2, 2, 1);
-	_mkAlienBase->unlock();
-
-	_mkCraft = new Surface(3, 3);
-	_mkCraft->lock();
-	_mkCraft->setPixel(1, 0, 11);
-	_mkCraft->setPixel(0, 1, 11);
-	_mkCraft->setPixel(2, 1, 11);
-	_mkCraft->setPixel(1, 2, 11);
-	_mkCraft->unlock();
-
-	_mkWaypoint = new Surface(3, 3);
-	_mkWaypoint->lock();
-	_mkWaypoint->setPixel(0, 0, 3);
-	_mkWaypoint->setPixel(0, 2, 3);
-	_mkWaypoint->setPixel(1, 1, 3);
-	_mkWaypoint->setPixel(2, 0, 3);
-	_mkWaypoint->setPixel(2, 2, 3);
-	_mkWaypoint->unlock();
-
-	_mkCity = new Surface(3, 3);
-	_mkCity->lock();
-	_mkCity->setPixel(0, 0, 14);
-	_mkCity->setPixel(1, 0, 14);
-	_mkCity->setPixel(2, 0, 14);
-	_mkCity->setPixel(0, 1, 14);
-	_mkCity->setPixel(1, 1, 11);
-	_mkCity->setPixel(2, 1, 14);
-	_mkCity->setPixel(0, 2, 14);
-	_mkCity->setPixel(1, 2, 14);
-	_mkCity->setPixel(2, 2, 14);
-	_mkCity->unlock();
-
-	_mkFlyingUfo = new Surface(3, 3);
-	_mkFlyingUfo->lock();
-	_mkFlyingUfo->setPixel(1, 0, 13);
-	_mkFlyingUfo->setPixel(0, 1, 13);
-	_mkFlyingUfo->setPixel(1, 1, 13);
-	_mkFlyingUfo->setPixel(2, 1, 13);
-	_mkFlyingUfo->setPixel(1, 2, 13);
-	_mkFlyingUfo->unlock();
-
-	_mkLandedUfo = new Surface(3, 3);
-	_mkLandedUfo->lock();
-	_mkLandedUfo->setPixel(0, 0, 7);
-	_mkLandedUfo->setPixel(0, 2, 7);
-	_mkLandedUfo->setPixel(1, 1, 7);
-	_mkLandedUfo->setPixel(2, 0, 7);
-	_mkLandedUfo->setPixel(2, 2, 7);
-	_mkLandedUfo->unlock();
-
-	_mkCrashedUfo = new Surface(3, 3);
-	_mkCrashedUfo->lock();
-	_mkCrashedUfo->setPixel(0, 0, 5);
-	_mkCrashedUfo->setPixel(0, 2, 5);
-	_mkCrashedUfo->setPixel(1, 1, 5);
-	_mkCrashedUfo->setPixel(2, 0, 5);
-	_mkCrashedUfo->setPixel(2, 2, 5);
-	_mkCrashedUfo->unlock();
-
-	_mkAlienSite = new Surface(3, 3);
-	_mkAlienSite->lock();
-	_mkAlienSite->setPixel(1, 0, 1);
-	_mkAlienSite->setPixel(0, 1, 1);
-	_mkAlienSite->setPixel(1, 1, 1);
-	_mkAlienSite->setPixel(2, 1, 1);
-	_mkAlienSite->setPixel(1, 2, 1);
-	_mkAlienSite->unlock();
-
 	_cenLon = _game->getSavedGame()->getGlobeLongitude();
 	_cenLat = _game->getSavedGame()->getGlobeLatitude();
 	_zoom = _game->getSavedGame()->getGlobeZoom();
@@ -197,23 +106,117 @@ Globe::Globe(Game *game, int cenX, int cenY, int width, int height, int x, int y
 	_radius.push_back(2.25*height);
 	_radius.push_back(3.60*height);
 
+	Uint8 color;
+	if (_game->getResourcePack()->getSurfaceSet("TFTD_TEXTURE.DAT") != 0)
+	{
+		_globeWater = new GlobeWater(_game, cenX, cenY, width, height, _radius, 0, 0);
+		color = Palette::blockOffset(7);
+	}
+	else
+	{
+		_globeWater = 0;
+	}
+
 	if (_game->getResourcePack()->getSurfaceSet("TEXTURE.DAT") != 0)
 	{
 		_globeLand = new GlobeLand(_game, cenX, cenY, width, height, _radius, 0, 0);
+		color = 0;
 	}
 	else
 	{
 		_globeLand = 0;
 	}
 
-	if (_game->getResourcePack()->getSurfaceSet("TFTD_TEXTURE.DAT") != 0)
-	{
-		_globeWater = new GlobeWater(_game, cenX, cenY, width, height, _radius, 0, 0);
-	}
-	else
-	{
-		_globeWater = 0;
-	}
+	// Globe markers
+	_mkXcomBase = new Surface(3, 3);
+	_mkXcomBase->lock();
+	_mkXcomBase->setPixel(0, 0, color + 9);
+	_mkXcomBase->setPixel(1, 0, color + 9);
+	_mkXcomBase->setPixel(2, 0, color + 9);
+	_mkXcomBase->setPixel(0, 1, color + 9);
+	_mkXcomBase->setPixel(2, 1, color + 9);
+	_mkXcomBase->setPixel(0, 2, color + 9);
+	_mkXcomBase->setPixel(1, 2, color + 9);
+	_mkXcomBase->setPixel(2, 2, color + 9);
+	_mkXcomBase->unlock();
+
+	_mkAlienBase = new Surface(3, 3);
+	_mkAlienBase->lock();
+	_mkAlienBase->setPixel(0, 0, color + 1);
+	_mkAlienBase->setPixel(1, 0, color + 1);
+	_mkAlienBase->setPixel(2, 0, color + 1);
+	_mkAlienBase->setPixel(0, 1, color + 1);
+	_mkAlienBase->setPixel(2, 1, color + 1);
+	_mkAlienBase->setPixel(0, 2, color + 1);
+	_mkAlienBase->setPixel(1, 2, color + 1);
+	_mkAlienBase->setPixel(2, 2, color + 1);
+	_mkAlienBase->unlock();
+
+	_mkCraft = new Surface(3, 3);
+	_mkCraft->lock();
+	_mkCraft->setPixel(1, 0, color + 11);
+	_mkCraft->setPixel(0, 1, color + 11);
+	_mkCraft->setPixel(2, 1, color + 11);
+	_mkCraft->setPixel(1, 2, color + 11);
+	_mkCraft->unlock();
+
+	_mkWaypoint = new Surface(3, 3);
+	_mkWaypoint->lock();
+	_mkWaypoint->setPixel(0, 0, color + 3);
+	_mkWaypoint->setPixel(0, 2, color + 3);
+	_mkWaypoint->setPixel(1, 1, color + 3);
+	_mkWaypoint->setPixel(2, 0, color + 3);
+	_mkWaypoint->setPixel(2, 2, color + 3);
+	_mkWaypoint->unlock();
+
+	_mkCity = new Surface(3, 3);
+	_mkCity->lock();
+	_mkCity->setPixel(0, 0, color + 14);
+	_mkCity->setPixel(1, 0, color + 14);
+	_mkCity->setPixel(2, 0, color + 14);
+	_mkCity->setPixel(0, 1, color + 14);
+	_mkCity->setPixel(1, 1, color + 11);
+	_mkCity->setPixel(2, 1, color + 14);
+	_mkCity->setPixel(0, 2, color + 14);
+	_mkCity->setPixel(1, 2, color + 14);
+	_mkCity->setPixel(2, 2, color + 14);
+	_mkCity->unlock();
+
+	_mkFlyingUfo = new Surface(3, 3);
+	_mkFlyingUfo->lock();
+	_mkFlyingUfo->setPixel(1, 0, color + 13);
+	_mkFlyingUfo->setPixel(0, 1, color + 13);
+	_mkFlyingUfo->setPixel(1, 1, color + 13);
+	_mkFlyingUfo->setPixel(2, 1, color + 13);
+	_mkFlyingUfo->setPixel(1, 2, color + 13);
+	_mkFlyingUfo->unlock();
+
+	_mkLandedUfo = new Surface(3, 3);
+	_mkLandedUfo->lock();
+	_mkLandedUfo->setPixel(0, 0, color + 7);
+	_mkLandedUfo->setPixel(0, 2, color + 7);
+	_mkLandedUfo->setPixel(1, 1, color + 7);
+	_mkLandedUfo->setPixel(2, 0, color + 7);
+	_mkLandedUfo->setPixel(2, 2, color + 7);
+	_mkLandedUfo->unlock();
+
+	_mkCrashedUfo = new Surface(3, 3);
+	_mkCrashedUfo->lock();
+	_mkCrashedUfo->setPixel(0, 0, color + 5);
+	_mkCrashedUfo->setPixel(0, 2, color + 5);
+	_mkCrashedUfo->setPixel(1, 1, color + 5);
+	_mkCrashedUfo->setPixel(2, 0, color + 5);
+	_mkCrashedUfo->setPixel(2, 2, color + 5);
+	_mkCrashedUfo->unlock();
+
+	_mkAlienSite = new Surface(3, 3);
+	_mkAlienSite->lock();
+	_mkAlienSite->setPixel(1, 0, color + 1);
+	_mkAlienSite->setPixel(0, 1, color + 1);
+	_mkAlienSite->setPixel(1, 1, color + 1);
+	_mkAlienSite->setPixel(2, 1, color + 1);
+	_mkAlienSite->setPixel(1, 2, color + 1);
+	_mkAlienSite->unlock();
 
 	cachePolygons();
 }
@@ -676,27 +679,30 @@ void Globe::cache(std::list<Polygon*> *polygons, std::list<Polygon*> *cache)
  */
 void Globe::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
-	if (_globeLand != 0)
-	{
-		_globeLand->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
-	}
+	SDL_Color *globeColors;
 	if (_globeWater != 0)
 	{
-		_globeWater->setPalette(_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0")->getColors());
+		globeColors = _game->getResourcePack()->getPalette(_globeWater->getPaletteName())->getColors();
+		_globeWater->setPalette(globeColors);
+	}
+	if (_globeLand != 0)
+	{
+		globeColors = _game->getResourcePack()->getPalette(_globeLand->getPaletteName())->getColors();
+		_globeLand->setPalette(globeColors);
 	}
 
-	_countries->setPalette(colors, firstcolor, ncolors);
-	_markers->setPalette(colors, firstcolor, ncolors);
-	_mkXcomBase->setPalette(colors, firstcolor, ncolors);
-	_mkAlienBase->setPalette(colors, firstcolor, ncolors);
-	_mkCraft->setPalette(colors, firstcolor, ncolors);
-	_mkWaypoint->setPalette(colors, firstcolor, ncolors);
-	_mkCity->setPalette(colors, firstcolor, ncolors);
-	_mkFlyingUfo->setPalette(colors, firstcolor, ncolors);
-	_mkLandedUfo->setPalette(colors, firstcolor, ncolors);
-	_mkCrashedUfo->setPalette(colors, firstcolor, ncolors);
-	_mkAlienSite->setPalette(colors, firstcolor, ncolors);
-	_radars->setPalette(colors, firstcolor, ncolors);
+	_countries->setPalette(globeColors);
+	_markers->setPalette(globeColors);
+	_mkXcomBase->setPalette(globeColors);
+	_mkAlienBase->setPalette(globeColors);
+	_mkCraft->setPalette(globeColors);
+	_mkWaypoint->setPalette(globeColors);
+	_mkCity->setPalette(globeColors);
+	_mkFlyingUfo->setPalette(globeColors);
+	_mkLandedUfo->setPalette(globeColors);
+	_mkCrashedUfo->setPalette(globeColors);
+	_mkAlienSite->setPalette(globeColors);
+	_radars->setPalette(globeColors);
 }
 
 /**

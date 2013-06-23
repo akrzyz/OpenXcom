@@ -59,6 +59,10 @@ void RuleTerrain::load(const YAML::Node &node, Ruleset *ruleset)
 		{
 			i.second() >> _name;
 		}
+		else if (key == "apalette")
+		{
+			i.second() >> _paletteName;
+		}
 		else if (key == "mapDataSets")
 		{
 			_mapDataSets.clear();
@@ -66,7 +70,7 @@ void RuleTerrain::load(const YAML::Node &node, Ruleset *ruleset)
 			{
 				std::string name;
 				*j >> name;
-				_mapDataSets.push_back(ruleset->getMapDataSet(name, _folder));
+				_mapDataSets.push_back(ruleset->getMapDataSet(name, _folder, _paletteName));
 			}
 		}
 		else if (key == "mapBlocks")

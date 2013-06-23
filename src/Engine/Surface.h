@@ -41,10 +41,11 @@ protected:
 	SDL_Rect _crop;
 	bool _visible, _hidden, _redraw;
 	SDL_Color *_originalColors;
+	std::string _paletteName;
 	void *_misalignedPixelBuffer, *_alignedBuffer;
 public:
 	/// Creates a new surface with the specified size and position.
-	Surface(int width, int height, int x = 0, int y = 0, int bpp = 8);
+	Surface(int width, int height, int x = 0, int y = 0, int bpp = 8, std::string paletteName = "PALETTES.DAT_");
 	/// Creates a new surface from an existing one.
 	Surface(const Surface& other);
 	/// Cleans up the surface.
@@ -131,6 +132,8 @@ public:
 	void blitNShade(Surface *surface, int x, int y, int off, bool half = false, int newBaseColor = 0);
 	/// Invalidate the surface: force it to be redrawn
 	void invalidate();
+	/// Gets palette's name
+	std::string getPaletteName();
 };
 
 }

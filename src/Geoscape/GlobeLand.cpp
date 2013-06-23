@@ -224,7 +224,7 @@ struct CreateShadow
  * @param y Y position in pixels.
  */
 GlobeLand::GlobeLand(Game *game, int cenX, int cenY, int width, int height, std::vector<double> radius, int x, int y):
-	InteractiveSurface(width, height, x, y, 8),
+	InteractiveSurface(width, height, x, y, 8, "PALETTES.DAT_0"),
 	 _game(game)
 {
 	_texture = new SurfaceSet(*_game->getResourcePack()->getSurfaceSet("TEXTURE.DAT"));

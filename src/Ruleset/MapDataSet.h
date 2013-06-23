@@ -40,14 +40,14 @@ class ResourcePack;
 class MapDataSet
 {
 private:
-	std::string _name, _dataFolder;
+	std::string _name, _dataFolder, _paletteName;
 	std::vector<MapData*> _objects;
 	SurfaceSet *_surfaceSet;
 	bool _loaded;
 	static MapData *_blankTile;
 	static MapData *_scorchedTile;
 public:
-	MapDataSet(const std::string &name, const std::string &dataFolder);
+	MapDataSet(const std::string &name, const std::string &dataFolder, const std::string &paletteName = "PALETTES.DAT_");
 	~MapDataSet();
 	/// Loads the map data set from YAML.
 	void load(const YAML::Node& node);
@@ -66,9 +66,11 @@ public:
 	/// Get surfaces in this dataset.
 	SurfaceSet *getSurfaceset() const;
 	/// Load the objects from an MCD file.
-	void loadData();
+	void loadData(SDL_Color *palette);
 	///	Unload to free memory.
 	void unloadData();
+
+	std::string getPaletteName() const;
 	///
 	static MapData *getBlankFloorTile();
 	static MapData *getScorchedEarthTile();

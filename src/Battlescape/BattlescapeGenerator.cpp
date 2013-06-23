@@ -35,6 +35,8 @@
 #include "../Savegame/Node.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Exception.h"
+#include "../Engine/Palette.h"
+#include "../Engine/SurfaceSet.h"
 #include "../Ruleset/MapBlock.h"
 #include "../Ruleset/MapDataSet.h"
 #include "../Ruleset/RuleUfo.h"
@@ -57,6 +59,7 @@
 #include "../Savegame/TerrorSite.h"
 #include "../Savegame/AlienBase.h"
 #include "../Savegame/EquipmentLayoutItem.h"
+#include "../Resource/ResourcePack.h"
 #include "PatrolBAIState.h"
 #include "Pathfinding.h"
 
@@ -1279,7 +1282,7 @@ void BattlescapeGenerator::generateMap()
 
 	for (std::vector<MapDataSet*>::iterator i = _terrain->getMapDataSets()->begin(); i != _terrain->getMapDataSets()->end(); ++i)
 	{
-		(*i)->loadData();
+		(*i)->loadData(_res->getPalette((*i)->getPaletteName())->getColors());
 		if (_game->getRuleset()->getMCDPatch((*i)->getName()))
 		{
 			_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
@@ -1421,7 +1424,7 @@ void BattlescapeGenerator::generateMap()
 	{
 		for (std::vector<MapDataSet*>::iterator i = _ufo->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _ufo->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
-			(*i)->loadData();
+			(*i)->loadData(_res->getPalette((*i)->getPaletteName())->getColors());
 			if (_game->getRuleset()->getMCDPatch((*i)->getName()))
 			{
 				_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
@@ -1444,7 +1447,7 @@ void BattlescapeGenerator::generateMap()
 	{
 		for (std::vector<MapDataSet*>::iterator i = _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
-			(*i)->loadData();
+			(*i)->loadData(_res->getPalette((*i)->getPaletteName())->getColors());
 			if (_game->getRuleset()->getMCDPatch((*i)->getName()))
 			{
 				_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);

@@ -50,7 +50,7 @@ namespace OpenXcom
  * @param y Y position in pixels.
  * @param bpp Bits-per-pixel depth.
  */
-Surface::Surface(int width, int height, int x, int y, int bpp) : _x(x), _y(y), _visible(true), _hidden(false), _redraw(false), _originalColors(0), _misalignedPixelBuffer(0), _alignedBuffer(0)
+Surface::Surface(int width, int height, int x, int y, int bpp, std::string paletteName) : _x(x), _y(y), _visible(true), _hidden(false), _redraw(false), _originalColors(0), _paletteName(paletteName), _misalignedPixelBuffer(0), _alignedBuffer(0)
 {
 	//_surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 8, 0, 0, 0, 0);
 	int pitch = (bpp/8) * ((width+15)& ~0xF);
@@ -637,7 +637,14 @@ void Surface::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 	if (_surface->format->BitsPerPixel != 32)
 		SDL_SetColors(_surface, colors, firstcolor, ncolors);
 	else
-		_originalColors = colors;
+	{
+		for (int i = 0; i < ncolors; ++i)
+		{
+			_originalColors[i + firstcolor].r = colors[i].r;
+			_originalColors[i + firstcolor].g = colors[i].g;
+			_originalColors[i + firstcolor].b = colors[i].b;
+		}
+	}
 }
 
 /**
@@ -914,4 +921,13 @@ void Surface::invalidate()
 {
 	_redraw = true;
 }
+
+/**
+ * Gets palette's name
+ */
+std::string Surface::getPaletteName()
+{
+	return _paletteName;
+}
+
 }
