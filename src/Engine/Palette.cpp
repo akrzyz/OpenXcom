@@ -26,7 +26,7 @@ namespace OpenXcom
 /**
  * Initializes a brand new palette.
  */
-Palette::Palette() : _colors(0)
+Palette::Palette(SDL_Color *colors) : _colors(colors)
 {
 }
 
@@ -84,6 +84,21 @@ void Palette::loadDat(const std::string &filename, int ncolors, int offset)
 SDL_Color *Palette::getColors(int offset) const
 {
 	return _colors + offset;
+}
+
+/**
+ * Sets the palette colors (used for TFTD tactical palettes).
+ * @param colors Pointer to the set of colors.
+ */
+void Palette::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+{
+	_colors = new SDL_Color[ncolors];
+	for (int i = 0; i < ncolors; ++i)
+	{
+		_colors[i + firstcolor].r = colors[i].r;
+		_colors[i + firstcolor].g = colors[i].g;
+		_colors[i + firstcolor].b = colors[i].b;
+	}
 }
 
 /**

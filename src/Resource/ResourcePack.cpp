@@ -511,7 +511,7 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 				s2 << gameFolder << "GEOGRAPH/" << tab;
 				_sets[sets[i]] = new SurfaceSet(32, 40);
 				_sets[sets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-				_sets[sets[i]]->setPalette(_palettes["PALETTES.DAT_0"]->getColors());
+				_sets[sets[i]]->setPalette(_palettes["PALETTES.DAT_1"]->getColors());
 			}
 			else
 			{
@@ -801,7 +801,7 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 	else if (game == "xcom2")
 	{
 		// Load TFTD palettes
-		for (int i = 0; i < 5; ++i)
+		for (int i = 0; i < 3; ++i)
 		{
 			std::stringstream s1, s2;
 			s1 << gameFolder << "GEODATA/PALETTES.DAT";
@@ -809,6 +809,17 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 			_palettes["TFTD_" + s2.str()] = new Palette();
 			_palettes["TFTD_" + s2.str()]->loadDat(CrossPlatform::getDataFile(s1.str()), 256, Palette::palOffset(i));
 		}
+		Surface *helper = new Surface(320, 200);
+		for (int i = 3; i < 7; ++i)
+		{
+			std::stringstream s1, s2;
+			s1 << gameFolder << "UFOGRAPH/D" << i - 3 << ".LBM";
+			s2 << "PALETTES.DAT_" << i;
+			helper->loadImage(CrossPlatform::getDataFile(s1.str()));
+			_palettes["TFTD_" + s2.str()] = new Palette();
+			_palettes["TFTD_" + s2.str()]->setPalette(helper->getPalette());
+		}
+		delete helper;
 
 		std::stringstream s1, s2;
 		s1 << gameFolder << "GEODATA/BACKPALS.DAT";
