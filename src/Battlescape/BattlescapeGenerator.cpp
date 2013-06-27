@@ -70,7 +70,7 @@ namespace OpenXcom
  * Sets up a BattlescapeGenerator.
  * @param game pointer to Game object.
  */
-BattlescapeGenerator::BattlescapeGenerator(Game *game) : _game(game), _save(game->getSavedGame()->getBattleGame()), _res(_game->getResourcePack()), _craft(0), _ufo(0), _base(0), _terror(0), _terrain(0),
+BattlescapeGenerator::BattlescapeGenerator(Game *game) : _game(game), _save(game->getSavedGame()->getSavedBattle()), _res(_game->getResourcePack()), _craft(0), _ufo(0), _base(0), _terror(0), _terrain(0),
 														 _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0), _unitSequence(0), _craftInventoryTile(0), _alienRace(""), _alienItemLevel(0)
 {
 }
@@ -171,28 +171,25 @@ void BattlescapeGenerator::setTerrorSite(TerrorSite *terror)
  */
 void BattlescapeGenerator::nextStage()
 {
-	// if you didn't win by killing everything.
-	if (_game->getSavedGame()->getBattleGame()->isAborted())
+	// kill all enemy units, or those not in endpoint area (if aborted)
+	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 	{
-		// kill all units not in endpoint area
-		for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
+		if ((_game->getSavedGame()->getSavedBattle()->isAborted() && !(*j)->isInExitArea(END_POINT))
+			|| (*j)->getOriginalFaction() == FACTION_HOSTILE)
 		{
-			if (!(*j)->isInExitArea(END_POINT) || (*j)->getOriginalFaction() == FACTION_HOSTILE)
-			{
-				(*j)->instaKill();
-			}
-			if ((*j)->getTile())
-			{
-				(*j)->getTile()->setUnit(0);
-			}
-			(*j)->setTile(0);
-			(*j)->setPosition(Position(-1,-1,-1), false);
+			(*j)->instaKill();
 		}
+		if ((*j)->getTile())
+		{
+			(*j)->getTile()->setUnit(0);
+		}
+		(*j)->setTile(0);
+		(*j)->setPosition(Position(-1,-1,-1), false);
 	}
 	
-	while (_game->getSavedGame()->getBattleGame()->getSide() != FACTION_PLAYER)
+	while (_game->getSavedGame()->getSavedBattle()->getSide() != FACTION_PLAYER)
 	{
-		_game->getSavedGame()->getBattleGame()->endTurn();
+		_game->getSavedGame()->getSavedBattle()->endTurn();
 	}
 	_save->resetTurnCounter();
 
@@ -207,10 +204,11 @@ void BattlescapeGenerator::nextStage()
 	bool selectedFirstSoldier = false;
 	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
 	{
-		if ((*j)->getFaction() == FACTION_PLAYER)
+		if ((*j)->getOriginalFaction() == FACTION_PLAYER)
 		{
 			if (!(*j)->isOut())
 			{
+				(*j)->convertToFaction(FACTION_PLAYER);
 				(*j)->setTurnsExposed(0);
 				if (!selectedFirstSoldier && (*j)->getGeoscapeSoldier())
 				{
@@ -262,15 +260,11 @@ void BattlescapeGenerator::nextStage()
 			_save->getTiles()[i]->getMapData(MapData::O_OBJECT))))
 				_save->getTiles()[i]->setDiscovered(true, 2);
 	}
-	for (std::vector<BattleUnit*>::iterator j = _save->getUnits()->begin(); j != _save->getUnits()->end(); ++j)
-	{
-		if (!(*j)->isOut())
-			_save->getTileEngine()->calculateFOV((*j));
-	}
 	_save->setGlobalShade(_worldShade);
 	_save->getTileEngine()->calculateSunShading();
 	_save->getTileEngine()->calculateTerrainLighting();
 	_save->getTileEngine()->calculateUnitLighting();
+	_save->getTileEngine()->recalculateFOV();
 }
 
 /**
@@ -474,6 +468,7 @@ void BattlescapeGenerator::run()
 	_save->getTileEngine()->calculateSunShading();
 	_save->getTileEngine()->calculateTerrainLighting();
 	_save->getTileEngine()->calculateUnitLighting();
+	_save->getTileEngine()->recalculateFOV();
 }
 
 /**
@@ -595,16 +590,8 @@ void BattlescapeGenerator::deployAliens(AlienRace *race, AlienDeployment *deploy
 			BattleUnit *unit = addAlien(rule, (*d).alienRank, outside);
 			if (unit)
 			{
-				for (std::vector<std::string>::iterator it = (*d).itemSets.at(_alienItemLevel).items.begin(); it != (*d).itemSets.at(_alienItemLevel).items.end(); ++it)
-				{
-					RuleItem *ruleItem = _game->getRuleset()->getItem((*it));
-					if (ruleItem)
-					{
-						addItem(ruleItem, unit);
-					}
-				}
 				// terrorist alien's equipment is a special case - they are fitted with a weapon which is the alien's name with suffix _WEAPON
-				if ((*d).alienRank == AR_TERRORIST || (*d).alienRank == AR_TERRORIST2)
+				if (rule->isLivingWeapon())
 				{
 					std::string terroristWeapon = rule->getRace().substr(4);
 					terroristWeapon += "_WEAPON";
@@ -612,6 +599,17 @@ void BattlescapeGenerator::deployAliens(AlienRace *race, AlienDeployment *deploy
 					if (ruleItem)
 					{
 						addItem(ruleItem, unit);
+					}
+				}
+				else
+				{
+					for (std::vector<std::string>::iterator it = (*d).itemSets.at(_alienItemLevel).items.begin(); it != (*d).itemSets.at(_alienItemLevel).items.end(); ++it)
+					{
+						RuleItem *ruleItem = _game->getRuleset()->getItem((*it));
+						if (ruleItem)
+						{
+							addItem(ruleItem, unit);
+						}
 					}
 				}
 			}
@@ -648,10 +646,10 @@ BattleUnit *BattlescapeGenerator::addAlien(Unit *rules, int alienRank, bool outs
 	if (node)
 	{
 		_save->setUnitPosition(unit, node->getPosition());
-		unit->setAIState(new PatrolBAIState(_game->getSavedGame()->getBattleGame(), unit, node));
+		unit->setAIState(new PatrolBAIState(_game->getSavedGame()->getSavedBattle(), unit, node));
 		unit->setRankInt(alienRank);
 		int dir = _save->getTileEngine()->faceWindow(node->getPosition());
-		Position craft = _game->getSavedGame()->getBattleGame()->getUnits()->at(0)->getPosition();
+		Position craft = _game->getSavedGame()->getSavedBattle()->getUnits()->at(0)->getPosition();
 		if (_save->getTileEngine()->distance(node->getPosition(), craft) <= 20 && RNG::generate(0,100) < 20 * difficulty)
 			dir = unit->getDirectionTo(craft);
 		if (dir != -1)
@@ -690,7 +688,7 @@ BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
 	if (node)
 	{
 		_save->setUnitPosition(unit, node->getPosition());
-		unit->setAIState(new PatrolBAIState(_game->getSavedGame()->getBattleGame(), unit, node));
+		unit->setAIState(new PatrolBAIState(_game->getSavedGame()->getSavedBattle(), unit, node));
 		unit->setDirection(RNG::generate(0,7));
 		
 		// we only add a unit if it has a node to spawn on.
@@ -699,7 +697,7 @@ BattleUnit *BattlescapeGenerator::addCivilian(Unit *rules)
 	}
 	else if (placeUnitNearFriend(unit))
 	{
-		unit->setAIState(new PatrolBAIState(_game->getSavedGame()->getBattleGame(), unit, node));
+		unit->setAIState(new PatrolBAIState(_game->getSavedGame()->getSavedBattle(), unit, node));
 		unit->setDirection(RNG::generate(0,7));
 		_save->getUnits()->push_back(unit);
 	}

@@ -27,7 +27,6 @@
 #include "Pathfinding.h"
 #include "TileEngine.h"
 #include "Projectile.h"
-#include "BulletSprite.h"
 #include "Explosion.h"
 #include "BattlescapeState.h"
 #include "../Resource/ResourcePack.h"
@@ -89,7 +88,7 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) 
 	_mapUfoPalette = new MapPaletted(game, width, height, x, y, visibleMapHeight);
 	_spriteWidth = _res->getSurfaceSet("BLANKS.PCK")->getFrame(0)->getWidth();
 	_spriteHeight = _res->getSurfaceSet("BLANKS.PCK")->getFrame(0)->getHeight();
-	_save = _game->getSavedGame()->getBattleGame();
+	_save = _game->getSavedGame()->getSavedBattle();
 	_message = new BattlescapeMessage(width, visibleMapHeight, 0, 0);
 	_camera = new Camera(_spriteWidth, _spriteHeight, _save->getMapSizeX(), _save->getMapSizeY(), _save->getMapSizeZ(), this, visibleMapHeight);
 	_scrollMouseTimer = new Timer(SCROLL_INTERVAL);
@@ -110,11 +109,6 @@ Map::~Map()
 	delete _arrow;
 	delete _message;
 	delete _camera;
-
-	for (int i = 0; i < BULLET_SPRITES; ++i)
-	{
-		delete _bullet[i];
-	}
 }
 
 /**
@@ -142,12 +136,6 @@ void Map::init()
 		for (int x = 0; x < 9; ++x)
 			_arrow->setPixel(x, y, pixels[x+(y*9)]);
 	_arrow->unlock();
-
-	for (int i = 0; i < BULLET_SPRITES; ++i)
-	{
-		_bullet[i] = new BulletSprite(i);
-		_bullet[i]->setPalette(_mapUfoPalette->getPalette());
-	}
 
 	_projectile = 0;
 }
@@ -240,12 +228,10 @@ void Map::drawTerrain()
 	NumberText *_numWaypid = 0;
 	
 	// if we got bullet, get the highest x and y tiles to draw it on
-	if (_projectile /* && !_projectile->getItem()*/) //thrown items also need to be sen by level
+	if (_projectile)
 	{
-		int part = _projectile->getParticle(0);
-		if (part == 0)
-			part = 1;
-		for (int i = 1; i <= part; ++i)
+		int part = _projectile->getItem() ? 0 : BULLET_SPRITES-1;
+		for (int i = 0; i <= part; ++i)
 		{
 			if (_projectile->getPosition(1-i).x < bulletLowX)
 				bulletLowX = _projectile->getPosition(1-i).x;
@@ -504,9 +490,10 @@ void Map::drawTerrain()
 							// draw bullet on the correct tile
 							if (itX >= bulletLowX && itX <= bulletHighX && itY >= bulletLowY && itY <= bulletHighY)
 							{
-								for (int i = 1; i <= _projectile->getParticle(0); ++i)
+								for (int i = 0; i < BULLET_SPRITES; ++i)
 								{
-									if (_projectile->getParticle(i) != 0xFF)
+									tmpSurface = _res->getSurfaceSet("Projectiles")->getFrame(_projectile->getParticle(i));
+									if (tmpSurface)
 									{
 										Position voxelPos = _projectile->getPosition(1-i);
 										// draw shadow on the floor
@@ -517,8 +504,11 @@ void Map::drawTerrain()
 											_save->getTileEngine()->isVoxelVisible(voxelPos))
 										{
 											_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
-											_bullet[_projectile->getParticle(i)]->blitNShade(_mapUfoPalette, bulletPositionScreen.x, bulletPositionScreen.y, 16);
+											bulletPositionScreen.x -= tmpSurface->getWidth() / 2;
+											bulletPositionScreen.y -= tmpSurface->getHeight() / 2;
+											tmpSurface->blitNShade(_mapUfoPalette, bulletPositionScreen.x, bulletPositionScreen.y, 16);
 										}
+										
 										// draw bullet itself
 										voxelPos = _projectile->getPosition(1-i);
 										if (voxelPos.x / 16 == itX &&
@@ -527,9 +517,10 @@ void Map::drawTerrain()
 											_save->getTileEngine()->isVoxelVisible(voxelPos))
 										{
 											_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
-											_bullet[_projectile->getParticle(i)]->blitNShade(_mapUfoPalette, bulletPositionScreen.x, bulletPositionScreen.y, 0);
+											bulletPositionScreen.x -= tmpSurface->getWidth() / 2;
+											bulletPositionScreen.y -= tmpSurface->getHeight() / 2;
+											tmpSurface->blitNShade(_mapUfoPalette, bulletPositionScreen.x, bulletPositionScreen.y, 0);
 										}
-
 									}
 								}
 							}
@@ -592,23 +583,13 @@ void Map::drawTerrain()
 					
 
 					// Draw smoke/fire
-					if (tile->getFire() && tile->isDiscovered(2))
-					{
-						frameNumber = 0; // see http://www.ufopaedia.org/images/c/cb/Smoke.gif
-						if ((_animFrame / 2) + tile->getAnimationOffset() > 3)
-						{
-							frameNumber += ((_animFrame / 2) + tile->getAnimationOffset() - 4);
-						}
-						else
-						{
-							frameNumber += (_animFrame / 2) + tile->getAnimationOffset();
-						}
-						tmpSurface = _res->getSurfaceSet("SMOKE.PCK")->getFrame(frameNumber);
-						tmpSurface->blitNShade(_mapUfoPalette, screenPosition.x, screenPosition.y, 0);
-					}
 					if (tile->getSmoke() && tile->isDiscovered(2))
 					{
-						frameNumber = 8 + int(floor((tile->getSmoke() / 6.0) - 0.1)); // see http://www.ufopaedia.org/images/c/cb/Smoke.gif
+						frameNumber = 0;
+						if (!tile->getFire())
+						{
+							frameNumber = 8 + int(floor((tile->getSmoke() / 6.0) - 0.1)); // see http://www.ufopaedia.org/images/c/cb/Smoke.gif
+						}
 
 						if ((_animFrame / 2) + tile->getAnimationOffset() > 3)
 						{

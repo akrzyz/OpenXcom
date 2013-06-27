@@ -224,6 +224,7 @@ void AggroBAIState::think(BattleAction *action)
 
 	if (takeCoverAssessment(action))
 	{
+		_unit->_hidingForTurn = true;
 		_aggroTarget = 0;
 		if (_traceAI) { Log(LOG_INFO) << "changed my mind, TAKING COVER!"; }
 		_coverCharge = 0;
@@ -233,7 +234,7 @@ void AggroBAIState::think(BattleAction *action)
 	{
 		grenadeAction(action);
 	}
-
+	action->TU = action->actor->getActionTUs(action->type, action->weapon);
 	if (_aggroTarget != 0) { setAggroTarget(_aggroTarget); }
 	else if (_lastKnownTarget) { stalkingAction(action); }
 }
@@ -288,7 +289,7 @@ bool AggroBAIState::explosiveEfficacy(Position targetPos, BattleUnit *attackingU
 		{
 			Position voxelPosA = Position ((targetPos.x * 16)+8, (targetPos.y * 16)+8, (targetPos.z * 24)+12);
 			Position voxelPosB = Position (((*i)->getPosition().x * 16)+8, ((*i)->getPosition().y * 16)+8, ((*i)->getPosition().z * 24)+12);
-			int collidesWith = _game->getTileEngine()->calculateLine(voxelPosA, voxelPosB, false, 0, target, true);
+			int collidesWith = _game->getTileEngine()->calculateLine(voxelPosA, voxelPosB, false, 0, target, true, false, *i);
 			if (collidesWith == 4)
 			{
 				if ((*i)->getFaction() != attackingUnit->getFaction())
@@ -344,7 +345,7 @@ void AggroBAIState::meleeAction(BattleAction *action)
 	}
 	if (_aggroTarget != 0)
 	{
-		if (_game->getTileEngine()->validMeleeRange(_unit, _aggroTarget, -1))
+		if (_game->getTileEngine()->validMeleeRange(_unit, _aggroTarget, _unit->getDirectionTo(_aggroTarget->getPosition())))
 		{
 			meleeAttack(action);
 		}
@@ -594,7 +595,6 @@ void AggroBAIState::takeCoverAction(BattleAction *action)
 	int unitsSpottingMe =_game->getSpottingUnits(action->actor);
 	action->type = BA_WALK;
 	int currentTilePreference = _unit->_hidingForTurn ? action->number * 5 : 0;
-	_unit->_hidingForTurn = true;
 	int tries = -1;
 	bool coverFound = false;
 	int dx = _unit->getPosition().x - _aggroTarget->getPosition().x; // 2d vector in the direction away from the aggro target
@@ -851,7 +851,7 @@ bool AggroBAIState::takeCoverAssessment(BattleAction *action)
 	int unitsSpottingMe = _game->getSpottingUnits(_unit);
 	int aggression = _unit->getAggression();
 
-	if (_charge)
+	if (_charge || !_aggroTarget)
 		return false;
 
 	// extra 5% chance per unit that sees us
@@ -932,7 +932,9 @@ bool AggroBAIState::selectPointNearTarget(BattleAction *action, BattleUnit *targ
 			if (x || y) // skip the unit itself
 			{
 				Position checkPath = target->getPosition() + Position (x, y, 0);
-				bool valid = _game->getTileEngine()->validMeleeRange(checkPath, -1, action->actor->getArmor()->getSize(), target);
+				int dir;
+				Pathfinding::vectorToDirection(target->getPosition() - checkPath, dir);
+				bool valid = _game->getTileEngine()->validMeleeRange(checkPath, dir, action->actor, target);
 				bool fitHere = _game->setUnitPosition(action->actor, checkPath, true);
 								
 				if (valid && fitHere)

@@ -31,7 +31,7 @@ private:
 	std::string _folder;
 	int _width, _height;
 	bool _singleImage;
-	int _modIndex;
+	int _modIndex, _subX, _subY;
 public:
 	/// Creates a blank external sprite set.
 	ExtraSprites(const std::string &folder);
@@ -42,15 +42,18 @@ public:
 	/// Gets the list of sprites defined by this mod
 	std::map<int, std::string> *getSprites();
 	/// get the width of the surfaces (used for single images and new spritesets)
-	int getWidth();
+	const int getWidth() const;
 	/// get the height of the surfaces (used for single images and new spritesets)
-	int getHeight();
+	const int getHeight() const;
 	/// is this a single surface, or a set of surfaces?
-	bool getSingleImage();
+	const bool getSingleImage() const;
 	/// Gets main directory with data for this external sprite set.
 	std::string getFolder();
 	/// get the mod index for this external sprite set.
-	int getModIndex();
+	const int getModIndex() const;
+	const int getSubX() const;
+	const int getSubY() const;
+
 };
 
 }
