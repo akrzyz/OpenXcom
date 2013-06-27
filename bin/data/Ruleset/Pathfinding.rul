@@ -4,3 +4,10 @@ extraSprites:
     height: 80
     files:
       0: Resources/Pathfinding/
+  - type: Projectiles
+    width: 105
+    height: 33
+    subX: 3
+    subY: 3
+    files:
+      0: Resources/BulletSprites/BulletSprites.png
