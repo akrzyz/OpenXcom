@@ -1065,7 +1065,7 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 			{
 				_sets["TFTD_" + sets[i]] = new SurfaceSet(32, 32);
 				_sets["TFTD_" + sets[i]]->loadDat(CrossPlatform::getDataFile(s.str()));
-				_sets["TFTD_" + sets[i]]->setPalette(_palettes["PALETTES.DAT_0"]->getColors());
+				_sets["TFTD_" + sets[i]]->setPalette(_palettes["TFTD_PALETTES.DAT_0"]->getColors());
 			}
 		}
 		_sets["TFTD_SCANG.DAT"] = new SurfaceSet(4, 4);

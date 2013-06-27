@@ -27,6 +27,7 @@ namespace OpenXcom
 {
 
 class ResourcePack;
+class MapPaletted;
 class SavedBattleGame;
 class Surface;
 class MapData;
@@ -50,6 +51,7 @@ class Map : public InteractiveSurface
 private:
 	static const int SCROLL_INTERVAL = 20;
 	static const int BULLET_SPRITES = 37;
+	MapPaletted *_mapUfoPalette;
 	Timer *_scrollMouseTimer, *_scrollKeyTimer;
 	Game *_game;
 	SavedBattleGame *_save;
@@ -70,14 +72,14 @@ private:
 	BattlescapeMessage *_message;
 	Camera *_camera;
 	int _visibleMapHeight;
-	void drawTerrain(Surface *surface);
+	void drawTerrain();
 	int getTerrainLevel(Position pos, int size);
 	std::vector<Position> _waypoints;
 	bool _unitDying;
 	int _previewSetting;
 public:
 	/// Creates a new map at the specified position and size.
-	Map(Game *game, int width, int height, int x, int y, int visibleMapHeight, int bpp);
+	Map(Game *game, int width, int height, int x, int y, int visibleMapHeight);
 	/// Cleans up the map.
 	~Map();
 	/// sets stuff up
