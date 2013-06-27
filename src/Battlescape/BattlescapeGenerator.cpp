@@ -1025,6 +1025,8 @@ void BattlescapeGenerator::generateMap()
 	int mapDataSetIDOffset = 0;
 	int craftDataSetIDOffset = 0;
 
+	std::string paletteName;
+
 	blocks.resize((_mapsize_x / 10), std::vector<MapBlock*>((_mapsize_y / 10)));
 	landingzone.resize((_mapsize_x / 10), std::vector<bool>((_mapsize_y / 10),false));
 	segments.resize((_mapsize_x / 10), std::vector<int>((_mapsize_y / 10),0));
@@ -1280,7 +1282,11 @@ void BattlescapeGenerator::generateMap()
 
 	for (std::vector<MapDataSet*>::iterator i = _terrain->getMapDataSets()->begin(); i != _terrain->getMapDataSets()->end(); ++i)
 	{
-		(*i)->loadData(_res->getPalette((*i)->getPaletteName())->getColors());
+		if ((*i)->getGame() == "xcom2")
+			paletteName = "TFTD_PALETTES.DAT_4";
+		else
+			paletteName = "PALETTES.DAT_4";
+		(*i)->loadData(_res->getPalette(paletteName)->getColors());
 		if (_game->getRuleset()->getMCDPatch((*i)->getName()))
 		{
 			_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
@@ -1422,7 +1428,11 @@ void BattlescapeGenerator::generateMap()
 	{
 		for (std::vector<MapDataSet*>::iterator i = _ufo->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _ufo->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
-			(*i)->loadData(_res->getPalette((*i)->getPaletteName())->getColors());
+			if ((*i)->getGame() == "xcom2")
+				paletteName = "TFTD_PALETTES.DAT_4";
+			else
+				paletteName = "PALETTES.DAT_4";
+			(*i)->loadData(_res->getPalette(paletteName)->getColors());
 			if (_game->getRuleset()->getMCDPatch((*i)->getName()))
 			{
 				_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
@@ -1445,7 +1455,11 @@ void BattlescapeGenerator::generateMap()
 	{
 		for (std::vector<MapDataSet*>::iterator i = _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
-			(*i)->loadData(_res->getPalette((*i)->getPaletteName())->getColors());
+			if ((*i)->getGame() == "xcom2")
+				paletteName = "TFTD_PALETTES.DAT_4";
+			else
+				paletteName = "PALETTES.DAT_4";
+			(*i)->loadData(_res->getPalette(paletteName)->getColors());
 			if (_game->getRuleset()->getMCDPatch((*i)->getName()))
 			{
 				_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);

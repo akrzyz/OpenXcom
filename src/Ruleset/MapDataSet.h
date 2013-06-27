@@ -40,14 +40,14 @@ class ResourcePack;
 class MapDataSet
 {
 private:
-	std::string _name, _dataFolder, _paletteName;
+	std::string _name, _dataFolder, _game;
 	std::vector<MapData*> _objects;
 	SurfaceSet *_surfaceSet;
 	bool _loaded;
 	static MapData *_blankTile;
 	static MapData *_scorchedTile;
 public:
-	MapDataSet(const std::string &name, const std::string &dataFolder, const std::string &paletteName = "PALETTES.DAT_");
+	MapDataSet(const std::string &name, const std::string &dataFolder, const std::string &game = "xcom1");
 	~MapDataSet();
 	/// Loads the map data set from YAML.
 	void load(const YAML::Node& node);
@@ -70,7 +70,7 @@ public:
 	///	Unload to free memory.
 	void unloadData();
 
-	std::string getPaletteName() const;
+	std::string getGame() const;
 	///
 	static MapData *getBlankFloorTile();
 	static MapData *getScorchedEarthTile();

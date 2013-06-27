@@ -320,10 +320,15 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
  */
 void SavedBattleGame::loadMapResources(Game *game)
 {
+	std::string paletteName;
 	ResourcePack *res = game->getResourcePack();
 	for (std::vector<MapDataSet*>::const_iterator i = _mapDataSets.begin(); i != _mapDataSets.end(); ++i)
 	{
-		(*i)->loadData(game->getResourcePack()->getPalette((*i)->getPaletteName())->getColors());
+		if ((*i)->getGame() == "xcom2")
+			paletteName = "TFTD_PALETTES.DAT_4";
+		else
+			paletteName = "PALETTES.DAT_4";
+		(*i)->loadData(game->getResourcePack()->getPalette(paletteName)->getColors());
 		if (game->getRuleset()->getMCDPatch((*i)->getName()))
 		{
 			game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);

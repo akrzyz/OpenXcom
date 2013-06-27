@@ -25,7 +25,6 @@
 #include "Pathfinding.h"
 #include "TileEngine.h"
 #include "Projectile.h"
-#include "BulletSprite.h"
 #include "Explosion.h"
 #include "BattlescapeState.h"
 #include "../Resource/ResourcePack.h"
@@ -82,7 +81,7 @@ MapPaletted::MapPaletted(Game *game, int width, int height, int x, int y, int vi
 		_previewSetting = 3;
 	}
 	_res = _game->getResourcePack();
-	_save = _game->getSavedGame()->getBattleGame();
+	_save = _game->getSavedGame()->getSavedBattle();
 }
 
 /**
@@ -90,10 +89,6 @@ MapPaletted::MapPaletted(Game *game, int width, int height, int x, int y, int vi
  */
 MapPaletted::~MapPaletted()
 {
-	for (int i = 0; i < BULLET_SPRITES; ++i)
-	{
-		delete _bullet[i];
-	}
 }
 
 /**

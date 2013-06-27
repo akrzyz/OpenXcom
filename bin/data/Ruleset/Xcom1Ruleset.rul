@@ -1067,7 +1067,6 @@ crafts:
     score: 200
     battlescapeTerrainData:
       name: PLANE
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - PLANE
@@ -1109,7 +1108,6 @@ crafts:
     score: 300
     battlescapeTerrainData:
       name: LIGHTNIN
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - LIGHTNIN
@@ -1132,7 +1130,6 @@ crafts:
     spacecraft: true
     battlescapeTerrainData:
       name: AVENGER
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - AVENGER
@@ -2863,7 +2860,6 @@ ufos:
     breakOffTime: 200
     battlescapeTerrainData:
       name: UFO1A
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - UFO1
@@ -2884,7 +2880,6 @@ ufos:
     breakOffTime: 250
     battlescapeTerrainData:
       name: UFO_110
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - U_EXT02
@@ -2907,7 +2902,6 @@ ufos:
     breakOffTime: 300
     battlescapeTerrainData:
       name: UFO_120
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - U_EXT02
@@ -2930,7 +2924,6 @@ ufos:
     breakOffTime: 500
     battlescapeTerrainData:
       name: UFO_140
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - U_EXT02
@@ -2954,7 +2947,6 @@ ufos:
     breakOffTime: 500
     battlescapeTerrainData:
       name: UFO_130
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - U_EXT02
@@ -2978,7 +2970,6 @@ ufos:
     breakOffTime: 3000
     battlescapeTerrainData:
       name: UFO_170
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - U_EXT02
@@ -3002,7 +2993,6 @@ ufos:
     breakOffTime: 2000
     battlescapeTerrainData:
       name: UFO_150
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - U_EXT02
@@ -3026,7 +3016,6 @@ ufos:
     breakOffTime: 4000
     battlescapeTerrainData:
       name: UFO_160
-      apalette: PALETTES.DAT_4
       mapDataSets:
         - BLANKS
         - U_EXT02
@@ -3180,7 +3169,6 @@ invs:
       STR_RIGHT_LEG: 12
 terrains:
   - name: CULTA
-    apalette: PALETTES.DAT_4
     mapDataSets:
       - BLANKS
       - CULTIVAT
@@ -3270,7 +3258,6 @@ terrains:
         length: 10
         maxCount: 3
   - name: DESERT
-    apalette: PALETTES.DAT_4
     mapDataSets:
       - BLANKS
       - DESERT
@@ -3320,7 +3307,6 @@ terrains:
         width: 20
         length: 20
   - name: FOREST
-    apalette: PALETTES.DAT_4
     mapDataSets:
       - BLANKS
       - FOREST
@@ -3367,7 +3353,6 @@ terrains:
         width: 20
         length: 20
   - name: JUNGLE
-    apalette: PALETTES.DAT_4
     mapDataSets:
       - BLANKS
       - JUNGLE
@@ -3423,7 +3408,6 @@ terrains:
         length: 10
         frequency: 1
   - name: MARS
-    apalette: PALETTES.DAT_4
     mapDataSets:
       - BLANKS
       - MARS
@@ -3466,7 +3450,6 @@ terrains:
         length: 10
         type: 6
   - name: MOUNT
-    apalette: PALETTES.DAT_4
     mapDataSets:
       - BLANKS
       - MOUNT
@@ -3516,7 +3499,6 @@ terrains:
         width: 20
         length: 20
   - name: POLAR
-    apalette: PALETTES.DAT_4
     mapDataSets:
       - BLANKS
       - POLAR
@@ -3572,7 +3554,6 @@ terrains:
         width: 20
         length: 20
   - name: UBASE
-    apalette: PALETTES.DAT_4
     mapDataSets:
       - BLANKS
       - U_BASE
@@ -3634,7 +3615,6 @@ terrains:
         length: 20
         type: 8
   - name: URBAN
-    apalette: PALETTES.DAT_4
     mapDataSets:
       - BLANKS
       - ROADS
@@ -3703,7 +3683,6 @@ terrains:
         length: 10
         frequency: 2
   - name: XBASE
-    apalette: PALETTES.DAT_4
     mapDataSets:
       - BLANKS
       - XBASE1

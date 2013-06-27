@@ -33,7 +33,6 @@ class MapData;
 class Position;
 class Tile;
 class BattleUnit;
-class BulletSprite;
 class Projectile;
 class Explosion;
 
@@ -49,7 +48,6 @@ private:
 	SavedBattleGame *_save;
 	ResourcePack *_res;
 	int _animFrame;
-	BulletSprite *_bullet[BULLET_SPRITES];
 	Projectile *_projectile;
 	bool projectileInFOV;
 	std::set<Explosion *> _explosions;

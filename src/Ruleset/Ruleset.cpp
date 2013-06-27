@@ -204,9 +204,9 @@ void Ruleset::load()
 		{
 			std::string dirname = CrossPlatform::getDataFolder(Options::getOpenxcomFolder(i->first) + "Ruleset/" + j->first + '/');
 			if (!CrossPlatform::folderExists(dirname))
-				loadFile(CrossPlatform::getDataFile(Options::getOpenxcomFolder(i->first) + "Ruleset/" + j->first + ".rul"), CrossPlatform::getDataFolder(j->second));
+				loadFile(CrossPlatform::getDataFile(Options::getOpenxcomFolder(i->first) + "Ruleset/" + j->first + ".rul"), CrossPlatform::getDataFolder(j->second), i->first);
 			else
-				loadFiles(dirname, CrossPlatform::getDataFolder(j->second));
+				loadFiles(dirname, CrossPlatform::getDataFolder(j->second), i->first);
 		}
 	}
 }
@@ -217,7 +217,7 @@ void Ruleset::load()
  * @param folder Directory containing files for this ruleset.
  * @param filename YAML filename.
  */
-void Ruleset::loadFile(const std::string &filename, const std::string &folder)
+void Ruleset::loadFile(const std::string &filename, const std::string &folder, const std::string &game)
 {
 	std::ifstream fin(filename.c_str());
 	if (!fin)
@@ -306,7 +306,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder)
 				}
 				else
 				{
-					rule = new RuleCraft(type, folder);
+					rule = new RuleCraft(type, folder, game);
 					_crafts[type] = rule;
 					_craftsIndex.push_back(type);
 				}
@@ -368,7 +368,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder)
 				}
 				else
 				{
-					rule = new RuleUfo(type, folder);
+					rule = new RuleUfo(type, folder, game);
 					_ufos[type] = rule;
 					_ufosIndex.push_back(type);
 				}
@@ -407,7 +407,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder)
 				}
 				else
 				{
-					rule = new RuleTerrain(type, folder);
+					rule = new RuleTerrain(type, folder, game);
 					_terrains[type] = rule;
 					_terrainIndex.push_back(type);
 				}
@@ -735,13 +735,13 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder)
  * @param auxShortFolder Short name of backup directory containing rule files.
  * @param dirname The name of an existing directory containing rule files.
  */
-void Ruleset::loadFiles(const std::string &dirname, const std::string &shortFolder)
+void Ruleset::loadFiles(const std::string &dirname, const std::string &shortFolder, const std::string &game)
 {
 	std::vector<std::string> names = CrossPlatform::getFolderContents(dirname, "rul");
 
 	for (std::vector<std::string>::iterator i = names.begin(); i != names.end(); ++i)
 	{
-		loadFile(dirname + *i, shortFolder);
+		loadFile(dirname + *i, shortFolder, game);
 	}
 }
 
@@ -1169,12 +1169,12 @@ RuleTerrain *Ruleset::getTerrain(const std::string &name) const
  * @param name datafile name.
  * @return Rules for the datafile.
  */
-MapDataSet *Ruleset::getMapDataSet(const std::string &name, const std::string &dataFolder, const std::string &paletteName)
+MapDataSet *Ruleset::getMapDataSet(const std::string &name, const std::string &dataFolder, const std::string &game)
 {
 	std::map<std::string, MapDataSet*>::iterator map = _mapDataSets.find(name);
 	if (map == _mapDataSets.end())
 	{
-		MapDataSet *set = new MapDataSet(name, dataFolder, paletteName);
+		MapDataSet *set = new MapDataSet(name, dataFolder, game);
 		_mapDataSets[name] = set;
 		return set;
 	}

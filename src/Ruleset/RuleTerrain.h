@@ -43,12 +43,12 @@ class RuleTerrain
 private:
 	std::vector<MapDataSet*> _mapDataSets;
 	std::vector<MapBlock*> _mapBlocks;
-	std::string _name, _folder, _paletteName;
+	std::string _name, _folder, _game;
 	int _largeBlockLimit;
 	std::vector<int> _textures;
 	int _hemisphere;
 public:
-	RuleTerrain(const std::string &name, const std::string &folder);
+	RuleTerrain(const std::string &name, const std::string &folder, const std::string &game);
 	~RuleTerrain();
 	/// Loads the terrain from YAML.
 	void load(const YAML::Node& node, Ruleset *ruleset);

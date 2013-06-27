@@ -35,7 +35,7 @@ MapData *MapDataSet::_scorchedTile = 0;
 /**
 * MapDataSet construction.
 */
-MapDataSet::MapDataSet(const std::string &name, const std::string &dataFolder, const std::string &paletteName) : _name(name), _dataFolder(dataFolder), _paletteName(paletteName), _objects(), _surfaceSet(0), _loaded(false)
+MapDataSet::MapDataSet(const std::string &name, const std::string &dataFolder, const std::string &game) : _name(name), _dataFolder(dataFolder), _game(game), _objects(), _surfaceSet(0), _loaded(false)
 {
 }
 
@@ -301,9 +301,9 @@ void MapDataSet::loadLOFTEMPS(const std::string &filename, std::vector<Uint16> *
 	mapFile.close();
 }
 
-std::string MapDataSet::getPaletteName() const
+std::string MapDataSet::getGame() const
 {
-	return _paletteName;
+	return _game;
 }
 
 MapData *MapDataSet::getBlankFloorTile()

@@ -28,7 +28,7 @@ namespace OpenXcom
  * @param type String defining the type.
  * @param folder Directory containing this UFO data.
  */
-RuleUfo::RuleUfo(const std::string &type, const std::string &folder) : _type(type), _size("STR_VERY_SMALL"), _folder(folder), _sprite(-1), _damageMax(0), _speedMax(0), _accel(0), _power(0), _range(0), _score(0), _reload(0), _breakOffTime(0), _battlescapeTerrainData(0), _modSprite("")
+RuleUfo::RuleUfo(const std::string &type, const std::string &folder, const std::string &game) : _type(type), _size("STR_VERY_SMALL"), _folder(folder), _game(game), _sprite(-1), _damageMax(0), _speedMax(0), _accel(0), _power(0), _range(0), _score(0), _reload(0), _breakOffTime(0), _battlescapeTerrainData(0), _modSprite("")
 {
 }
 
@@ -103,7 +103,7 @@ void RuleUfo::load(const YAML::Node &node, Ruleset *ruleset)
 		{
 			std::string name;
 			i.second()["name"] >> name;
-			RuleTerrain *rule = new RuleTerrain(name, _folder);
+			RuleTerrain *rule = new RuleTerrain(name, _folder, _game);
 			rule->load(i.second(), ruleset);
 			_battlescapeTerrainData = rule;
 		}
