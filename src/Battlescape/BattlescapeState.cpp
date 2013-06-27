@@ -240,7 +240,7 @@ BattlescapeState::BattlescapeState(Game *game) : State(game), _popups()
 
 	// Set up objects
 
-	_save = _game->getSavedGame()->getBattleGame();
+	_save = _game->getSavedGame()->getSavedBattle();
 	_map->init();
 	_map->onMouseOver((ActionHandler)&BattlescapeState::mapOver);
 	_map->onMousePress((ActionHandler)&BattlescapeState::mapPress);
@@ -1604,6 +1604,7 @@ void BattlescapeState::popup(State *state)
  */
 void BattlescapeState::finishBattle(bool abort, int inExitArea)
 {
+	_game->getCursor()->setVisible(true);
 	std::string nextStage = "";
 	if (_save->getMissionType() != "STR_UFO_GROUND_ASSAULT" && _save->getMissionType() != "STR_UFO_CRASH_RECOVERY")
 	{

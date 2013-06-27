@@ -27,6 +27,7 @@
 #include "BattleAIState.h"
 #include "AggroBAIState.h"
 #include "UnitTurnBState.h"
+#include "EndBattleBState.h"
 #include "Map.h"
 #include "Camera.h"
 #include "../Savegame/SavedBattleGame.h"
@@ -558,6 +559,15 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	{
 		return false;
 	}
+
+	// aliens can see in the dark, xcom can see at a distance of 18 or less, 2 further if there's enough light.
+	if (currentUnit->getFaction() == FACTION_PLAYER &&
+		distance(currentUnit->getPosition(), tile->getPosition()) > 18 &&
+		tile->getShade() > MAX_DARKNESS_TO_SEE_UNITS)
+	{
+		return false;
+	}
+
 	if (currentUnit->getFaction() == tile->getUnit()->getFaction()) return true; //friendlies are always seen
 
 	Position originVoxel = getSightOriginVoxel(currentUnit);
@@ -1061,6 +1071,11 @@ bool TileEngine::tryReactionSnap(BattleUnit *unit, BattleUnit *target)
 	action.weapon = unit->getMainHandWeapon();
 	// reaction fire is ALWAYS snap shot.
 	action.type = BA_SNAPSHOT;
+	// unless we're a melee unit.
+	if (action.weapon->getRules()->getBattleType() == BT_MELEE)
+	{
+		action.type = BA_HIT;
+	}
 	action.target = target->getPosition();
 	action.TU = unit->getActionTUs(action.type, action.weapon);
 
@@ -1171,8 +1186,8 @@ BattleUnit *TileEngine::hit(const Position &center, int power, ItemDamageType ty
 	}
 	applyGravity(tile);
 	calculateSunShading(); // roofs could have been destroyed
-	calculateFOV(center);
 	calculateTerrainLighting(); // fires could have been started
+	calculateFOV(center);
 	return bu;
 }
 
@@ -1254,6 +1269,12 @@ void TileEngine::explode(const Position &center, int power, ItemDamageType type,
 					power_ -= (horizontalBlockage(origin, dest, type) + verticalBlockage(origin, dest, type)) * 2;
 					power_ -= 10; // explosive damage decreases by 10 per tile
 					if (origin->getPosition().z != tileZ) power_ -= vertdec; //3d explosion factor
+					if (type == DT_IN)
+					{
+						int dir;
+						Pathfinding::vectorToDirection(origin->getPosition() - dest->getPosition(), dir);
+						if (dir != -1 && dir %2) power_ -= 5; // diagonal movement costs an extra 50% for fire.
+					}
 				}
 
 				if (power_ > 0)
@@ -1316,7 +1337,8 @@ void TileEngine::explode(const Position &center, int power, ItemDamageType type,
 							// smoke from explosions always stay 6 to 14 turns - power of a smoke grenade is 60
 							if (dest->getSmoke() < 10)
 							{
-								dest->addSmoke(RNG::generate(power_/10, 14));
+								dest->setFire(0);
+								dest->setSmoke(RNG::generate(7, 15));
 							}
 						}
 
@@ -1324,7 +1346,8 @@ void TileEngine::explode(const Position &center, int power, ItemDamageType type,
 						{
 							if (dest->getFire() == 0)
 							{
-								dest->ignite();
+								dest->setFire(dest->getFuel() + 1);
+								dest->setSmoke(std::max(1, std::min(15 - (dest->getFlammability() / 10), 12)));
 							}
 							if (dest->getUnit())
 							{
@@ -1369,27 +1392,8 @@ void TileEngine::explode(const Position &center, int power, ItemDamageType type,
 	}
 
 	calculateSunShading(); // roofs could have been destroyed
-	calculateFOV(center);
 	calculateTerrainLighting(); // fires could have been started
-}
-
-/**
- * get the height of an object checking it's voxels at 8,8
- * @return int height
- */
-int TileEngine::getVoxelHeight(MapData *mp)
-{
-	int x = 8;
-	int y = 8;
-	for (int i=0; i < 12; i++)
-	{
-		int idx = (mp->getLoftID(i)*16) + y;
-		if ((_voxelData->at(idx) & (1 << x)) == 0)
-		{
-			return i;
-		}
-	}
-	return 12;
+	calculateFOV(center);
 }
 
 /**
@@ -1412,7 +1416,7 @@ bool TileEngine::detonate(Tile* tile)
 	if (explosive)
 	{
 		// explosions create smoke which only stays 1 or 2 turns
-		tile->addSmoke(RNG::generate(0,2));
+		tile->setSmoke(std::max(1, std::min(tile->getSmoke() + RNG::generate(0,2), 15)));
 		for (int i = 0; i < 7; ++i)
 		{
 			if(tiles[i] && tiles[i]->getMapData(parts[i]))
@@ -1423,18 +1427,34 @@ bool TileEngine::detonate(Tile* tile)
 					remainingPower -= tiles[i]->getMapData(parts[i])->getArmor();
 					if (remainingPower >= 0)
 					{
-						int height = getVoxelHeight(tiles[i]->getMapData(parts[i]));
-						if (i > 3) tiles[i]->addSmoke(RNG::generate((height/2), (height/2)+1)); //only current tile produces smoke[2]
+						int volume = 0;
+						// get the volume of the object by checking it's loftemps objects.
+						for (int j=0; j < 12; j++)
+						{
+							if (tiles[i]->getMapData(parts[i])->getLoftID(j) != 0)
+								++volume;
+						}
+
+						if (i > 3)
+						{
+							tiles[i]->setFire(0);
+							int smoke = RNG::generate(0, (volume / 2) + 2);
+							smoke += (volume / 2) + 1;
+							if (smoke > tiles[i]->getSmoke())
+							{
+								tiles[i]->setSmoke(std::max(0, std::min(smoke, 15)));
+							}
+						}
 						objective = objective || tiles[i]->destroy(parts[i]);
 					}
 				}
 			}
 		}
 
-		int flam = tile->getFlammability();
-		if (explosive > flam)
+		if (2 * tile->getFlammability() < explosive)
 		{
-			tile->ignite();
+			tile->setFire(tile->getFuel() + 1);
+			tile->setSmoke(std::max(1, std::min(15 - (tile->getFlammability() / 10), 12)));
 		}
 	}
 
@@ -1539,7 +1559,8 @@ int TileEngine::horizontalBlockage(Tile *startTile, Tile *endTile, ItemDamageTyp
 	if (startTile == 0 || endTile == 0) return 0;
 	if (startTile->getPosition().z != endTile->getPosition().z) return 0;
 
-	int direction = vectorToDirection(endTile->getPosition() - startTile->getPosition());
+	int direction;
+	Pathfinding::vectorToDirection(endTile->getPosition() - startTile->getPosition(), direction);
 	if (direction == -1) return 0;
 	int block = 0;
 
@@ -1686,9 +1707,10 @@ int TileEngine::blockage(Tile *tile, const int part, ItemDamageType type, int di
 	if (tile->getMapData(part))
 	{
 		bool check = true;
+		int wall = -1;
 		if (direction != -1)
 		{
-			int wall = tile->getMapData(MapData::O_OBJECT)->getBigWall();
+			wall = tile->getMapData(MapData::O_OBJECT)->getBigWall();
 			switch (direction)
 			{
 			case 0: // north
@@ -1761,6 +1783,10 @@ int TileEngine::blockage(Tile *tile, const int part, ItemDamageType type, int di
 
 		if (check)
 		{
+			if (type == DT_SMOKE && check && wall != 0)
+			{
+				return 255;
+			}
 			blockage += tile->getMapData(part)->getBlock(type);
 		}
 	}
@@ -1774,24 +1800,6 @@ int TileEngine::blockage(Tile *tile, const int part, ItemDamageType type, int di
 }
 
 
-
-/*
- * Converts direction to a vector. Direction starts north = 0 and goes clockwise.
- * @param vector pointer to a position (which acts as a vector)
- * @return direction
- */
-int TileEngine::vectorToDirection(const Position &vector)
-{
-	int x[8] = {0, 1, 1, 1, 0, -1, -1, -1};
-	int y[8] = {-1, -1, 0, 1, 1, 1, 0, -1};
-	for (int i = 0; i < 8; ++i)
-	{
-		if (x[i] == vector.x && y[i] == vector.y)
-			return i;
-	}
-	return -1;
-}
-
 /**
  * Soldier opens a door (if any) by rightclick, or by walking through it. The unit has to face in the right direction.
  * @param unit
@@ -1800,7 +1808,7 @@ int TileEngine::vectorToDirection(const Position &vector)
  *		  1 ufo door is starting to open, make a whoosh sound, don't walk through.
  *		  3 ufo door is still opening, don't walk through it yet. (have patience, futuristic technology...)
  */
-int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick)
+int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick, int dir)
 {
 	int door = -1;
 	int TUCost = 0;
@@ -1808,7 +1816,10 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick)
 	int z = unit->getTile()->getTerrainLevel() < -12 ? 1 : 0; // if we're standing on stairs, check the tile above instead.
 	if (size > 1 && rClick)
 		return door;
-
+	if (dir == -1)
+	{
+		dir = unit->getDirection();
+	}
 	for (int x = 0; x < size && door == -1; x++)
 	{
 		for (int y = 0; y < size && door == -1; y++)
@@ -1817,7 +1828,7 @@ int TileEngine::unitOpensDoor(BattleUnit *unit, bool rClick)
 			Tile *tile = _save->getTile(unit->getPosition() + Position(x,y,z));
 			if (!tile) continue;
 
-			switch (unit->getDirection())
+			switch (dir)
 			{
 			case 0: // north
 				checkPositions.push_back(std::make_pair(Position(0, 0, 0), MapData::O_NORTHWALL)); // origin
@@ -2383,7 +2394,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 			calculateFOV(victim);
 			calculateUnitLighting();
 			victim->setTimeUnits(victim->getStats()->tu);
-			victim->lookAt(victim->getDirection()); // resets unit status to STANDING
+			victim->abortTurn(); // resets unit status to STANDING
 			// if all units from either faction are mind controlled - auto-end the mission.
 			if (Options::getBool("battleAutoEnd") && Options::getBool("allowPsionicCapture"))
 			{
@@ -2392,7 +2403,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 				_save->getBattleState()->getBattleGame()->tallyUnits(liveAliens, liveSoldiers, false);
 				if (liveAliens == 0 || liveSoldiers == 0)
 				{
-					_save->getBattleState()->finishBattle(false, liveSoldiers);
+					_save->getBattleState()->getBattleGame()->statePushBack(new EndBattleBState(_save->getBattleState()->getBattleGame(), liveSoldiers, _save->getBattleState()));
 				}
 			}
 		}
@@ -2494,80 +2505,49 @@ Tile *TileEngine::applyGravity(Tile *t)
  * Validate the melee range between two units.
  * @param *unit the attacking unit.
  * @param *target the unit we want to attack.
- * @param dir direction to check, -1 for all.
+ * @param dir direction to check.
  * @return true when range is valid.
  */
-bool TileEngine::validMeleeRange(BattleUnit *unit, BattleUnit *target, int dir)
+bool TileEngine::validMeleeRange(BattleUnit *attacker, BattleUnit *target, int dir)
 {
-	return validMeleeRange(unit->getPosition(), dir, unit->getArmor()->getSize(), target);
+	return validMeleeRange(attacker->getPosition(), dir, attacker, target);
 }
 
 /*
  * Validate the melee range between a tile and a unit.
  * @param pos Position to check from.
- * @param direction direction to check, -1 for all.
+ * @param direction direction to check.
  * @param size for large units, we have to do extra checks.
  * @param *target the unit we want to attack, 0 for any unit.
  * @return true when range is valid.
  */
-bool TileEngine::validMeleeRange(Position pos, int direction, int size, BattleUnit *target)
+bool TileEngine::validMeleeRange(Position pos, int direction, BattleUnit *attacker, BattleUnit *target)
 {
 	Position p;
-	
-	if (direction == -1)
+	int size = attacker->getArmor()->getSize() - 1;
+	Pathfinding::directionToVector(direction, &p);
+	for (int x = 0; x <= size; ++x)
 	{
-		for (int dir = 0; dir <= 7; ++dir)
+		for (int y = 0; y <= size; ++y)
 		{
-			Pathfinding::directionToVector(dir, &p);
-			for (int x = 0; x <= size-1; ++x)
+			Tile *origin (_save->getTile(Position(pos + Position(x, y, 0))));
+			Tile *targetTile (_save->getTile(Position(pos + Position(x, y, 0) + p)));
+			Tile *aboveTargetTile (_save->getTile(Position(pos + Position(x, y, 1) + p)));
+
+			if (targetTile && origin)
 			{
-				for (int y = 0; y <= size-1; ++y)
+				if (origin->getTerrainLevel() <= -16 && aboveTargetTile && !aboveTargetTile->hasNoFloor(targetTile))
 				{
-					Tile *origin (_save->getTile(Position(pos + Position(x, y, 0))));
-					Tile *targetTile (_save->getTile(Position(pos + Position(x, y, 0) + p)));
-					if (targetTile && origin)
-					{
-						if (_save->getPathfinding()->isOnStairs(origin->getPosition(), targetTile->getPosition()))
-						{
-							targetTile = _save->getTile(targetTile->getPosition() + Position(0,0,1));
-						}
-						if (!targetTile)
-							continue;
-						if (targetTile->getUnit())
-						{
-							if (!_save->getPathfinding()->isBlocked(origin, targetTile, dir, targetTile->getUnit())
-								&& (target == 0 || targetTile->getUnit() == target))
-							{
-								return true;
-							}
-						}
-					}
+					targetTile = aboveTargetTile;
 				}
-			}
-		}
-	}
-	else
-	{
-		Pathfinding::directionToVector(direction, &p);
-		for (int x = 0; x <= size-1; ++x)
-		{
-			for (int y = 0; y <= size-1; ++y)
-			{
-				Tile *origin (_save->getTile(Position(pos + Position(x, y, 0))));
-				Tile *targetTile (_save->getTile(Position(pos + Position(x, y, 0) + p)));
-				
-				if (targetTile && origin)
+				if (targetTile->getUnit())
 				{
-					if (_save->getPathfinding()->isOnStairs(origin->getPosition(), targetTile->getPosition()))
+					if (target == 0 || targetTile->getUnit() == target)
 					{
-						targetTile = _save->getTile(targetTile->getPosition() + Position(0,0,1));
-					}
-					if (!targetTile)
-						continue;
-					if (targetTile->getUnit())
-					{
-						if (!_save->getPathfinding()->isBlocked(origin, targetTile, direction, targetTile->getUnit())
-							&& (target == 0 || targetTile->getUnit() == target))
+						Position originVoxel = Position(origin->getPosition() * Position(16,16,24))
+							+ Position(8,8,attacker->getHeight() + attacker->getFloatHeight() - 4 -origin->getTerrainLevel());
+						Position targetVoxel;
+						if (canTargetUnit(&originVoxel, targetTile, &targetVoxel, attacker))
 						{
 							return true;
 						}
@@ -2662,6 +2642,17 @@ bool TileEngine::validateThrow(BattleAction *action)
 	}
 
 	return ProjectileFlyBState::validThrowRange(action);
+}
+
+/*
+ * Recalculate FOV of all units in-game.
+ */
+void TileEngine::recalculateFOV()
+{
+	for (std::vector<BattleUnit*>::iterator bu = _save->getUnits()->begin(); bu != _save->getUnits()->end(); ++bu)
+	{
+		calculateFOV(*bu);
+	}
 }
 
 }

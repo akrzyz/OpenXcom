@@ -163,7 +163,7 @@ void ProjectileFlyBState::init()
 		_projectileItem = weapon;
 		break;
 	case BA_HIT:
-		if (!_parent->getTileEngine()->validMeleeRange(_action.actor->getPosition(), _action.actor->getDirection(), _action.actor->getArmor()->getSize(), 0))
+		if (!_parent->getTileEngine()->validMeleeRange(_action.actor->getPosition(), _action.actor->getDirection(), _action.actor, 0))
 		{
 			_action.result = "STR_THERE_IS_NO_ONE_THERE";
 			_parent->popState();
@@ -195,7 +195,16 @@ bool ProjectileFlyBState::createNewProjectile()
 
 	// add the projectile on the map
 	_parent->getMap()->setProjectile(projectile);
-	_parent->setStateInterval(Options::getInt("battleFireSpeed"));
+
+	// set the speed of the projectile
+	if (_action.type == BA_THROW)
+	{
+		_parent->setStateInterval(Options::getInt("battleFireSpeed"));
+	}
+	else
+	{
+		_parent->setStateInterval(std::max(1, Options::getInt("battleFireSpeed") - _action.weapon->getRules()->getBulletSpeed()));
+	}
 
 	// let it calculate a trajectory
 	_projectileImpact = -1;
@@ -300,7 +309,10 @@ void ProjectileFlyBState::think()
 			{
 				_parent->getTileEngine()->checkReactionFire(_unit);
 			}
-			_unit->abortTurn();
+			if (!_action.actor->isOut())
+			{
+				_unit->abortTurn();
+			}
 			_parent->popState();
 		}
 	}
@@ -334,7 +346,7 @@ void ProjectileFlyBState::think()
 				_action.waypoints.pop_front();
 				_action.target = _action.waypoints.front();
 				// launch the next projectile in the waypoint cascade
-				_parent->statePushBack(new ProjectileFlyBState(_parent, _action, _origin));
+				_parent->statePushNext(new ProjectileFlyBState(_parent, _action, _origin));
 			}
 			else
 			{
@@ -359,7 +371,7 @@ void ProjectileFlyBState::think()
 					// if the unit burns floortiles, burn floortiles
 					if (_unit->getSpecialAbility() == SPECAB_BURNFLOOR)
 					{
-						_parent->getSave()->getTile(_action.target)->ignite();
+						_parent->getSave()->getTile(_action.target)->ignite(15);
 					}
 
 					if (_projectileImpact == 4)

@@ -183,6 +183,28 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 	
 	_tuReserved = BA_NONE;
 
+	if (unit->getTimeUnits() <= 5)
+	{
+		if (_save->selectNextPlayerUnit(true, true) == 0)
+		{
+			if (!_save->getDebugMode())
+			{
+				statePushBack(0); // end AI turn
+			}
+			else
+			{
+				_save->selectNextPlayerUnit();
+				_debugPlay = true;
+			}
+		}
+		if (_save->getSelectedUnit())
+		{
+			getMap()->getCamera()->centerOnPosition(_save->getSelectedUnit()->getPosition());
+		}
+		_AIActionCounter = 0;
+		return;
+	}
+
 	if (unit->getMainHandWeapon() && unit->getMainHandWeapon()->getRules()->getBattleType() == BT_FIREARM)
 	{
 		switch (unit->getAggression())
@@ -314,14 +336,15 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 			action.weapon = new BattleItem(_parentState->getGame()->getRuleset()->getItem("ALIEN_PSI_WEAPON"), _save->getCurrentItemId());
 			action.TU = action.weapon->getRules()->getTUUse();
 		}
+		else
+		{
+			statePushBack(new UnitTurnBState(this, action));
+		}
 
 		ss.clear();
 		ss << L"Attack type=" << action.type << " target="<< action.target.x << " "<< action.target.y << " "<< action.target.z << " weapon=" << action.weapon->getRules()->getName().c_str();
 		_parentState->debug(ss.str());
 
-		action.actor->lookAt(action.target);
-		while (action.actor->getStatus() == STATUS_TURNING)
-			action.actor->turn();
 		statePushBack(new ProjectileFlyBState(this, action));
 		if (action.type == BA_MINDCONTROL || action.type == BA_PANIC)
 		{
@@ -1252,7 +1275,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 		{
 			if (_save->selectUnit(pos) && _save->selectUnit(pos)->getFaction() != _save->getSelectedUnit()->getFaction())
 			{
-				if (_currentAction.actor->spendTimeUnits(_currentAction.TU, false))
+				if (_currentAction.actor->spendTimeUnits(_currentAction.TU))
 				{
 					_parentState->getGame()->getResourcePack()->getSound("BATTLE.CAT", _currentAction.weapon->getRules()->getHitSound())->play();
 					_parentState->getGame()->pushState (new UnitInfoState (_parentState->getGame(), _save->selectUnit(pos)));
