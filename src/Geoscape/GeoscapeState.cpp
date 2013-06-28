@@ -31,7 +31,6 @@
 #include "../Engine/Surface.h"
 #include "../Engine/Options.h"
 #include "Globe.h"
-#include "GlobeLand.h"
 #include "../Interface/Text.h"
 #include "../Interface/ImageButton.h"
 #include "../Interface/Cursor.h"

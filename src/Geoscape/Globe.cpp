@@ -621,12 +621,10 @@ void Globe::cachePolygons()
 	if (_globeLand != 0)
 	{
 		cache(_game->getResourcePack()->getPolygonsLand(), &_cacheLand);
-		_globeLand->invalidate();
 	}
 	if (_globeWater != 0)
 	{
 		cache(_game->getResourcePack()->getPolygonsWater(), &_cacheWater);
-		_globeWater->invalidate();
 	}
 }
 
