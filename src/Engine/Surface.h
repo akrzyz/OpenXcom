@@ -134,6 +134,7 @@ public:
 	void invalidate();
 	/// Gets palette's name
 	std::string getPaletteName();
+	void blitBattlescapeElement(Surface* surface, int x, int y);
 };
 
 }

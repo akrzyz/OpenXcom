@@ -87,8 +87,6 @@ set ( battlescape_src
   Battlescape/Position.cpp
   Battlescape/Map.h
   Battlescape/Map.cpp
-  Battlescape/MapPaletted.h
-  Battlescape/MapPaletted.cpp
   Battlescape/Pathfinding.h
   Battlescape/Pathfinding.cpp
   Battlescape/EndBattleBState.h

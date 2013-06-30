@@ -887,7 +887,7 @@ struct StandartShade
  * Specific blit function to blit battlescape terrain data in different shades in a fast way.
  * Notice there is no surface locking here - you have to make sure you lock the surface yourself
  * at the start of blitting and unlock it when done.
- * @param surface to blit to
+ * @param surface Surface to blit image to
  * @param x
  * @param y
  * @param off
@@ -911,7 +911,6 @@ void Surface::blitNShade(Surface *surface, int x, int y, int off, bool half, int
 	}
 	else
 		ShaderDraw<StandartShade>(ShaderSurface(surface), src, ShaderScalar(off));
-		
 }
 
 /**
@@ -928,6 +927,19 @@ void Surface::invalidate()
 std::string Surface::getPaletteName()
 {
 	return _paletteName;
+}
+
+/**
+ * Special blit function for battlescape elements
+ */
+void Surface::blitBattlescapeElement(Surface* surface, int x, int y)
+{		
+	SDL_Rect cropper;
+	cropper.x = x;
+	cropper.y = y;
+	cropper.w = _surface->w;
+	cropper.h = _surface->h;
+	SDL_BlitSurface(_surface, 0, surface->getSurface(), &cropper);
 }
 
 }
