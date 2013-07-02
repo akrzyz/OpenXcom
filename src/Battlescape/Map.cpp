@@ -523,6 +523,10 @@ void Map::drawTerrain()
 						}
 						else
 						{
+							if (shadeSurface != 0)
+								delete shadeSurface;
+							shadeSurface = new Surface(3, 3);
+							shadeSurface->setPalette(_res->getPalette(_mainPalette)->getColors());
 							// draw bullet on the correct tile
 							if (itX >= bulletLowX && itX <= bulletHighX && itY >= bulletLowY && itY <= bulletHighY)
 							{
@@ -531,9 +535,8 @@ void Map::drawTerrain()
 									tmpSurface = _res->getSurfaceSet("Projectiles")->getFrame(_projectile->getParticle(i));
 									if (tmpSurface)
 									{
-										if (shadeSurface != 0)
-											delete shadeSurface;
-										shadeSurface = new Surface(*tmpSurface);
+										shadeSurface->clear();
+										shadeSurface->copy(tmpSurface);
 										Position voxelPos = _projectile->getPosition(1-i);
 										// draw shadow on the floor
 										voxelPos.z = _save->getTileEngine()->castedShade(voxelPos);
@@ -1174,7 +1177,7 @@ void Map::cacheUnits()
 void Map::cacheUnit(BattleUnit *unit)
 {
 	UnitSprite *unitSprite = new UnitSprite(_spriteWidth, _spriteHeight, 0, 0);
-	unitSprite->setPalette(_res->getPalette("PALETTES.DAT_4")->getColors());
+	unitSprite->setPalette(_res->getPalette(_mainPalette)->getColors());
 	bool invalid, dummy;
 	int numOfParts = unit->getArmor()->getSize() == 1?1:unit->getArmor()->getSize()*2;
 
@@ -1188,7 +1191,7 @@ void Map::cacheUnit(BattleUnit *unit)
 			if (!cache) // no cache created yet
 			{
 				cache = new Surface(_spriteWidth, _spriteHeight);
-				cache->setPalette(_res->getPalette("PALETTES.DAT_4")->getColors());
+				cache->setPalette(_res->getPalette(_mainPalette)->getColors());
 			}
 			unitSprite->setBattleUnit(unit, i);
 

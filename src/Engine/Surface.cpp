@@ -887,7 +887,7 @@ struct StandartShade
  * Specific blit function to blit battlescape terrain data in different shades in a fast way.
  * Notice there is no surface locking here - you have to make sure you lock the surface yourself
  * at the start of blitting and unlock it when done.
- * @param surface Surface to blit image to
+ * @param surface to blit to
  * @param x
  * @param y
  * @param off

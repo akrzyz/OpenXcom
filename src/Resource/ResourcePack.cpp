@@ -1412,7 +1412,7 @@ void ResourcePack::loadExtraResources(std::vector<std::pair<std::string, ExtraSp
 					{
 						_surfaces["tempSurface"] = new Surface(spritePack->getWidth(), spritePack->getHeight());
 						s.str("");
-						s << CrossPlatform::getDataFile(spritePack->getSprites()->operator[](startFrame));
+						s << CrossPlatform::getDataFile(spritePack->getFolder() + spritePack->getSprites()->operator[](startFrame));
 						_surfaces["tempSurface"]->loadImage(s.str());
 						int xDivision = spritePack->getWidth() / spritePack->getSubX();
 						int yDivision = spritePack->getHeight() / spritePack->getSubY();

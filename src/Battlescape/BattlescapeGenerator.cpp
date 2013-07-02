@@ -1018,9 +1018,8 @@ void BattlescapeGenerator::generateMap()
 	int ufoX = 0, ufoY = 0;
 	bool placed = false;
 
-	MapBlock* dummy = new MapBlock(_terrain, "UFO1/", "dummy", 0, 0, MT_DEFAULT);
-	MapBlock* craftMap = 0;
-	MapBlock* ufoMap = 0;
+	MapBlock* dummy = new MapBlock(_terrain, _terrain->getFolder(), "dummy", 0, 0, MT_DEFAULT);
+	MapBlock* craftMap = 0;	MapBlock* ufoMap = 0;
 
 	int mapDataSetIDOffset = 0;
 	int craftDataSetIDOffset = 0;
@@ -1283,7 +1282,7 @@ void BattlescapeGenerator::generateMap()
 	for (std::vector<MapDataSet*>::iterator i = _terrain->getMapDataSets()->begin(); i != _terrain->getMapDataSets()->end(); ++i)
 	{
 		if ((*i)->getGame() == "xcom2")
-			paletteName = "TFTD_PALETTES.DAT_4";
+			paletteName = "TFTD_PALETTES.DAT_3";
 		else
 			paletteName = "PALETTES.DAT_4";
 		(*i)->loadData(_res->getPalette(paletteName)->getColors());
@@ -1429,7 +1428,7 @@ void BattlescapeGenerator::generateMap()
 		for (std::vector<MapDataSet*>::iterator i = _ufo->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _ufo->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
 			if ((*i)->getGame() == "xcom2")
-				paletteName = "TFTD_PALETTES.DAT_4";
+				paletteName = "TFTD_PALETTES.DAT_3";
 			else
 				paletteName = "PALETTES.DAT_4";
 			(*i)->loadData(_res->getPalette(paletteName)->getColors());
@@ -1456,7 +1455,7 @@ void BattlescapeGenerator::generateMap()
 		for (std::vector<MapDataSet*>::iterator i = _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
 			if ((*i)->getGame() == "xcom2")
-				paletteName = "TFTD_PALETTES.DAT_4";
+				paletteName = "TFTD_PALETTES.DAT_3";
 			else
 				paletteName = "PALETTES.DAT_4";
 			(*i)->loadData(_res->getPalette(paletteName)->getColors());
