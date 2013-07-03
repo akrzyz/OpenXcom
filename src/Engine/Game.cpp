@@ -402,10 +402,10 @@ void Game::loadLanguage(const std::string &filename)
 	ss << "Language/" << filename << ".lng";
 	ss2 << "Language/" << filename << ".geo";
 
-	if (_res->getSurface("GEOBORD.SCR"))
-		background = "GEOBORD.SCR";
-	else
+	if ( ( (_res->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_res->getPalette("PALETTES.DAT_0") == 0) ) || ( (_res->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "tftd") ) )
 		background = "TFTD_GEOBORD.SCR";
+	else
+		background = "GEOBORD.SCR";
 
 	_lang->loadLng(CrossPlatform::getDataFile(ss.str()), _rules->getExtraStrings()[filename]);
 
@@ -476,12 +476,6 @@ void Game::loadRuleset()
 {
 	_rules = new Ruleset();
 	_rules->load();
-/*	std::vector<std::string> rulesets = Options::getRulesets();
-	for (std::vector<std::string>::iterator i = rulesets.begin(); i != rulesets.end(); ++i)
-	{
-		_rules->load(*i);
-	}
-	_rules->sortLists();*/
 }
 
 /**

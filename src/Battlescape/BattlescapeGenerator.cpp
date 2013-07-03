@@ -1018,7 +1018,7 @@ void BattlescapeGenerator::generateMap()
 	int ufoX = 0, ufoY = 0;
 	bool placed = false;
 
-	MapBlock* dummy = new MapBlock(_terrain, _terrain->getFolder(), "dummy", 0, 0, MT_DEFAULT);
+	MapBlock* dummy = new MapBlock(_terrain, "dummy", _terrain->getFolder(), 0, 0, MT_DEFAULT);
 	MapBlock* craftMap = 0;	MapBlock* ufoMap = 0;
 
 	int mapDataSetIDOffset = 0;
