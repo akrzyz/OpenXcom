@@ -100,7 +100,7 @@ public:
 	/// Loads geoscape specific resources
 	void loadGeoscapeResources(std::vector<std::pair<std::string, ExtraSprites *> > extraSprites, std::vector<std::pair<std::string, ExtraSounds *> > extraSounds, const std::string &gameFolder, const std::string &game);
 	/// Loads battlescape specific resources
-	void loadBattlescapeResources(const std::string &gameFolder);
+	void loadBattlescapeResources(const std::string &gameFolder, const std::string &game);
 	/// Loads extra resources specified in ruleset
 	void loadExtraResources(std::vector<std::pair<std::string, ExtraSprites *> > extraSprites, std::vector<std::pair<std::string, ExtraSounds *> > extraSounds);
 };

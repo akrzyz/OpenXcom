@@ -748,7 +748,7 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 		Window::soundPopup[1] = getSound("GEO.CAT", 2);
 		Window::soundPopup[2] = getSound("GEO.CAT", 3);
 
-		loadBattlescapeResources(gameFolder); // TODO load this at battlescape start, unload at battlescape end?
+		loadBattlescapeResources(gameFolder, game); // TODO load this at battlescape start, unload at battlescape end?
 
 		//"fix" of hair color of male personal armor
 		SurfaceSet *xcom_1 = _sets["XCOM_1.PCK"];
@@ -1081,193 +1081,389 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 
 		// Load sounds and music
 
+		loadBattlescapeResources(gameFolder, game);
+
 		loadExtraResources(extraSprites, extraSounds);
 	}
 }
 
-void ResourcePack::loadBattlescapeResources(const std::string &gameFolder)
+void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const std::string &game)
 {
-	// Load Battlescape ICONS
-	std::stringstream s;
-	s << gameFolder << "UFOGRAPH/" << "SPICONS.DAT";
-	_sets["SPICONS.DAT"] = new SurfaceSet(32, 24);
-	_sets["SPICONS.DAT"]->loadDat(CrossPlatform::getDataFile(s.str()));
-	_sets["SPICONS.DAT"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+	if (game == "xcom1")
+	{
+		// Load Battlescape ICONS
+		std::stringstream s;
+		s << gameFolder << "UFOGRAPH/" << "SPICONS.DAT";
+		_sets["SPICONS.DAT"] = new SurfaceSet(32, 24);
+		_sets["SPICONS.DAT"]->loadDat(CrossPlatform::getDataFile(s.str()));
+		_sets["SPICONS.DAT"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
-	s.str("");
-	std::stringstream s2;
-	s << gameFolder << "UFOGRAPH/" << "CURSOR.PCK";
-	s2 << gameFolder << "UFOGRAPH/" << "CURSOR.TAB";
-	_sets["CURSOR.PCK"] = new SurfaceSet(32, 40);
-	_sets["CURSOR.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-	_sets["CURSOR.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		s.str("");
+		std::stringstream s2;
+		s << gameFolder << "UFOGRAPH/" << "CURSOR.PCK";
+		s2 << gameFolder << "UFOGRAPH/" << "CURSOR.TAB";
+		_sets["CURSOR.PCK"] = new SurfaceSet(32, 40);
+		_sets["CURSOR.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["CURSOR.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
-	s.str("");
-	s2.str("");
-	s << gameFolder << "UFOGRAPH/" << "SMOKE.PCK";
-	s2 << gameFolder << "UFOGRAPH/" << "SMOKE.TAB";
-	_sets["SMOKE.PCK"] = new SurfaceSet(32, 40);
-	_sets["SMOKE.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-	_sets["SMOKE.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		s.str("");
+		s2.str("");
+		s << gameFolder << "UFOGRAPH/" << "SMOKE.PCK";
+		s2 << gameFolder << "UFOGRAPH/" << "SMOKE.TAB";
+		_sets["SMOKE.PCK"] = new SurfaceSet(32, 40);
+		_sets["SMOKE.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["SMOKE.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 	
-	s.str("");
-	s2.str("");
-	s << gameFolder << "UFOGRAPH/" << "HIT.PCK";
-	s2 << gameFolder << "UFOGRAPH/" << "HIT.TAB";
-	_sets["HIT.PCK"] = new SurfaceSet(32, 40);
-	_sets["HIT.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-	_sets["HIT.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		s.str("");
+		s2.str("");
+		s << gameFolder << "UFOGRAPH/" << "HIT.PCK";
+		s2 << gameFolder << "UFOGRAPH/" << "HIT.TAB";
+		_sets["HIT.PCK"] = new SurfaceSet(32, 40);
+		_sets["HIT.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["HIT.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
-	s.str("");
-	s2.str("");
-	s << gameFolder << "UFOGRAPH/" << "X1.PCK";
-	s2 << gameFolder << "UFOGRAPH/" << "X1.TAB";
-	_sets["X1.PCK"] = new SurfaceSet(128, 64);
-	_sets["X1.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-	_sets["X1.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		s.str("");
+		s2.str("");
+		s << gameFolder << "UFOGRAPH/" << "X1.PCK";
+		s2 << gameFolder << "UFOGRAPH/" << "X1.TAB";
+		_sets["X1.PCK"] = new SurfaceSet(128, 64);
+		_sets["X1.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["X1.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
-	s.str("");
-	_sets["MEDIBITS.DAT"] = new SurfaceSet(52, 58);
-	s << gameFolder << "UFOGRAPH/" << "MEDIBITS.DAT";
-	_sets["MEDIBITS.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()));
-	_sets["MEDIBITS.DAT"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		s.str("");
+		_sets["MEDIBITS.DAT"] = new SurfaceSet(52, 58);
+		s << gameFolder << "UFOGRAPH/" << "MEDIBITS.DAT";
+		_sets["MEDIBITS.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()));
+		_sets["MEDIBITS.DAT"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
-	s.str("");
-	_sets["DETBLOB.DAT"] = new SurfaceSet(16, 16);
-	s << gameFolder << "UFOGRAPH/" << "DETBLOB.DAT";
-	_sets["DETBLOB.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()));
-	_sets["DETBLOB.DAT"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		s.str("");
+		_sets["DETBLOB.DAT"] = new SurfaceSet(16, 16);
+		s << gameFolder << "UFOGRAPH/" << "DETBLOB.DAT";
+		_sets["DETBLOB.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()));
+		_sets["DETBLOB.DAT"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 
-	// Load Battlescape Terrain (only blacks are loaded, others are loaded just in time)
-	std::string bsets[] = {"BLANKS.PCK"};
+		// Load Battlescape Terrain (only blacks are loaded, others are loaded just in time)
+		std::string bsets[] = {"BLANKS.PCK"};
 
-	for (int i = 0; i < 1; ++i)
-	{
-		std::stringstream s;
-		s << gameFolder << "TERRAIN/" << bsets[i];
-		std::string tab = bsets[i].substr(0, bsets[i].length()-4) + ".TAB";
-		std::stringstream s2;
-		s2 << gameFolder << "TERRAIN/" << tab;
-		_sets[bsets[i]] = new SurfaceSet(32, 40);
-		_sets[bsets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-		_sets[bsets[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
-	}
-
-	// Load Battlescape units
-	std::string usets[] = {"SILACOID.PCK",
-							"CELATID.PCK",
-							"HANDOB.PCK",
-							"CYBER.PCK",
-							"FLOOROB.PCK",
-							"SECTOID.PCK",
-							"CIVF.PCK",
-							"CIVM.PCK",
-							"XCOM_1.PCK",
-							"SNAKEMAN.PCK",
-							"XCOM_0.PCK",
-							"CHRYS.PCK",
-							"TANKS.PCK",
-							"FLOATER.PCK",
-							"XCOM_2.PCK",
-							"ZOMBIE.PCK",
-							"MUTON.PCK",
-							"X_REAP.PCK",
-							"ETHEREAL.PCK",
-							"X_ROB.PCK"
-					 };
-
-	for (int i = 0; i < 20; ++i)
-	{
-		std::stringstream s;
-		s << gameFolder << "UNITS/" << usets[i];
-		std::string tab = usets[i].substr(0, usets[i].length()-4) + ".TAB";
-		std::stringstream s2;
-		s2 << gameFolder + "UNITS/" << tab;
-		_sets[usets[i]] = new SurfaceSet(32, 40);
-		_sets[usets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-		_sets[usets[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
-	}
-
-	s.str("");
-	s << gameFolder << "UNITS/" << "BIGOBS.PCK";
-	s2.str("");
-	s2 << gameFolder << "UNITS/" << "BIGOBS.TAB";
-	_sets["BIGOBS.PCK"] = new SurfaceSet(32, 48);
-	_sets["BIGOBS.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-	_sets["BIGOBS.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
-
-	s.str("");
-	s << gameFolder << "GEODATA/" << "LOFTEMPS.DAT";
-	MapDataSet::loadLOFTEMPS(CrossPlatform::getDataFile(s.str()), &_voxelData);
-
-	std::string scrs[] = {"TAC00.SCR"};
-
-	for (int i = 0; i < 1; ++i)
-	{
-		std::stringstream s;
-		s << gameFolder << "UFOGRAPH/" << scrs[i];
-		_surfaces[scrs[i]] = new Surface(320, 200);
-		_surfaces[scrs[i]]->loadScr(CrossPlatform::getDataFile(s.str()));
-		_surfaces[scrs[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
-	}
-
-	std::string spks[] = {"TAC01.SCR",
-						  "DETBORD.PCK",
-						  "DETBORD2.PCK",
-						  "ICONS.PCK",
-						  "MEDIBORD.PCK",
-						  "SCANBORD.PCK",
-						  "UNIBORD.PCK"};
-
-	for (int i = 0; i < 7; ++i)
-	{
-		std::stringstream s;
-		s << gameFolder << "UFOGRAPH/" << spks[i];
-		_surfaces[spks[i]] = new Surface(320, 200);
-		_surfaces[spks[i]]->loadSpk(CrossPlatform::getDataFile(s.str()));
-		_surfaces[spks[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
-	}
-
-	std::string invs[] = {"MAN_0",
-						  "MAN_1",
-						  "MAN_2",
-						  "MAN_3"};
-	std::string sets[] = {"F0",
-						  "F1",
-						  "F2",
-						  "F3",
-						  "M0",
-						  "M1",
-						  "M2",
-						  "M3"};
-
-	for (int i = 0; i < 4; ++i)
-	{
-		std::stringstream s1, s1full, s2, s2full;
-		s1 << invs[i] << ".SPK";
-		s1full << gameFolder << "UFOGRAPH/" << s1.str();
-		s2 << invs[i] << sets[0] << ".SPK";
-		s2full << gameFolder << "UFOGRAPH/" << s2.str();
-		// Load fixed inventory image
-		if (CrossPlatform::fileExists(CrossPlatform::getDataFile(s1full.str())))
+		if (_sets.find("BLANKS.PCK") == _sets.end())
 		{
-			_surfaces[s1.str()] = new Surface(320, 200);
-			_surfaces[s1.str()]->loadSpk(CrossPlatform::getDataFile(s1full.str()));
-			_surfaces[s1.str()]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
-		}
-		// Load gender-based inventory image
-		if (CrossPlatform::fileExists(CrossPlatform::getDataFile(s2full.str())))
-		{
-			for (int j = 0; j < 8; j++)
+			for (int i = 0; i < 1; ++i)
 			{
-				std::stringstream s3, s3full;
-				s3 << invs[i] << sets[j] << ".SPK";
-				s3full << gameFolder << "UFOGRAPH/" << s3.str();
-				_surfaces[s3.str()] = new Surface(320, 200);
-				_surfaces[s3.str()]->loadSpk(CrossPlatform::getDataFile(s3full.str()));
-				_surfaces[s3.str()]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+				std::stringstream s;
+				s << gameFolder << "TERRAIN/" << bsets[i];
+				std::string tab = bsets[i].substr(0, bsets[i].length()-4) + ".TAB";
+				std::stringstream s2;
+				s2 << gameFolder << "TERRAIN/" << tab;
+				_sets[bsets[i]] = new SurfaceSet(32, 40);
+				_sets[bsets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+				_sets[bsets[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
 			}
 		}
+
+		// Load Battlescape units
+		std::string usets[] = {"SILACOID.PCK",
+								"CELATID.PCK",
+								"HANDOB.PCK",
+								"CYBER.PCK",
+								"FLOOROB.PCK",
+								"SECTOID.PCK",
+								"CIVF.PCK",
+								"CIVM.PCK",
+								"XCOM_1.PCK",
+								"SNAKEMAN.PCK",
+								"XCOM_0.PCK",
+								"CHRYS.PCK",
+								"TANKS.PCK",
+								"FLOATER.PCK",
+								"XCOM_2.PCK",
+								"ZOMBIE.PCK",
+								"MUTON.PCK",
+								"X_REAP.PCK",
+								"ETHEREAL.PCK",
+								"X_ROB.PCK"
+						 };
+
+		for (int i = 0; i < 20; ++i)
+		{
+			std::stringstream s;
+			s << gameFolder << "UNITS/" << usets[i];
+			std::string tab = usets[i].substr(0, usets[i].length()-4) + ".TAB";
+			std::stringstream s2;
+			s2 << gameFolder + "UNITS/" << tab;
+			_sets[usets[i]] = new SurfaceSet(32, 40);
+			_sets[usets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+			_sets[usets[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		}
+
+		s.str("");
+		s << gameFolder << "UNITS/" << "BIGOBS.PCK";
+		s2.str("");
+		s2 << gameFolder << "UNITS/" << "BIGOBS.TAB";
+		_sets["BIGOBS.PCK"] = new SurfaceSet(32, 48);
+		_sets["BIGOBS.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["BIGOBS.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+
+		s.str("");
+		s << gameFolder << "GEODATA/" << "LOFTEMPS.DAT";
+		MapDataSet::loadLOFTEMPS(CrossPlatform::getDataFile(s.str()), &_voxelData);
+
+		std::string scrs[] = {"TAC00.SCR"};
+
+		for (int i = 0; i < 1; ++i)
+		{
+			std::stringstream s;
+			s << gameFolder << "UFOGRAPH/" << scrs[i];
+			_surfaces[scrs[i]] = new Surface(320, 200);
+			_surfaces[scrs[i]]->loadScr(CrossPlatform::getDataFile(s.str()));
+			_surfaces[scrs[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		}
+
+		std::string spks[] = {"TAC01.SCR",
+							  "DETBORD.PCK",
+							  "DETBORD2.PCK",
+							  "ICONS.PCK",
+							  "MEDIBORD.PCK",
+							  "SCANBORD.PCK",
+							  "UNIBORD.PCK"};
+
+		for (int i = 0; i < 7; ++i)
+		{
+			std::stringstream s;
+			s << gameFolder << "UFOGRAPH/" << spks[i];
+			_surfaces[spks[i]] = new Surface(320, 200);
+			_surfaces[spks[i]]->loadSpk(CrossPlatform::getDataFile(s.str()));
+			_surfaces[spks[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		}
+
+		std::string invs[] = {"MAN_0",
+							  "MAN_1",
+							  "MAN_2",
+							  "MAN_3"};
+		std::string sets[] = {"F0",
+							  "F1",
+							  "F2",
+							  "F3",
+							  "M0",
+							  "M1",
+							  "M2",
+							  "M3"};
+
+		for (int i = 0; i < 4; ++i)
+		{
+			std::stringstream s1, s1full, s2, s2full;
+			s1 << invs[i] << ".SPK";
+			s1full << gameFolder << "UFOGRAPH/" << s1.str();
+			s2 << invs[i] << sets[0] << ".SPK";
+			s2full << gameFolder << "UFOGRAPH/" << s2.str();
+			// Load fixed inventory image
+			if (CrossPlatform::fileExists(CrossPlatform::getDataFile(s1full.str())))
+			{
+				_surfaces[s1.str()] = new Surface(320, 200);
+				_surfaces[s1.str()]->loadSpk(CrossPlatform::getDataFile(s1full.str()));
+				_surfaces[s1.str()]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+			}
+			// Load gender-based inventory image
+			if (CrossPlatform::fileExists(CrossPlatform::getDataFile(s2full.str())))
+			{
+				for (int j = 0; j < 8; j++)
+				{
+					std::stringstream s3, s3full;
+					s3 << invs[i] << sets[j] << ".SPK";
+					s3full << gameFolder << "UFOGRAPH/" << s3.str();
+					_surfaces[s3.str()] = new Surface(320, 200);
+					_surfaces[s3.str()]->loadSpk(CrossPlatform::getDataFile(s3full.str()));
+					_surfaces[s3.str()]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+				}
+			}
+		}
+	}
+	else if (game == "xcom2")
+	{
+		// Load Battlescape ICONS
+		std::stringstream s;
+		s << gameFolder << "UFOGRAPH/" << "SPICONS.DAT";
+		_sets["TFTD_SPICONS.DAT"] = new SurfaceSet(32, 24);
+		_sets["TFTD_SPICONS.DAT"]->loadDat(CrossPlatform::getDataFile(s.str()));
+		_sets["TFTD_SPICONS.DAT"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+
+		s.str("");
+		std::stringstream s2;
+/*		s << gameFolder << "UFOGRAPH/" << "CURSOR.PCK";
+		s2 << gameFolder << "UFOGRAPH/" << "CURSOR.TAB";
+		_sets["CURSOR.PCK"] = new SurfaceSet(32, 40);
+		_sets["CURSOR.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["CURSOR.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+
+		s.str("");
+		s2.str("");
+		s << gameFolder << "UFOGRAPH/" << "SMOKE.PCK";
+		s2 << gameFolder << "UFOGRAPH/" << "SMOKE.TAB";
+		_sets["SMOKE.PCK"] = new SurfaceSet(32, 40);
+		_sets["SMOKE.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["SMOKE.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+*/	
+		s.str("");
+		s2.str("");
+		s << gameFolder << "UFOGRAPH/" << "HIT.PCK";
+		s2 << gameFolder << "UFOGRAPH/" << "HIT.TAB";
+		_sets["TFTD_HIT.PCK"] = new SurfaceSet(32, 40);
+		_sets["TFTD_HIT.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["TFTD_HIT.PCK"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+
+		s.str("");
+		s2.str("");
+		s << gameFolder << "UFOGRAPH/" << "X1.PCK";
+		s2 << gameFolder << "UFOGRAPH/" << "X1.TAB";
+		_sets["TFTD_X1.PCK"] = new SurfaceSet(128, 64);
+		_sets["TFTD_X1.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["TFTD_X1.PCK"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+
+		s.str("");
+		_sets["TFTD_MEDIBITS.DAT"] = new SurfaceSet(52, 58);
+		s << gameFolder << "UFOGRAPH/" << "MEDIBITS.DAT";
+		_sets["TFTD_MEDIBITS.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()));
+		_sets["TFTD_MEDIBITS.DAT"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+
+		s.str("");
+		_sets["TFTD_DETBLOB.DAT"] = new SurfaceSet(16, 16);
+		s << gameFolder << "UFOGRAPH/" << "DETBLOB.DAT";
+		_sets["TFTD_DETBLOB.DAT"]->loadDat (CrossPlatform::getDataFile(s.str()));
+		_sets["TFTD_DETBLOB.DAT"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+
+		// Load Battlescape Terrain (only blacks are loaded, others are loaded just in time)
+		std::string bsets[] = {"BLANKS.PCK"};
+
+		if (_sets.find("BLANKS.PCK") == _sets.end())
+		{
+			for (int i = 0; i < 1; ++i)
+			{
+				std::stringstream s;
+				s << gameFolder << "TERRAIN/" << bsets[i];
+				std::string tab = bsets[i].substr(0, bsets[i].length()-4) + ".TAB";
+				std::stringstream s2;
+				s2 << gameFolder << "TERRAIN/" << tab;
+				_sets[bsets[i]] = new SurfaceSet(32, 40);
+				_sets[bsets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+				_sets[bsets[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+			}
+		}
+
+		// Load Battlescape units
+		std::string usets[] = {"AQUA.PCK",
+								"BIODRON.PCK",
+								"CALCIN.PCK",
+								"CIVIL_1.PCK",
+								"CIVIL_2.PCK",
+								"DEEPONE.PCK",
+								"FLOOROB.PCK",
+								"GILLMAN.PCK",
+								"HALLUCIN.PCK",
+								"HANDOB.PCK",
+								"LOBSTER.PCK",
+								"TANK01.PCK",
+								"TASOTHS.PCK",
+								"TDXCOM_0.PCK",
+								"TDXCOM_1.PCK",
+								"TDXCOM_2.PCK",
+								"TENTAC.PCK",
+								"TRISCEN.PCK",
+								"XARQUID.PCK",
+								"ZOMBIE.PCK"
+						 };
+
+		for (int i = 0; i < 20; ++i)
+		{
+			std::stringstream s;
+			s << gameFolder << "UNITS/" << usets[i];
+			std::string tab = usets[i].substr(0, usets[i].length()-4) + ".TAB";
+			std::stringstream s2;
+			s2 << gameFolder + "UNITS/" << tab;
+			_sets["TFTD_" + usets[i]] = new SurfaceSet(32, 40);
+			_sets["TFTD_" + usets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+			_sets["TFTD_" + usets[i]]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+		}
+
+		s.str("");
+		s << gameFolder << "UNITS/" << "BIGOBS.PCK";
+		s2.str("");
+		s2 << gameFolder << "UNITS/" << "BIGOBS.TAB";
+		_sets["TFTD_BIGOBS.PCK"] = new SurfaceSet(32, 48);
+		_sets["TFTD_BIGOBS.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["TFTD_BIGOBS.PCK"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+
+/*		s.str("");
+		s << gameFolder << "GEODATA/" << "LOFTEMPS.DAT";
+		MapDataSet::loadLOFTEMPS(CrossPlatform::getDataFile(s.str()), &_voxelData);
+*/
+		std::string scrs[] = {"TAC00.SCR"};
+
+		for (int i = 0; i < 1; ++i)
+		{
+			std::stringstream s;
+			s << gameFolder << "UFOGRAPH/" << scrs[i];
+			_surfaces["TFTD_" + scrs[i]] = new Surface(320, 200);
+			_surfaces["TFTD_" + scrs[i]]->loadScr(CrossPlatform::getDataFile(s.str()));
+			_surfaces["TFTD_" + scrs[i]]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+		}
+
+/*		std::string spks[] = {"TAC01.SCR",
+							  "DETBORD.PCK",
+							  "DETBORD2.PCK",
+							  "ICONS.PCK",
+							  "MEDIBORD.PCK",
+							  "SCANBORD.PCK",
+							  "UNIBORD.PCK"};
+
+		for (int i = 0; i < 7; ++i)
+		{
+			std::stringstream s;
+			s << gameFolder << "UFOGRAPH/" << spks[i];
+			_surfaces[spks[i]] = new Surface(320, 200);
+			_surfaces[spks[i]]->loadSpk(CrossPlatform::getDataFile(s.str()));
+			_surfaces[spks[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		}
+
+		std::string invs[] = {"MAN_0",
+							  "MAN_1",
+							  "MAN_2",
+							  "MAN_3"};
+		std::string sets[] = {"F0",
+							  "F1",
+							  "F2",
+							  "F3",
+							  "M0",
+							  "M1",
+							  "M2",
+							  "M3"};
+
+		for (int i = 0; i < 4; ++i)
+		{
+			std::stringstream s1, s1full, s2, s2full;
+			s1 << invs[i] << ".SPK";
+			s1full << gameFolder << "UFOGRAPH/" << s1.str();
+			s2 << invs[i] << sets[0] << ".SPK";
+			s2full << gameFolder << "UFOGRAPH/" << s2.str();
+			// Load fixed inventory image
+			if (CrossPlatform::fileExists(CrossPlatform::getDataFile(s1full.str())))
+			{
+				_surfaces[s1.str()] = new Surface(320, 200);
+				_surfaces[s1.str()]->loadSpk(CrossPlatform::getDataFile(s1full.str()));
+				_surfaces[s1.str()]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+			}
+			// Load gender-based inventory image
+			if (CrossPlatform::fileExists(CrossPlatform::getDataFile(s2full.str())))
+			{
+				for (int j = 0; j < 8; j++)
+				{
+					std::stringstream s3, s3full;
+					s3 << invs[i] << sets[j] << ".SPK";
+					s3full << gameFolder << "UFOGRAPH/" << s3.str();
+					_surfaces[s3.str()] = new Surface(320, 200);
+					_surfaces[s3.str()]->loadSpk(CrossPlatform::getDataFile(s3full.str()));
+					_surfaces[s3.str()]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+				}
+			}
+		}*/
 	}
 }
 
