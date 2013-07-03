@@ -17,6 +17,7 @@
  * along with OpenXcom.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "Surface.h"
+#include "Screen.h"
 #include "ShaderDraw.h"
 #include <fstream>
 #include <SDL_gfxPrimitives.h>
@@ -85,6 +86,8 @@ Surface::Surface(int width, int height, int x, int y, int bpp, std::string palet
 	_crop.h = 0;
 	_crop.x = 0;
 	_crop.y = 0;
+	_dx = Screen::getDX();
+	_dy = Screen::getDY();
 }
 
 /**
@@ -940,6 +943,16 @@ void Surface::blitBattlescapeElement(Surface* surface, int x, int y)
 	cropper.w = _surface->w;
 	cropper.h = _surface->h;
 	SDL_BlitSurface(_surface, 0, surface->getSurface(), &cropper);
+}
+
+void Surface::setDX(int dx)
+{
+	_dx = dx;
+}
+
+void Surface::setDY(int dy)
+{
+	_dy = dy;
 }
 
 }

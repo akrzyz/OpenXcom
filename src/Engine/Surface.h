@@ -43,6 +43,7 @@ protected:
 	SDL_Color *_originalColors;
 	std::string _paletteName;
 	void *_misalignedPixelBuffer, *_alignedBuffer;
+	int _dx, _dy;
 public:
 	/// Creates a new surface with the specified size and position.
 	Surface(int width, int height, int x = 0, int y = 0, int bpp = 8, std::string paletteName = "PALETTES.DAT_");
@@ -135,6 +136,8 @@ public:
 	/// Gets palette's name
 	std::string getPaletteName();
 	void blitBattlescapeElement(Surface* surface, int x, int y);
+	void setDX(int dx);
+	void setDY(int dy);
 };
 
 }

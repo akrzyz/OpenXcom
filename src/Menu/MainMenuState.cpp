@@ -87,6 +87,8 @@ MainMenuState::MainMenuState(Game *game) : State(game)
 	add(_btnQuit);
 	add(_txtTitle);
 
+	centerAllSurfaces();
+
 	// Set up objects
 	_window->setColor(colors[0]);
 	_window->setBackground(_game->getResourcePack()->getSurface(background));
