@@ -101,7 +101,7 @@ void ExplosionBState::init()
 				int Y = RNG::generate(-_power/2,_power/2);
 				Position p = _center;
 				p.x += X; p.y += Y;
-				Explosion *explosion = new Explosion(p, RNG::generate(0,6), true);
+				Explosion *explosion = new Explosion(p, RNG::generate(0,6), true, _item->getRules()->getTerrorPrefix());
 				// add the explosion on the map
 				_parent->getMap()->getExplosions()->insert(explosion);
 			}
@@ -124,7 +124,7 @@ void ExplosionBState::init()
 	{
 		_parent->setStateInterval(BattlescapeState::DEFAULT_ANIM_SPEED/2);
 		bool hit = (_item->getRules()->getBattleType() == BT_MELEE || _item->getRules()->getBattleType() == BT_PSIAMP);
-		Explosion *explosion = new Explosion(_center, _item->getRules()->getHitAnimation(), false, hit);
+		Explosion *explosion = new Explosion(_center, _item->getRules()->getHitAnimation(), false, _item->getRules()->getTerrorPrefix(), hit);
 		_parent->getMap()->getExplosions()->insert(explosion);
 		// bullet hit sound
 		_parent->getResourcePack()->getSound("BATTLE.CAT", _item->getRules()->getHitSound())->play();

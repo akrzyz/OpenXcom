@@ -1024,7 +1024,7 @@ void BattlescapeState::updateSoldierInfo()
 	_numAmmoLeft->setVisible(false);
 	if (leftHandItem)
 	{
-		leftHandItem->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet("BIGOBS.PCK"), _btnLeftHandItem);
+		leftHandItem->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet(leftHandItem->getRules()->getTerrorPrefix() + "BIGOBS.PCK"), _btnLeftHandItem);
 		if (leftHandItem->getRules()->getBattleType() == BT_FIREARM && leftHandItem->needsAmmo())
 		{
 			_numAmmoLeft->setVisible(true);
@@ -1039,7 +1039,7 @@ void BattlescapeState::updateSoldierInfo()
 	_numAmmoRight->setVisible(false);
 	if (rightHandItem)
 	{
-		rightHandItem->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet("BIGOBS.PCK"), _btnRightHandItem);
+		rightHandItem->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet(rightHandItem->getRules()->getTerrorPrefix() + "BIGOBS.PCK"), _btnRightHandItem);
 		if (rightHandItem->getRules()->getBattleType() == BT_FIREARM && rightHandItem->needsAmmo())
 		{
 			_numAmmoRight->setVisible(true);

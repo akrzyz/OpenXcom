@@ -173,7 +173,7 @@ public:
 	/// Remove item
 	void removeItem(BattleItem *item);
 	/// Get top-most item
-	int getTopItemSprite();
+	BattleItem *getTopItem();
 	/// New turn preparations.
 	void prepareNewTurn();
 	/// Get inventory on this tile.

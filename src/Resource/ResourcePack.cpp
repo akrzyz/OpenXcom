@@ -1083,6 +1083,14 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 
 		loadBattlescapeResources(gameFolder, game);
 
+		// tftd_handob2 is used for all the left handed terror sprites.
+		_sets["TFTD_HANDOB2.PCK"] = new SurfaceSet(_sets["TFTD_HANDOB.PCK"]->getWidth(), _sets["TFTD_HANDOB.PCK"]->getHeight());
+		std::map<int, Surface*> *handob = _sets["TFTD_HANDOB.PCK"]->getFrames();
+		for (std::map<int, Surface*>::const_iterator i = handob->begin(); i != handob->end(); ++i)
+		{
+			(i->second)->blit(_sets["TFTD_HANDOB2.PCK"]->addFrame(i->first));
+		}
+
 		loadExtraResources(extraSprites, extraSounds);
 	}
 }
@@ -1288,20 +1296,20 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const
 
 		s.str("");
 		std::stringstream s2;
-/*		s << gameFolder << "UFOGRAPH/" << "CURSOR.PCK";
+		s << gameFolder << "UFOGRAPH/" << "CURSOR.PCK";
 		s2 << gameFolder << "UFOGRAPH/" << "CURSOR.TAB";
-		_sets["CURSOR.PCK"] = new SurfaceSet(32, 40);
-		_sets["CURSOR.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-		_sets["CURSOR.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+		_sets["TFTD_CURSOR.PCK"] = new SurfaceSet(32, 40);
+		_sets["TFTD_CURSOR.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["TFTD_CURSOR.PCK"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
 
 		s.str("");
 		s2.str("");
 		s << gameFolder << "UFOGRAPH/" << "SMOKE.PCK";
 		s2 << gameFolder << "UFOGRAPH/" << "SMOKE.TAB";
-		_sets["SMOKE.PCK"] = new SurfaceSet(32, 40);
-		_sets["SMOKE.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-		_sets["SMOKE.PCK"]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
-*/	
+		_sets["TFTD_SMOKE.PCK"] = new SurfaceSet(32, 40);
+		_sets["TFTD_SMOKE.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["TFTD_SMOKE.PCK"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+	
 		s.str("");
 		s2.str("");
 		s << gameFolder << "UFOGRAPH/" << "HIT.PCK";

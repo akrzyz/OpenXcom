@@ -27,9 +27,8 @@ namespace OpenXcom
  * @param startFrame A startframe - can be used to offset different explosions at different frames.
  * @param big Flag to indicate it is a bullet hit(false), or a real explosion(true).
  */
-Explosion::Explosion(Position position, int startFrame, bool big, bool hit) : _res(0), _save(0), _item(0), _position(position), _currentFrame(startFrame), _startFrame(startFrame), _big(big), _hit(hit)
+Explosion::Explosion(Position position, int startFrame, bool big, const std::string &terrorPrefix, bool hit) : _res(0), _save(0), _item(0), _position(position), _currentFrame(startFrame), _startFrame(startFrame), _big(big), _hit(hit), _terrorPrefix(terrorPrefix)
 {
-
 }
 
 /**
@@ -89,4 +88,14 @@ bool Explosion::isHit() const
 {
 	return _hit;
 }
+
+/**
+ * Get TFTD prefix. Only TFTD explosions have one.
+ * @return frame number.
+ */
+std::string Explosion::getTerrorPrefix() const
+{
+	return _terrorPrefix;
+}
+
 }

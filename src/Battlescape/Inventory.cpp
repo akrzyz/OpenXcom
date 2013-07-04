@@ -207,10 +207,11 @@ void Inventory::drawItems()
 	_items->clear();
 	if (_selUnit != 0)
 	{
-		SurfaceSet *texture = _game->getResourcePack()->getSurfaceSet("BIGOBS.PCK");
+		SurfaceSet *texture;
 		// Soldier items
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getInventory()->begin(); i != _selUnit->getInventory()->end(); ++i)
 		{
+			texture = _game->getResourcePack()->getSurfaceSet((*i)->getRules()->getTerrorPrefix() + "BIGOBS.PCK");
 			if ((*i) == _selItem)
 				continue;
 
@@ -232,6 +233,7 @@ void Inventory::drawItems()
 		// Ground items
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
 		{
+			texture = _game->getResourcePack()->getSurfaceSet((*i)->getRules()->getTerrorPrefix() + "BIGOBS.PCK");
 			// note that you can make items invisible by setting their width or height to 0 (for example used with tank corpse items)
 			if ((*i) == _selItem || (*i)->getSlotX() < _groundOffset || (*i)->getRules()->getInventoryHeight() == 0 || (*i)->getRules()->getInventoryWidth() == 0)
 				continue;
@@ -418,7 +420,7 @@ void Inventory::setSelectedItem(BattleItem *item)
 		{
 			_stackLevel[_selItem->getSlotX()][_selItem->getSlotY()] -= 1;
 		}
-		_selItem->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet("BIGOBS.PCK"), _selection);
+		_selItem->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet(item->getRules()->getTerrorPrefix() + "BIGOBS.PCK"), _selection);
 	}
 	drawItems();
 }

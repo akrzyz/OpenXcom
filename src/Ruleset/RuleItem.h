@@ -43,6 +43,7 @@ class RuleItem
 {
 private:
 	std::string _type, _name; // two types of objects can have the same name
+	std::string _terrorPrefix;
 	std::vector<std::string> _requires;
 	float _size;
 	int _costBuy, _costSell, _transferTime, _weight;
@@ -69,7 +70,7 @@ private:
 	int _listOrder, _range, _bulletSpeed;
 public:
 	/// Creates a blank item ruleset.
-	RuleItem(const std::string &type);
+	RuleItem(const std::string &type, const std::string &game);
 	/// Cleans up the item ruleset.
 	~RuleItem();
 	/// Loads item data from YAML.
@@ -184,6 +185,8 @@ public:
 	int getRange() const;
 	/// how fast does a projectile fired from this weapon travel?
 	int getBulletSpeed() const;
+	/// get prefix indicating TFTD item.
+	std::string getTerrorPrefix() const;
 
 };
 

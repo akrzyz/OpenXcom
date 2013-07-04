@@ -42,9 +42,10 @@ private:
 	Position _position;
 	int _currentFrame, _startFrame;
 	bool _big, _hit;
+	std::string _terrorPrefix;
 public:
 	/// Creates a new Explosion.
-	Explosion(Position _position, int startFrame, bool big, bool hit = false);
+	Explosion(Position _position, int startFrame, bool big, const std::string &terrorPrefix, bool hit = false);
 	/// Cleans up the Explosion.
 	~Explosion();
 	/// Move the Explosion one frame.
@@ -56,6 +57,8 @@ public:
 	/// Is big?
 	bool isBig() const;
 	bool isHit() const;
+	/// Get TFTD prefix (if exists).
+	std::string getTerrorPrefix() const;
 };
 
 }

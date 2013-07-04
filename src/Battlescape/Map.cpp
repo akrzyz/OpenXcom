@@ -467,10 +467,10 @@ void Map::drawTerrain()
 							}
 						}
 						// draw an item on top of the floor (if any)
-						int sprite = tile->getTopItemSprite();
-						if (sprite != -1)
+						BattleItem *sprite = tile->getTopItem();
+						if (sprite != 0)
 						{
-							tmpSurface = _res->getSurfaceSet("FLOOROB.PCK")->getFrame(sprite);
+							tmpSurface = _res->getSurfaceSet(sprite->getRules()->getTerrorPrefix() + "FLOOROB.PCK")->getFrame(sprite->getRules()->getFloorSprite());
 							if (shadeSurface != 0)
 								delete shadeSurface;
 							shadeSurface = new Surface(*tmpSurface);
@@ -875,7 +875,7 @@ void Map::drawTerrain()
 			{
 				Position voxelPos = (*i)->getPosition();
 				_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
-				tmpSurface = _res->getSurfaceSet("X1.PCK")->getFrame((*i)->getCurrentFrame());
+				tmpSurface = _res->getSurfaceSet("TFTD_X1.PCK")->getFrame((*i)->getCurrentFrame());
 				if (shadeSurface != 0)
 					delete shadeSurface;
 				shadeSurface = new Surface(*tmpSurface);
@@ -886,7 +886,7 @@ void Map::drawTerrain()
 			{
 				Position voxelPos = (*i)->getPosition();
 				_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
-				tmpSurface = _res->getSurfaceSet("HIT.PCK")->getFrame((*i)->getCurrentFrame());
+				tmpSurface = _res->getSurfaceSet((*i)->getTerrorPrefix() + "HIT.PCK")->getFrame((*i)->getCurrentFrame());
 				if (shadeSurface != 0)
 					delete shadeSurface;
 				shadeSurface = new Surface(*tmpSurface);
@@ -897,7 +897,7 @@ void Map::drawTerrain()
 			{
 				Position voxelPos = (*i)->getPosition();
 				_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
-				tmpSurface = _res->getSurfaceSet("SMOKE.PCK")->getFrame((*i)->getCurrentFrame());
+				tmpSurface = _res->getSurfaceSet((*i)->getTerrorPrefix() + "SMOKE.PCK")->getFrame((*i)->getCurrentFrame());
 				if (shadeSurface != 0)
 					delete shadeSurface;
 				shadeSurface = new Surface(*tmpSurface);
@@ -1179,6 +1179,7 @@ void Map::cacheUnit(BattleUnit *unit)
 	UnitSprite *unitSprite = new UnitSprite(_spriteWidth, _spriteHeight, 0, 0);
 	unitSprite->setPalette(_res->getPalette(_mainPalette)->getColors());
 	bool invalid, dummy;
+	std::string rhandObjectsName = "", lhandObjectsName = "";
 	int numOfParts = unit->getArmor()->getSize() == 1?1:unit->getArmor()->getSize()*2;
 
 	unit->getCache(&invalid);
@@ -1200,10 +1201,12 @@ void Map::cacheUnit(BattleUnit *unit)
 			if (rhandItem)
 			{
 				unitSprite->setBattleItem(rhandItem);
+				rhandObjectsName = rhandItem->getRules()->getTerrorPrefix() + "HANDOB.PCK";
 			}
 			if (lhandItem)
 			{
 				unitSprite->setBattleItem(lhandItem);
+				lhandObjectsName = lhandItem->getRules()->getTerrorPrefix() + "HANDOB2.PCK";
 			}
 			
 			if(!lhandItem && !rhandItem)
@@ -1211,8 +1214,8 @@ void Map::cacheUnit(BattleUnit *unit)
 				unitSprite->setBattleItem(0);
 			}
 			unitSprite->setSurfaces(_res->getSurfaceSet(unit->getArmor()->getSpriteSheet()),
-									_res->getSurfaceSet("HANDOB.PCK"),
-									_res->getSurfaceSet("HANDOB2.PCK"));
+									_res->getSurfaceSet(rhandObjectsName),
+									_res->getSurfaceSet(lhandObjectsName));
 			unitSprite->setAnimationFrame(_animFrame);
 			cache->clear();
 			unitSprite->blit(cache);

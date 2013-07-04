@@ -347,7 +347,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder, c
 				}
 				else
 				{
-					rule = new RuleItem(type);
+					rule = new RuleItem(type, game);
 					_items[type] = rule;
 					_itemsIndex.push_back(type);
 				}
