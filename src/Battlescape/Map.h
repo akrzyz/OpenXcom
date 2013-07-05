@@ -76,7 +76,7 @@ private:
 	std::string _terrorPalette;
 public:
 	/// Creates a new map at the specified position and size.
-	Map(Game *game, int width, int height, int x, int y, int visibleMapHeight, int terrorPalette);
+	Map(Game *game, int width, int height, int x, int y, int visibleMapHeight);
 	/// Cleans up the map.
 	~Map();
 	/// sets stuff up

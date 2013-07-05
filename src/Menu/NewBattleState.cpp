@@ -76,6 +76,8 @@ NewBattleState::NewBattleState(Game *game) : State(game), _alienEquipLevel(0), _
 	
 	_txtItemLevel = new Text(136, 9, 110, 110);
 	_btnItemLevel = new TextButton(100, 20, 110, 120);
+	_txtDepth = new Text(100, 9, 5, 110);
+	_btnDepth = new TextButton(100, 20, 5, 120);
 
 	add(_window);
 	add(_txtTitle);
@@ -97,6 +99,8 @@ NewBattleState::NewBattleState(Game *game) : State(game), _alienEquipLevel(0), _
 	add(_btnCancel);
 	add(_txtItemLevel);
 	add(_btnItemLevel);
+	add(_txtDepth);
+	add(_btnDepth);
 
 	centerAllSurfaces();
 
@@ -129,10 +133,18 @@ NewBattleState::NewBattleState(Game *game) : State(game), _alienEquipLevel(0), _
 	
 	_txtItemLevel->setColor(Palette::blockOffset(8)+10);
 	_txtItemLevel->setText(_game->getLanguage()->getString("STR_ENEMY_WEAPON_LEVEL"));
+
+	_txtDepth->setColor(Palette::blockOffset(8)+10);
+	_txtDepth->setText(_game->getLanguage()->getString("STR_DEPTH"));
 	
 	_itemLevels.push_back("STR_LOW");
 	_itemLevels.push_back("STR_MEDIUM");
 	_itemLevels.push_back("STR_HIGH");
+
+	_depths.push_back("STR_GROUND");
+	_depths.push_back("STR_SHALLOW_DEPTH");
+	_depths.push_back("STR_MEDIUM_DEPTH");
+	_depths.push_back("STR_DEEP_SEA");
 
 	_missionTypes = _game->getRuleset()->getDeploymentsList();
 
@@ -178,6 +190,7 @@ NewBattleState::NewBattleState(Game *game) : State(game), _alienEquipLevel(0), _
 	_selDifficulty = Options::getInt("NewBattleDifficulty");
 	_selDarkness = Options::getInt("NewBattleDarkness");
 	_selCraft = Options::getInt("NewBattleCraft");
+	_selDepth = Options::getInt("NewBattleDepth");
 
 	_btnMissionType->setColor(Palette::blockOffset(15)-1);
 	_btnMissionType->setText(_game->getLanguage()->getString(_missionTypes[_selMission]));
@@ -206,6 +219,10 @@ NewBattleState::NewBattleState(Game *game) : State(game), _alienEquipLevel(0), _
 	_btnCraft->setColor(Palette::blockOffset(15)-1);
 	_btnCraft->setText(_game->getLanguage()->getString(_crafts[_selCraft]));
 	_btnCraft->onMouseClick((ActionHandler)&NewBattleState::btnCraftClick, 0);
+
+	_btnDepth->setColor(Palette::blockOffset(15)-1);
+	_btnDepth->setText(_game->getLanguage()->getString(_depths[_selDepth]));
+	_btnDepth->onMouseClick((ActionHandler)&NewBattleState::btnDepthClick, 0);
 
 	_btnEquip->setColor(Palette::blockOffset(8)+5);
 	_btnEquip->setText(_game->getLanguage()->getString("STR_EQUIP_CRAFT"));
@@ -433,6 +450,7 @@ void NewBattleState::btnOkClick(Action *)
 	bgen.setWorldShade(shade);
 	bgen.setAlienRace(_alienRaces[_selAlien]);
 	bgen.setAlienItemlevel(_selItemLevel);
+	bgen.setDepth(_selDepth);
 
 	bgen.run();
 	//_game->pushState(new BattlescapeState(_game));
@@ -469,6 +487,7 @@ void NewBattleState::btnRandomClick(Action *)
 	_selDifficulty = RNG::generate(0,4) ;
 	_selDarkness = RNG::generate(0,5) ;
 	_selItemLevel = RNG::generate(0,2);
+	_selDepth = RNG::generate(0,3);
 
 	_btnMissionType->setText(_game->getLanguage()->getString(_missionTypes[_selMission]));
 	_btnTerrainType->setText(_game->getLanguage()->getString(_terrainTypes[_selTerrain]));
@@ -477,6 +496,7 @@ void NewBattleState::btnRandomClick(Action *)
 	_btnDarkness->setText(Language::utf8ToWstr(_darkness[_selDarkness]));
 	_btnCraft->setText(_game->getLanguage()->getString(_crafts[_selCraft]));
 	_btnItemLevel->setText(_game->getLanguage()->getString(_itemLevels[_selItemLevel]));
+	_btnDepth->setText(_game->getLanguage()->getString(_depths[_selDepth]));
 
 	initSave();
 }
@@ -615,6 +635,24 @@ void NewBattleState::btnCraftClick(Action *action)
 	_btnCraft->setText(_game->getLanguage()->getString(_crafts[_selCraft]));
 	_craft->setRules(_game->getRuleset()->getCraft(_crafts[_selCraft]));
 	Options::setInt("NewBattleCraft", _selCraft);
+}
+
+/**
+ * Changes battle depth.
+ * @param action Pointer to an action.
+ */
+void NewBattleState::btnDepthClick(Action *action)
+{
+	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
+	{
+		updateIndex(_selDepth, _depths, 1);
+	}
+	else if (action->getDetails()->button.button == SDL_BUTTON_RIGHT)
+	{
+		updateIndex(_selDepth, _depths, -1);
+	}
+	_btnDepth->setText(_game->getLanguage()->getString(_depths[_selDepth]));
+	Options::setInt("NewBattleDepth", _selDepth);
 }
 
 }

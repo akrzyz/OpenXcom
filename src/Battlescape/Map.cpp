@@ -75,7 +75,7 @@ namespace OpenXcom
  * @param y Y position in pixels.
  * @param visibleMapHeight Current visible map height.
  */
-Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight, int terrorPalette) : InteractiveSurface(width, height, x, y, 32), _game(game), _arrow(0), _selectorX(0), _selectorY(0), _mouseX(0), _mouseY(0), _cursorType(CT_NORMAL), _cursorSize(1), _animFrame(0), _launch(false), _visibleMapHeight(visibleMapHeight), _unitDying(false), _terrorPalette("TFTD_PALETTES.DAT_3")
+Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) : InteractiveSurface(width, height, x, y, 32), _game(game), _arrow(0), _selectorX(0), _selectorY(0), _mouseX(0), _mouseY(0), _cursorType(CT_NORMAL), _cursorSize(1), _animFrame(0), _launch(false), _visibleMapHeight(visibleMapHeight), _unitDying(false), _terrorPalette("TFTD_PALETTES.DAT_3")
 {
 	_previewSetting = Options::getInt("battleNewPreviewPath");
 	std::stringstream palette;
@@ -86,9 +86,9 @@ Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight, 
 	}
 	_res = _game->getResourcePack();
 
-	if (terrorPalette > 3)
+	if (_game->getSavedGame()->getSavedBattle()->getDepth() > 0)
 	{
-		palette << "TFTD_PALETTES.DAT_" << terrorPalette;
+		palette << "TFTD_PALETTES.DAT_" << _game->getSavedGame()->getSavedBattle()->getDepth() + 3;
 		_terrorPalette = palette.str();
 	}
 
@@ -211,6 +211,11 @@ void Map::draw()
  */
 void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
+	for (std::vector<MapDataSet*>::const_iterator i = _save->getMapDataSets()->begin(); i != _save->getMapDataSets()->end(); ++i)
+	{
+		if ((*i)->getGame() == "xcom2")
+			(*i)->getSurfaceset()->setPalette(_res->getPalette(_terrorPalette)->getColors());
+	}
 	_message->setPalette(colors, firstcolor, ncolors);
 	_message->setBackground(_res->getSurface("TAC00.SCR"));
 	_message->setFonts(_res->getFont("Big.fnt"), _res->getFont("Small.fnt"));

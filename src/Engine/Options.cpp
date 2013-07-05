@@ -136,6 +136,7 @@ void createDefault()
 	setInt("NewBattleDifficulty", 0);
 	setInt("NewBattleDarkness", 0);
 	setInt("NewBattleCraft", 0);
+	setInt("NewBattleDepth", 0);
 	
 	// new battle loadout data
 	setInt("NewBattle_STR_AC_AP_AMMO", 0);

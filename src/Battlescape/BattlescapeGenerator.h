@@ -63,7 +63,7 @@ private:
 	int _unitSequence;
 	Tile *_craftInventoryTile;
 	std::string _alienRace;
-	int _alienItemLevel;
+	int _alienItemLevel, _depth;
 
 	/// Generate a new battlescape map.
 	void generateMap();
@@ -108,6 +108,8 @@ public:
 	void setAlienRace(const std::string &alienRace);
 	/// Set the alien item level.
 	void setAlienItemlevel(int alienItemLevel);
+	/// Set battle depth.
+	void setDepth(int depth);
 	/// Sets the xcom base.
 	void setBase(Base *base);
 	/// Sets the terror site.

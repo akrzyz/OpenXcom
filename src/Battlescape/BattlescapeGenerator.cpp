@@ -71,7 +71,7 @@ namespace OpenXcom
  * @param game pointer to Game object.
  */
 BattlescapeGenerator::BattlescapeGenerator(Game *game) : _game(game), _save(game->getSavedGame()->getSavedBattle()), _res(_game->getResourcePack()), _craft(0), _ufo(0), _base(0), _terror(0), _terrain(0),
-														 _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0), _unitSequence(0), _craftInventoryTile(0), _alienRace(""), _alienItemLevel(0)
+														 _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0), _unitSequence(0), _craftInventoryTile(0), _alienRace(""), _alienItemLevel(0), _depth(0)
 {
 }
 
@@ -143,6 +143,16 @@ void BattlescapeGenerator::setAlienRace(const std::string &alienRace)
 void BattlescapeGenerator::setAlienItemlevel(int alienItemLevel)
 {
 	_alienItemLevel = alienItemLevel;
+}
+
+/**
+ * Sets mission depth.
+ * - this value should be from 0 to 3.
+ * @param depth Depth.
+ */
+void BattlescapeGenerator::setDepth(int depth)
+{
+	_depth = depth;
 }
 
 /**
@@ -261,6 +271,8 @@ void BattlescapeGenerator::nextStage()
 				_save->getTiles()[i]->setDiscovered(true, 2);
 	}
 	_save->setGlobalShade(_worldShade);
+	_save->setDepth(_depth);
+
 	_save->getTileEngine()->calculateSunShading();
 	_save->getTileEngine()->calculateTerrainLighting();
 	_save->getTileEngine()->calculateUnitLighting();
@@ -464,6 +476,7 @@ void BattlescapeGenerator::run()
 
 	// set shade (alien bases are a little darker, sites depend on worldshade)
 	_save->setGlobalShade(_worldShade);
+	_save->setDepth(_depth);
 
 	_save->getTileEngine()->calculateSunShading();
 	_save->getTileEngine()->calculateTerrainLighting();
