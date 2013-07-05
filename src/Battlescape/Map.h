@@ -73,10 +73,10 @@ private:
 	std::vector<Position> _waypoints;
 	bool _unitDying;
 	int _previewSetting;
-	std::string _mainPalette;
+	std::string _terrorPalette;
 public:
 	/// Creates a new map at the specified position and size.
-	Map(Game *game, int width, int height, int x, int y, int visibleMapHeight);
+	Map(Game *game, int width, int height, int x, int y, int visibleMapHeight, int terrorPalette);
 	/// Cleans up the map.
 	~Map();
 	/// sets stuff up

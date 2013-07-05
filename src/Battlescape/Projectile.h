@@ -68,6 +68,8 @@ public:
 	Surface *getSprite() const;
 	/// skip the bullet flight
 	void skipTrajectory();
+	/// Get shooting item
+	BattleItem *getShootingItem() const;
 };
 
 }

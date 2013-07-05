@@ -75,18 +75,21 @@ namespace OpenXcom
  * @param y Y position in pixels.
  * @param visibleMapHeight Current visible map height.
  */
-Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight) : InteractiveSurface(width, height, x, y, 32), _game(game), _arrow(0), _selectorX(0), _selectorY(0), _mouseX(0), _mouseY(0), _cursorType(CT_NORMAL), _cursorSize(1), _animFrame(0), _launch(false), _visibleMapHeight(visibleMapHeight), _unitDying(false), _mainPalette("PALETTES.DAT_4")
+Map::Map(Game *game, int width, int height, int x, int y, int visibleMapHeight, int terrorPalette) : InteractiveSurface(width, height, x, y, 32), _game(game), _arrow(0), _selectorX(0), _selectorY(0), _mouseX(0), _mouseY(0), _cursorType(CT_NORMAL), _cursorSize(1), _animFrame(0), _launch(false), _visibleMapHeight(visibleMapHeight), _unitDying(false), _terrorPalette("TFTD_PALETTES.DAT_3")
 {
 	_previewSetting = Options::getInt("battleNewPreviewPath");
+	std::stringstream palette;
 	if (Options::getBool("TraceAI"))
 	{
 		// turn everything on because we want to see the markers.
 		_previewSetting = 3;
 	}
 	_res = _game->getResourcePack();
-	if (_game->getResourcePack()->getPalette("PALETTES.DAT_4") == 0)
+
+	if (terrorPalette > 3)
 	{
-		_mainPalette = "TFTD_PALETTES.DAT_3";
+		palette << "TFTD_PALETTES.DAT_" << terrorPalette;
+		_terrorPalette = palette.str();
 	}
 
 	_spriteWidth = _res->getSurfaceSet("BLANKS.PCK")->getFrame(0)->getWidth();
@@ -119,7 +122,18 @@ Map::~Map()
 void Map::init()
 {
 	// load the tiny arrow into a surface
-	int f = Palette::blockOffset(1)+1; // yellow
+	int f;
+	std::string palette;
+	if ((Options::getString("GUIstyle") == "tftd") && (_res->getPalette("TFTD_PALETTES.DAT_3") != 0))
+	{
+		f = Palette::blockOffset(10)+1;
+		palette = _terrorPalette;
+	}
+	else
+	{
+		f = Palette::blockOffset(1)+1; // yellow
+		palette = "PALETTES.DAT_4";
+	}
 	int b = 15; // black
 	int pixels[81] = { 0, 0, b, b, b, b, b, 0, 0,
 					   0, 0, b, f, f, f, b, 0, 0,
@@ -132,7 +146,7 @@ void Map::init()
 					   0, 0, 0, 0, b, 0, 0, 0, 0 };
 
 	_arrow = new Surface(9, 9);
-	_arrow->setPalette(_res->getPalette(_mainPalette)->getColors());
+	_arrow->setPalette(_res->getPalette(palette)->getColors());
 	_arrow->lock();
 	for (int y = 0; y < 9;++y)
 		for (int x = 0; x < 9; ++x)
@@ -523,10 +537,15 @@ void Map::drawTerrain()
 						}
 						else
 						{
+							std::string palette;
 							if (shadeSurface != 0)
 								delete shadeSurface;
 							shadeSurface = new Surface(3, 3);
-							shadeSurface->setPalette(_res->getPalette(_mainPalette)->getColors());
+							if (_projectile->getShootingItem()->getRules()->getTerrorPrefix() == "")
+								palette = "PALETTES.DAT_4";
+							else
+								palette = _terrorPalette;
+							shadeSurface->setPalette(_res->getPalette(palette)->getColors());
 							// draw bullet on the correct tile
 							if (itX >= bulletLowX && itX <= bulletHighX && itY >= bulletLowY && itY <= bulletHighY)
 							{
@@ -875,7 +894,7 @@ void Map::drawTerrain()
 			{
 				Position voxelPos = (*i)->getPosition();
 				_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
-				tmpSurface = _res->getSurfaceSet("TFTD_X1.PCK")->getFrame((*i)->getCurrentFrame());
+				tmpSurface = _res->getSurfaceSet((*i)->getTerrorPrefix() + "X1.PCK")->getFrame((*i)->getCurrentFrame());
 				if (shadeSurface != 0)
 					delete shadeSurface;
 				shadeSurface = new Surface(*tmpSurface);
@@ -1177,7 +1196,12 @@ void Map::cacheUnits()
 void Map::cacheUnit(BattleUnit *unit)
 {
 	UnitSprite *unitSprite = new UnitSprite(_spriteWidth, _spriteHeight, 0, 0);
-	unitSprite->setPalette(_res->getPalette(_mainPalette)->getColors());
+	std::string palette;
+	if (_res->getPalette("PALETTES.DAT_4") != 0)
+		palette = "PALETTES.DAT_4";
+	else
+		palette = _terrorPalette;
+	unitSprite->setPalette(_res->getPalette(palette)->getColors());
 	bool invalid, dummy;
 	std::string rhandObjectsName = "", lhandObjectsName = "";
 	int numOfParts = unit->getArmor()->getSize() == 1?1:unit->getArmor()->getSize()*2;
@@ -1192,7 +1216,7 @@ void Map::cacheUnit(BattleUnit *unit)
 			if (!cache) // no cache created yet
 			{
 				cache = new Surface(_spriteWidth, _spriteHeight);
-				cache->setPalette(_res->getPalette(_mainPalette)->getColors());
+				cache->setPalette(_res->getPalette(palette)->getColors());
 			}
 			unitSprite->setBattleUnit(unit, i);
 

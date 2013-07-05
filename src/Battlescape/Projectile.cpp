@@ -488,4 +488,17 @@ void Projectile::skipTrajectory()
 	_position = _trajectory.size() - 2;
 }
 
+/**
+ * Get the shooting item.
+ * Returns 0 when there is no item thrown.
+ * @return pointer to BattleItem
+ */
+BattleItem *Projectile::getShootingItem() const
+{
+	if (_action.type == BA_THROW)
+		return 0;
+	else
+		return _action.weapon;
+}
+
 }

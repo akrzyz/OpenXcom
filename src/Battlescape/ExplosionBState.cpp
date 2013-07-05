@@ -67,6 +67,7 @@ ExplosionBState::~ExplosionBState()
  */
 void ExplosionBState::init()
 {
+	std::string prefix = "";
 	if (_item)
 	{
 		_power = _item->getRules()->getPower();
@@ -78,6 +79,7 @@ void ExplosionBState::init()
 						|| _item->getRules()->getDamageType() == DT_IN 
 						|| _item->getRules()->getDamageType() == DT_SMOKE
 						|| _item->getRules()->getDamageType() == DT_STUN);
+		prefix = _item->getRules()->getTerrorPrefix();
 	}
 	else if (_tile)
 	{
@@ -101,7 +103,7 @@ void ExplosionBState::init()
 				int Y = RNG::generate(-_power/2,_power/2);
 				Position p = _center;
 				p.x += X; p.y += Y;
-				Explosion *explosion = new Explosion(p, RNG::generate(0,6), true, _item->getRules()->getTerrorPrefix());
+				Explosion *explosion = new Explosion(p, RNG::generate(0,6), true, prefix);
 				// add the explosion on the map
 				_parent->getMap()->getExplosions()->insert(explosion);
 			}

@@ -787,6 +787,8 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 			surf->unlock();
 		}
 
+		loadExtraResources(extraSprites, extraSounds);
+
 		// copy constructor doesn't like doing this directly, so let's make a second handobs file the old fashioned way.
 		// handob2 is used for all the left handed sprites.
 		_sets["HANDOB2.PCK"] = new SurfaceSet(_sets["HANDOB.PCK"]->getWidth(), _sets["HANDOB.PCK"]->getHeight());
@@ -795,8 +797,6 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 		{
 			(i->second)->blit(_sets["HANDOB2.PCK"]->addFrame(i->first));
 		}
-
-		loadExtraResources(extraSprites, extraSounds);
 	}
 	else if (game == "xcom2")
 	{
@@ -1083,6 +1083,8 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 
 		loadBattlescapeResources(gameFolder, game);
 
+		loadExtraResources(extraSprites, extraSounds);
+
 		// tftd_handob2 is used for all the left handed terror sprites.
 		_sets["TFTD_HANDOB2.PCK"] = new SurfaceSet(_sets["TFTD_HANDOB.PCK"]->getWidth(), _sets["TFTD_HANDOB.PCK"]->getHeight());
 		std::map<int, Surface*> *handob = _sets["TFTD_HANDOB.PCK"]->getFrames();
@@ -1090,8 +1092,6 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 		{
 			(i->second)->blit(_sets["TFTD_HANDOB2.PCK"]->addFrame(i->first));
 		}
-
-		loadExtraResources(extraSprites, extraSounds);
 	}
 }
 
@@ -1496,8 +1496,9 @@ void ResourcePack::loadExtraResources(std::vector<std::pair<std::string, ExtraSp
 		{
 			if (_surfaces.find(sheetName) == _surfaces.end())
 			{
+				if (debugOutput)
 				{
-					Log(LOG_INFO) << "Creating new single image: " << i->first;
+					Log(LOG_INFO) << "Creating new single image: " << sheetName;
 				}
 				_surfaces[sheetName] = new Surface(spritePack->getWidth(), spritePack->getHeight());
 			}
@@ -1505,7 +1506,7 @@ void ResourcePack::loadExtraResources(std::vector<std::pair<std::string, ExtraSp
 			{
 				if (debugOutput)
 				{
-					Log(LOG_INFO) << "Adding/Replacing single image: " << i->first;
+					Log(LOG_INFO) << "Adding/Replacing single image: " << sheetName;
 				}
 				delete _surfaces[sheetName];
 				_surfaces[sheetName] = new Surface(spritePack->getWidth(), spritePack->getHeight());
