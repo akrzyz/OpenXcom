@@ -286,7 +286,7 @@ std::vector<Uint16> *ResourcePack::getVoxelData()
  * @param gameFolder folder currently loaded.
  * @param game Name of the game resources beind loaded.
  */
-void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, ExtraSprites *> > extraSprites, std::vector<std::pair<std::string, ExtraSounds *> > extraSounds, const std::string &gameFolder, const std::string &game)
+void ResourcePack::loadGeoscapeResources(const std::string &gameFolder, const std::string &game)
 {
 	if (game == "xcom1")
 	{
@@ -787,8 +787,6 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 			surf->unlock();
 		}
 
-		loadExtraResources(extraSprites, extraSounds);
-
 		// copy constructor doesn't like doing this directly, so let's make a second handobs file the old fashioned way.
 		// handob2 is used for all the left handed sprites.
 		_sets["HANDOB2.PCK"] = new SurfaceSet(_sets["HANDOB.PCK"]->getWidth(), _sets["HANDOB.PCK"]->getHeight());
@@ -1083,9 +1081,7 @@ void ResourcePack::loadGeoscapeResources(std::vector<std::pair<std::string, Extr
 
 		loadBattlescapeResources(gameFolder, game);
 
-		loadExtraResources(extraSprites, extraSounds);
-
-		// tftd_handob2 is used for all the left handed terror sprites.
+		// tftd_handob2 is used for all the left handed terror item sprites.
 		_sets["TFTD_HANDOB2.PCK"] = new SurfaceSet(_sets["TFTD_HANDOB.PCK"]->getWidth(), _sets["TFTD_HANDOB.PCK"]->getHeight());
 		std::map<int, Surface*> *handob = _sets["TFTD_HANDOB.PCK"]->getFrames();
 		for (std::map<int, Surface*>::const_iterator i = handob->begin(); i != handob->end(); ++i)
@@ -1554,7 +1550,7 @@ void ResourcePack::loadExtraResources(std::vector<std::pair<std::string, ExtraSp
 				{
 					if (debugOutput)
 					{
-						Log(LOG_INFO) << "Loading surface set from folder: " << fileName << " starting at frame: " << startFrame;
+						Log(LOG_INFO) << "Loading surface set from folder: " << spritePack->getFolder() + fileName << " starting at frame: " << startFrame;
 					}
 					int offset = startFrame;
 					std::stringstream folder;
@@ -1665,75 +1661,78 @@ void ResourcePack::loadExtraResources(std::vector<std::pair<std::string, ExtraSp
 		}
 	}
 
-	for (std::vector<std::pair<std::string, ExtraSounds *> >::const_iterator i = extraSounds.begin(); i != extraSounds.end(); ++i)
+	if (!Options::getBool("mute"))
 	{
-		std::string setName = i->first;
-		ExtraSounds *soundPack = i->second;
-		if (_sounds.find(setName) == _sounds.end())
+		for (std::vector<std::pair<std::string, ExtraSounds *> >::const_iterator i = extraSounds.begin(); i != extraSounds.end(); ++i)
 		{
-			if (debugOutput)
-			{
-				Log(LOG_INFO) << "Creating new sound set: " << setName << ", this will likely have no in-game use.";
-			}
-			_sounds[setName] = new SoundSet();
-		}
-		else if (debugOutput)
-		{
-			Log(LOG_INFO) << "Adding/Replacing items in sound set: " << setName;
-		}
-		for (std::map<int, std::string>::iterator j = soundPack->getSounds()->begin(); j != soundPack->getSounds()->end(); ++j)
-		{
-			int startSound = j->first;
-			std::string fileName = j->second;
-			s.str("");
-			if (fileName.substr(fileName.length() - 1, 1) == "/")
+			std::string setName = i->first;
+			ExtraSounds *soundPack = i->second;
+			if (_sounds.find(setName) == _sounds.end())
 			{
 				if (debugOutput)
 				{
-					Log(LOG_INFO) << "Loading sound set from folder: " << fileName << " starting at index: " << startSound;
+					Log(LOG_INFO) << "Creating new sound set: " << setName << ", this will likely have no in-game use.";
 				}
-				int offset = startSound;
-				std::stringstream folder;
-				folder << CrossPlatform::getDataFolder(fileName);
-				std::vector<std::string> contents = CrossPlatform::getFolderContents(folder.str());
-				for (std::vector<std::string>::iterator k = contents.begin();
-					k != contents.end(); ++k)
-				{
-					s.str("");
-					s << folder.str() << CrossPlatform::getDataFile(*k);
-					if (_sounds[setName]->getSound(offset))
-					{
-						_sounds[setName]->getSound(offset)->load(s.str());
-					}
-					else
-					{
-						_sounds[setName]->addSound(offset + soundPack->getModIndex())->load(s.str());
-					}
-					offset++;
-				}
+				_sounds[setName] = new SoundSet();
 			}
-			else
+			else if (debugOutput)
 			{
-				s << CrossPlatform::getDataFile(fileName);
-				if (_sounds[setName]->getSound(startSound))
+				Log(LOG_INFO) << "Adding/Replacing items in sound set: " << setName;
+			}
+			for (std::map<int, std::string>::iterator j = soundPack->getSounds()->begin(); j != soundPack->getSounds()->end(); ++j)
+			{
+				int startSound = j->first;
+				std::string fileName = j->second;
+				s.str("");
+				if (fileName.substr(fileName.length() - 1, 1) == "/")
 				{
 					if (debugOutput)
 					{
-						Log(LOG_INFO) << "Replacing index: " << startSound;
+						Log(LOG_INFO) << "Loading sound set from folder: " << soundPack->getFolder() + fileName << " starting at index: " << startSound;
 					}
-					_sounds[setName]->getSound(startSound)->load(s.str());
+					int offset = startSound;
+					std::stringstream folder;
+					folder << CrossPlatform::getDataFolder(soundPack->getFolder() + fileName);
+					std::vector<std::string> contents = CrossPlatform::getFolderContents(folder.str());
+					for (std::vector<std::string>::iterator k = contents.begin();
+						k != contents.end(); ++k)
+					{
+						s.str("");
+						s << folder.str() << CrossPlatform::getDataFile(*k);
+						if (_sounds[setName]->getSound(offset))
+						{
+							_sounds[setName]->getSound(offset)->load(s.str());
+						}
+						else
+						{
+							_sounds[setName]->addSound(offset + soundPack->getModIndex())->load(s.str());
+						}
+						offset++;
+					}
 				}
 				else
 				{
-					if (debugOutput)
+					s << CrossPlatform::getDataFile(soundPack->getFolder() + fileName);
+					if (_sounds[setName]->getSound(startSound))
 					{
-						Log(LOG_INFO) << "Adding index: " << startSound;
+						if (debugOutput)
+						{
+							Log(LOG_INFO) << "Replacing index: " << startSound;
+						}
+						_sounds[setName]->getSound(startSound)->load(s.str());
 					}
-					_sounds[setName]->addSound(startSound + soundPack->getModIndex())->load(s.str());
+					else
+					{
+						if (debugOutput)
+						{
+							Log(LOG_INFO) << "Adding index: " << startSound;
+						}
+						_sounds[setName]->addSound(startSound + soundPack->getModIndex())->load(s.str());
+					}
 				}
 			}
 		}
-	}	
+	}
 }
 
 }

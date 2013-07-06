@@ -5,7 +5,7 @@ extraSprites:
     files:
       0: Resources/Pathfinding/
   - type: Projectiles
-    width: 105
+    width: 108
     height: 33
     subX: 3
     subY: 3

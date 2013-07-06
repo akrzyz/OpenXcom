@@ -117,9 +117,9 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder)
 		else if (key == "bulletSprite")
 		{
 			i.second() >> _bulletSprite;
-			// Projectiles: 385 entries ((105*33) / (3*3)) (35 sprites per projectile(0-34), 11 projectiles (0-10))
-			_bulletSprite *= 35;
-			if (_bulletSprite >= 385)
+			// Projectiles: 396 entries ((108*33) / (3*3)) (36 sprites per projectile(0-35), 11 projectiles (0-10))
+			_bulletSprite *= 36;
+			if (_bulletSprite >= 396)
 			{
 				_bulletSprite += modIndex;
 			}

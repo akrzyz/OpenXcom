@@ -25,7 +25,7 @@ namespace OpenXcom
 /*
  * Creates a blank set of extra sound data.
  */
-ExtraSounds::ExtraSounds() : _modIndex(0)
+ExtraSounds::ExtraSounds(const std::string &folder) : _folder(folder), _modIndex(0)
 {
 }
 
@@ -68,6 +68,14 @@ void ExtraSounds::load(const YAML::Node &node, int modIndex)
 std::map<int, std::string> *ExtraSounds::getSounds()
 {
 	return &_sounds;
+}
+
+/*
+ * @return directory with data for this external sound set.
+ */
+std::string ExtraSounds::getFolder()
+{
+	return _folder;
 }
 
 /*

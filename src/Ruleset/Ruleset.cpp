@@ -698,7 +698,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder, c
 			{
 				std::string type;
 				(*j)["type"] >> type;
-				std::auto_ptr<ExtraSounds> extraSounds(new ExtraSounds());
+				std::auto_ptr<ExtraSounds> extraSounds(new ExtraSounds(folder));
 				extraSounds->load(*j, _modIndex);
 				_extraSounds.push_back(std::make_pair(type, extraSounds.release()));
 				_extraSoundsIndex.push_back(type);
