@@ -236,6 +236,7 @@ void createDefault()
 	setInt("keyBattleCenterEnemy8", SDLK_8);
 	setInt("keyBattleCenterEnemy9", SDLK_9);
 	setInt("keyBattleCenterEnemy10", SDLK_0);
+	setInt("keyBattleVoxelView", SDLK_F10);
 
 	
 	_folders.clear();
