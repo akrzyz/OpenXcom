@@ -46,6 +46,7 @@ private:
 	std::string _type;
 	std::string _race;
 	std::string _rank;
+	std::string _terrorPrefix;
 	UnitStats _stats;
 	std::string _armor;
 	int _standHeight, _kneelHeight, _floatHeight;
@@ -56,7 +57,7 @@ private:
 	bool _livingWeapon;
 public:
 	/// Creates a blank unit ruleset.
-	Unit(const std::string &type, std::string race, std::string rank);
+	Unit(const std::string &type, std::string race, std::string rank, const std::string &game);
 	/// Cleans up the unit ruleset.
 	~Unit();
 	/// Loads the unit data from YAML.
@@ -99,6 +100,8 @@ public:
 	int getAggroSound() const;
 	/// does this unit have a built in weapon?
 	bool isLivingWeapon() const;
+	/// get prefix indicating TFTD unit.
+	std::string getTerrorPrefix() const;
 };
 
 }

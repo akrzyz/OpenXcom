@@ -256,7 +256,7 @@ Palette *ResourcePack::getPalette(const std::string &name) const
 }
 
 /**
- * Changes the palette of all the graphics in the resource set.
+ * Changes the palette of font graphics in the resource set.
  * @param colors Pointer to the set of colors.
  * @param firstcolor Offset of the first color to replace.
  * @param ncolors Amount of colors to replace.
@@ -266,6 +266,30 @@ void ResourcePack::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 	for (std::map<std::string, Font*>::iterator i = _fonts.begin(); i != _fonts.end(); ++i)
 	{
 		i->second->getSurface()->setPalette(colors, firstcolor, ncolors);
+	}
+}
+
+/**
+ * Changes the palette of all TFTD related graphics in the resource set.
+ * @param colors Pointer to the set of colors.
+ * @param firstcolor Offset of the first color to replace.
+ * @param ncolors Amount of colors to replace.
+ */
+void ResourcePack::setPaletteTerror(SDL_Color *colors, int firstcolor, int ncolors)
+{
+/*	for (std::map<std::string, Font*>::iterator i = _fonts.begin(); i != _fonts.end(); ++i)
+	{
+		i->second->getSurface()->setPalette(colors, firstcolor, ncolors);
+	}*/
+	for (std::map<std::string, Surface*>::iterator i = _surfaces.begin(); i != _surfaces.end(); ++i)
+	{
+		if ((i->first.substr(i->first.length()-3, 3) != "LBM") && (i->first.substr(0, 4) == "TFTD"))
+			i->second->setPalette(colors, firstcolor, ncolors);
+	}
+	for (std::map<std::string, SurfaceSet*>::iterator i = _sets.begin(); i != _sets.end(); ++i)
+	{
+		if (i->first.substr(0, 4) == "TFTD")
+			i->second->setPalette(colors, firstcolor, ncolors);
 	}
 }
 
@@ -1295,7 +1319,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const
 		s << gameFolder << "UFOGRAPH/" << "CURSOR.PCK";
 		s2 << gameFolder << "UFOGRAPH/" << "CURSOR.TAB";
 		_sets["TFTD_CURSOR.PCK"] = new SurfaceSet(32, 40);
-		_sets["TFTD_CURSOR.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["TFTD_CURSOR.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()), 4);
 		_sets["TFTD_CURSOR.PCK"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
 
 		s.str("");
@@ -1303,7 +1327,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const
 		s << gameFolder << "UFOGRAPH/" << "SMOKE.PCK";
 		s2 << gameFolder << "UFOGRAPH/" << "SMOKE.TAB";
 		_sets["TFTD_SMOKE.PCK"] = new SurfaceSet(32, 40);
-		_sets["TFTD_SMOKE.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+		_sets["TFTD_SMOKE.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()), 4);
 		_sets["TFTD_SMOKE.PCK"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
 	
 		s.str("");
@@ -1348,7 +1372,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const
 				s2 << gameFolder << "TERRAIN/" << tab;
 				_sets[bsets[i]] = new SurfaceSet(32, 40);
 				_sets[bsets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-				_sets[bsets[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+				_sets[bsets[i]]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
 			}
 		}
 
@@ -1383,7 +1407,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const
 			std::stringstream s2;
 			s2 << gameFolder + "UNITS/" << tab;
 			_sets["TFTD_" + usets[i]] = new SurfaceSet(32, 40);
-			_sets["TFTD_" + usets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+			_sets["TFTD_" + usets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()), 4);
 			_sets["TFTD_" + usets[i]]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
 		}
 

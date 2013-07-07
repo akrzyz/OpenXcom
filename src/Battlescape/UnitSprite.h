@@ -50,6 +50,7 @@ private:
 	void drawRoutine8();
 	void drawRoutine9();
 	void drawRoutine10();
+	void drawRoutine11();
 	int _drawingRoutine;
 	/// sort two handed sprites out.
 	void sortRifles();

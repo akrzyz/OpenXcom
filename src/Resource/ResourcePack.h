@@ -95,6 +95,8 @@ public:
 	Palette *getPalette(const std::string &name) const;
 	/// Sets a new palette.
 	void setPalette(SDL_Color *colors, int firstcolor, int ncolors);
+	/// Sets a new palette for TFTD related files only.
+	void setPaletteTerror(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 	/// Gets list of voxel data.
 	std::vector<Uint16> *getVoxelData();
 	/// Loads geoscape specific resources

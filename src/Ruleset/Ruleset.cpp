@@ -466,7 +466,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder, c
 				}
 				else
 				{
-					rule = new Unit(type, "", "");
+					rule = new Unit(type, "", "", game);
 					_units[type] = rule;
 				}
 				rule->load(*j);

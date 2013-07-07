@@ -890,7 +890,7 @@ int RuleItem::getBulletSpeed() const
 
 /**
  * Returns prefix used by TFTD items. UFO:EU items have empty prefix.
- * @return BIGOBS file name.
+ * @return terror prefix.
  */
 std::string RuleItem::getTerrorPrefix() const
 {

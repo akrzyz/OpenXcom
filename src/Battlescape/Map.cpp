@@ -211,6 +211,8 @@ void Map::draw()
  */
 void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
+	if (_res->getPalette(_terrorPalette) != 0)
+		_res->setPaletteTerror(_res->getPalette(_terrorPalette)->getColors());
 	for (std::vector<MapDataSet*>::const_iterator i = _save->getMapDataSets()->begin(); i != _save->getMapDataSets()->end(); ++i)
 	{
 		if ((*i)->getGame() == "xcom2")
@@ -556,7 +558,7 @@ void Map::drawTerrain()
 							{
 								for (int i = 0; i < BULLET_SPRITES; ++i)
 								{
-									tmpSurface = _res->getSurfaceSet("Projectiles")->getFrame(_projectile->getParticle(i));
+									tmpSurface = _res->getSurfaceSet(_projectile->getShootingItem()->getRules()->getTerrorPrefix() + "Projectiles")->getFrame(_projectile->getParticle(i));
 									if (tmpSurface)
 									{
 										shadeSurface->clear();
@@ -1202,10 +1204,17 @@ void Map::cacheUnit(BattleUnit *unit)
 {
 	UnitSprite *unitSprite = new UnitSprite(_spriteWidth, _spriteHeight, 0, 0);
 	std::string palette;
-	if (_res->getPalette("PALETTES.DAT_4") != 0)
-		palette = "PALETTES.DAT_4";
-	else
-		palette = _terrorPalette;
+	palette = "PALETTES.DAT_4";
+/*	if (unit->getUnitRules() != 0)
+		if (unit->getUnitRules()->getTerrorPrefix() == "")
+			palette = "PALETTES.DAT_4";
+		else
+			palette = _terrorPalette;
+	else 
+		if (Options::getString("GUIstyle") == "tftd")//_res->getPalette("PALETTES.DAT_4") != 0)
+			palette = _terrorPalette;
+		else
+			palette = "PALETTES.DAT_4";*/
 	unitSprite->setPalette(_res->getPalette(palette)->getColors());
 	bool invalid, dummy;
 	std::string rhandObjectsName = "", lhandObjectsName = "";
