@@ -1218,20 +1218,24 @@ void UnitSprite::drawRoutine10()
 		s->blit(this);
 	}
 
-	int turretOffsetX = 0;
-	int turretOffsetY = 0;
+	int turretOffsetX;
+	int turretOffsetY;
 	switch (_part)
 	{
+	case 0:
+		turretOffsetX = 0;
+		turretOffsetY = 0;
+		break;
 	case 1:
-		turretOffsetX -= 16;
-		turretOffsetY -= 8;
+		turretOffsetX = -16;
+		turretOffsetY = -8;
 		break;
 	case 2:
-		turretOffsetX += 16;
-		turretOffsetY -= 8;
+		turretOffsetX = 16;
+		turretOffsetY = -8;
 		break;
 	case 3:
-		turretOffsetY -= 16;
+		turretOffsetY = -16;
 		break;
 	}
 
