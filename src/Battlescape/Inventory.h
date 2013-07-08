@@ -46,6 +46,7 @@ private:
 	BattleUnit *_selUnit;
 	BattleItem *_selItem;
 	bool _tu;
+	std::string _GUIstyle;
 	int _groundOffset;
 	std::map<int, std::map<int, int> > _stackLevel;
 	NumberText *_stackNumber;

@@ -44,7 +44,7 @@ namespace OpenXcom
 MainMenuState::MainMenuState(Game *game) : State(game)
 {
 	std::string palette, backpalette, background;
-	int colors[3];
+	Uint8 colors[3];
 
 	// Create objects
 	_window = new Window(this, 256, 160, 32, 20, POPUP_BOTH);
@@ -55,7 +55,7 @@ MainMenuState::MainMenuState(Game *game) : State(game)
 	_btnQuit = new TextButton(192, 20, 64, 146);
 	_txtTitle = new Text(256, 30, 32, 45);
 
-	if ( ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_game->getResourcePack()->getPalette("PALETTES.DAT_0") == 0) ) || ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "tftd") ) )
+	if ( ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_game->getResourcePack()->getPalette("PALETTES.DAT_0") == 0) ) || ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "xcom2") ) )
 	{
 		// Basic properties for display in TFTD style
 		palette = "TFTD_PALETTES.DAT_0";

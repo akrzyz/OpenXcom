@@ -53,15 +53,29 @@ namespace OpenXcom
  */
 Inventory::Inventory(Game *game, int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _game(game), _selUnit(0), _selItem(0), _tu(true), _groundOffset(0)
 {
+	Uint8 colors[2];
+
 	_grid = new Surface(width, height, x, y);
 	_items = new Surface(width, height, x, y);
 	_selection = new Surface(RuleInventory::HAND_W * RuleInventory::SLOT_W, RuleInventory::HAND_H * RuleInventory::SLOT_H, x, y);
 	_warning = new WarningMessage(224, 24, 48, 176);
 	_stackNumber = new NumberText(15, 15, 0, 0);
 
+	if ( ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_game->getResourcePack()->getPalette("PALETTES.DAT_0") == 0) ) || ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "xcom2") ) )
+	{
+		_GUIstyle = "xcom2";
+		colors[0] = colors[1] = Palette::blockOffset(3);
+	}
+	else
+	{
+		_GUIstyle = "xcom1";
+		colors[0] = Palette::blockOffset(2);
+		colors[1] = Palette::blockOffset(1) - 1;
+	}
+
 	_warning->setFonts(_game->getResourcePack()->getFont("Big.fnt"), _game->getResourcePack()->getFont("Small.fnt"));
-	_warning->setColor(Palette::blockOffset(2));
-	_warning->setTextColor(Palette::blockOffset(1)-1);
+	_warning->setColor(colors[0]);
+	_warning->setTextColor(colors[1]);
 }
 
 /**
@@ -128,14 +142,27 @@ void Inventory::draw()
  */
 void Inventory::drawGrid()
 {
+	Uint8 colors[2];
+
 	_grid->clear();
 	Text text = Text(80, 9, 0, 0);
 	text.setPalette(_grid->getPalette());
 	text.setFonts(_game->getResourcePack()->getFont("Big.fnt"), _game->getResourcePack()->getFont("Small.fnt"));
-	text.setColor(Palette::blockOffset(4)-1);
-	text.setHighContrast(true);
 
-	Uint8 color = Palette::blockOffset(0)+8;
+	if (_GUIstyle == "xcom2")
+	{
+		colors[0] = Palette::blockOffset(0) + 1;
+		colors[1] = Palette::blockOffset(0) + 5;
+	}
+	else
+	{
+		colors[0] = Palette::blockOffset(4) - 1;
+		colors[1] = Palette::blockOffset(0) + 8;
+		text.setHighContrast(true);
+	}
+
+	text.setColor(colors[0]);
+
 	for (std::map<std::string, RuleInventory*>::iterator i = _game->getRuleset()->getInventories()->begin(); i != _game->getRuleset()->getInventories()->end(); ++i)
 	{
 		// Draw grid
@@ -148,7 +175,7 @@ void Inventory::drawGrid()
 				r.y = i->second->getY() + RuleInventory::SLOT_H * j->y;
 				r.w = RuleInventory::SLOT_W + 1;
 				r.h = RuleInventory::SLOT_H + 1;
-				_grid->drawRect(&r, color);
+				_grid->drawRect(&r, colors[1]);
 				r.x++;
 				r.y++;
 				r.w -= 2;
@@ -163,7 +190,7 @@ void Inventory::drawGrid()
 			r.y = i->second->getY();
 			r.w = RuleInventory::HAND_W * RuleInventory::SLOT_W;
 			r.h = RuleInventory::HAND_H * RuleInventory::SLOT_H;
-			_grid->drawRect(&r, color);
+			_grid->drawRect(&r, colors[1]);
 			r.x++;
 			r.y++;
 			r.w -= 2;
@@ -181,7 +208,7 @@ void Inventory::drawGrid()
 					r.y = y;
 					r.w = RuleInventory::SLOT_W + 1;
 					r.h = RuleInventory::SLOT_H + 1;
-					_grid->drawRect(&r, color);
+					_grid->drawRect(&r, colors[1]);
 					r.x++;
 					r.y++;
 					r.w -= 2;
@@ -204,6 +231,12 @@ void Inventory::drawGrid()
  */
 void Inventory::drawItems()
 {
+	Uint8 color;
+	if (_GUIstyle == "xcom2")
+		color = Palette::blockOffset(0) + 1;
+	else
+		color = Palette::blockOffset(4) + 2;
+
 	_items->clear();
 	if (_selUnit != 0)
 	{
@@ -251,7 +284,7 @@ void Inventory::drawItems()
 				_stackNumber->setY(((*i)->getSlot()->getY() + ((*i)->getSlotY() + (*i)->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H)-5);
 				_stackNumber->setValue(_stackLevel[(*i)->getSlotX()][(*i)->getSlotY()]);
 				_stackNumber->draw();
-				_stackNumber->setColor(Palette::blockOffset(4)+2);
+				_stackNumber->setColor(color);
 				_stackNumber->blit(stackLayer);
 			}
 		}

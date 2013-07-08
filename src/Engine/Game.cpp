@@ -402,7 +402,7 @@ void Game::loadLanguage(const std::string &filename)
 	ss << "Language/" << filename << ".lng";
 	ss2 << "Language/" << filename << ".geo";
 
-	if ( ( (_res->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_res->getPalette("PALETTES.DAT_0") == 0) ) || ( (_res->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "tftd") ) )
+	if ( ( (_res->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_res->getPalette("PALETTES.DAT_0") == 0) ) || ( (_res->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "xcom2") ) )
 		background = "TFTD_GEOBORD.SCR";
 	else
 		background = "GEOBORD.SCR";

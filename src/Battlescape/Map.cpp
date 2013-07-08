@@ -122,18 +122,16 @@ Map::~Map()
 void Map::init()
 {
 	// load the tiny arrow into a surface
-	int f;
 	std::string palette;
-	if ((Options::getString("GUIstyle") == "tftd") && (_res->getPalette("TFTD_PALETTES.DAT_3") != 0))
+	if ((Options::getString("GUIstyle") == "xcom2") && (_res->getPalette("TFTD_PALETTES.DAT_3") != 0))
 	{
-		f = Palette::blockOffset(10)+1;
 		palette = _terrorPalette;
 	}
 	else
 	{
-		f = Palette::blockOffset(1)+1; // yellow
 		palette = "PALETTES.DAT_4";
 	}
+	int	f = Palette::blockOffset(1)+1; // yellow
 	int b = 15; // black
 	int pixels[81] = { 0, 0, b, b, b, b, b, 0, 0,
 					   0, 0, b, f, f, f, b, 0, 0,
