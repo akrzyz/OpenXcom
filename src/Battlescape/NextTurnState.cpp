@@ -22,6 +22,7 @@
 #include "../Resource/ResourcePack.h"
 #include "../Engine/Language.h"
 #include "../Engine/Palette.h"
+#include "../Engine/Options.h"
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
 #include "../Engine/Action.h"
@@ -42,6 +43,9 @@ namespace OpenXcom
  */
 NextTurnState::NextTurnState(Game *game, SavedBattleGame *battleGame, BattlescapeState *state) : State(game), _battleGame(battleGame), _state(state)
 {
+	std::string background;
+	Uint8 color;
+
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_txtTitle = new Text(320, 16, 0, 68);
@@ -57,37 +61,53 @@ NextTurnState::NextTurnState(Game *game, SavedBattleGame *battleGame, Battlescap
 
 	centerAllSurfaces();
 
-	// Set up objects
-	_window->setColor(Palette::blockOffset(0));
-	_window->setHighContrast(true);
-	_window->setBackground(_game->getResourcePack()->getSurface("TAC00.SCR"));
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_TAC00.SCR";
 
-	_txtTitle->setColor(Palette::blockOffset(0));
+		color = Palette::blockOffset(0)+1;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "TAC00.SCR";
+
+		color = Palette::blockOffset(0);
+
+		_window->setHighContrast(true);
+		_txtTitle->setHighContrast(true);
+		_txtTurn->setHighContrast(true);
+		_txtSide->setHighContrast(true);
+		_txtMessage->setHighContrast(true);
+	}
+
+	// Set up objects
+	_window->setColor(color);
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
+
+	_txtTitle->setColor(color);
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
-	_txtTitle->setHighContrast(true);
 	_txtTitle->setText(_game->getLanguage()->getString("STR_OPENXCOM"));
 
-	_txtTurn->setColor(Palette::blockOffset(0));
+	_txtTurn->setColor(color);
 	_txtTurn->setBig();
 	_txtTurn->setAlign(ALIGN_CENTER);
-	_txtTurn->setHighContrast(true);
 	std::wstringstream ss;
 	ss << _game->getLanguage()->getString("STR_TURN") << L" " << _battleGame->getTurn();
 	_txtTurn->setText(ss.str());
 
-	_txtSide->setColor(Palette::blockOffset(0));
+	_txtSide->setColor(color);
 	_txtSide->setBig();
 	_txtSide->setAlign(ALIGN_CENTER);
-	_txtSide->setHighContrast(true);
 	ss.str(L"");
 	ss << _game->getLanguage()->getString("STR_SIDE") << _game->getLanguage()->getString((_battleGame->getSide() == FACTION_PLAYER?"STR_XCOM":"STR_ALIENS"));
 	_txtSide->setText(ss.str());
 
-	_txtMessage->setColor(Palette::blockOffset(0));
+	_txtMessage->setColor(color);
 	_txtMessage->setBig();
 	_txtMessage->setAlign(ALIGN_CENTER);
-	_txtMessage->setHighContrast(true);
 	_txtMessage->setText(_game->getLanguage()->getString("STR_PRESS_BUTTON_TO_CONTINUE"));
 
 	_state->clearMouseScrollingState();

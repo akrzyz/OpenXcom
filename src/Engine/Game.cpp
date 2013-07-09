@@ -403,9 +403,15 @@ void Game::loadLanguage(const std::string &filename)
 	ss2 << "Language/" << filename << ".geo";
 
 	if ( ( (_res->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_res->getPalette("PALETTES.DAT_0") == 0) ) || ( (_res->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "xcom2") ) )
+	{
+		Options::setString("GUIstyle", "xcom2");
 		background = "TFTD_GEOBORD.SCR";
+	}
 	else
+	{
+		Options::setString("GUIstyle", "xcom1");
 		background = "GEOBORD.SCR";
+	}
 
 	_lang->loadLng(CrossPlatform::getDataFile(ss.str()), _rules->getExtraStrings()[filename]);
 

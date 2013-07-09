@@ -39,6 +39,8 @@ namespace OpenXcom
  */
 BattlescapeOptionsState::BattlescapeOptionsState(Game *game) : State(game)
 {
+	std::string background;
+	Uint8 color;
 	_screen = false;
 
 	// Create objects
@@ -183,192 +185,208 @@ BattlescapeOptionsState::BattlescapeOptionsState(Game *game) : State(game)
 
 	centerAllSurfaces();
 
-	// Set up objects
-	_window->setColor(Palette::blockOffset(0));
-	_window->setHighContrast(true);
-	_window->setBackground(_game->getResourcePack()->getSurface("TAC00.SCR"));
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_TAC00.SCR";
 
-	_txtTitle->setColor(Palette::blockOffset(0));
+		color = Palette::blockOffset(0)+1;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "TAC00.SCR";
+
+		color = Palette::blockOffset(0);
+
+		_window->setHighContrast(true);
+		_txtTitle->setHighContrast(true);
+		_txtScrollSpeed->setHighContrast(true);
+		_btnScrollSpeed1->setHighContrast(true);
+		_btnScrollSpeed2->setHighContrast(true);
+		_btnScrollSpeed3->setHighContrast(true);
+		_btnScrollSpeed4->setHighContrast(true);
+		_btnScrollSpeed5->setHighContrast(true);
+		_txtScrollType->setHighContrast(true);
+		_txtTriggerScroll->setHighContrast(true);
+		_txtAutoScroll->setHighContrast(true);
+		_txtDragScroll->setHighContrast(true);
+		_btnScrollType1->setHighContrast(true);
+		_btnScrollType2->setHighContrast(true);
+		_btnScrollType3->setHighContrast(true);
+		_txtFireSpeed->setHighContrast(true);
+		_btnFireSpeed1->setHighContrast(true);
+		_btnFireSpeed2->setHighContrast(true);
+		_btnFireSpeed3->setHighContrast(true);
+		_btnFireSpeed4->setHighContrast(true);
+		_btnFireSpeed5->setHighContrast(true);
+		_btnFireSpeed6->setHighContrast(true);
+		_txtXcomSpeed->setHighContrast(true);
+		_btnXcomSpeed1->setHighContrast(true);
+		_btnXcomSpeed2->setHighContrast(true);
+		_btnXcomSpeed3->setHighContrast(true);
+		_btnXcomSpeed4->setHighContrast(true);
+		_btnXcomSpeed5->setHighContrast(true);
+		_btnXcomSpeed6->setHighContrast(true);
+		_txtAlienSpeed->setHighContrast(true);
+		_btnAlienSpeed1->setHighContrast(true);
+		_btnAlienSpeed2->setHighContrast(true);
+		_btnAlienSpeed3->setHighContrast(true);
+		_btnAlienSpeed4->setHighContrast(true);
+		_btnAlienSpeed5->setHighContrast(true);
+		_btnAlienSpeed6->setHighContrast(true);
+		_btnOk->setHighContrast(true);
+		_btnLoad->setHighContrast(true);
+		_btnSave->setHighContrast(true);
+	}
+
+	// Set up objects
+	_window->setColor(color);
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
+
+	_txtTitle->setColor(color);
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
-	_txtTitle->setHighContrast(true);
 	_txtTitle->setText(_game->getLanguage()->getString("STR_GAME_OPTIONS"));
 
-	_txtScrollSpeed->setColor(Palette::blockOffset(0));
-	_txtScrollSpeed->setHighContrast(true);
+	_txtScrollSpeed->setColor(color);
 	_txtScrollSpeed->setText(_game->getLanguage()->getString("STR_SCROLL_SPEED"));
 
-	_btnScrollSpeed1->setColor(Palette::blockOffset(0));
-	_btnScrollSpeed1->setHighContrast(true);
+	_btnScrollSpeed1->setColor(color);
 	_btnScrollSpeed1->setText(L"1");
 	_btnScrollSpeed1->setGroup(&_scrollSpeed);
 
-	_btnScrollSpeed2->setColor(Palette::blockOffset(0));
-	_btnScrollSpeed2->setHighContrast(true);
+	_btnScrollSpeed2->setColor(color);
 	_btnScrollSpeed2->setText(L"2");
 	_btnScrollSpeed2->setGroup(&_scrollSpeed);
 
-	_btnScrollSpeed3->setColor(Palette::blockOffset(0));
-	_btnScrollSpeed3->setHighContrast(true);
+	_btnScrollSpeed3->setColor(color);
 	_btnScrollSpeed3->setText(L"3");
 	_btnScrollSpeed3->setGroup(&_scrollSpeed);
 
-	_btnScrollSpeed4->setColor(Palette::blockOffset(0));
-	_btnScrollSpeed4->setHighContrast(true);
+	_btnScrollSpeed4->setColor(color);
 	_btnScrollSpeed4->setText(L"4");
 	_btnScrollSpeed4->setGroup(&_scrollSpeed);
 
-	_btnScrollSpeed5->setColor(Palette::blockOffset(0));
-	_btnScrollSpeed5->setHighContrast(true);
+	_btnScrollSpeed5->setColor(color);
 	_btnScrollSpeed5->setText(L"5");
 	_btnScrollSpeed5->setGroup(&_scrollSpeed);
 
-	_txtScrollType->setColor(Palette::blockOffset(0));
-	_txtScrollType->setHighContrast(true);
+	_txtScrollType->setColor(color);
 	_txtScrollType->setText(_game->getLanguage()->getString("STR_SCROLL_TYPE"));
 
-	_txtTriggerScroll->setColor(Palette::blockOffset(0));
-	_txtTriggerScroll->setHighContrast(true);
+	_txtTriggerScroll->setColor(color);
 	_txtTriggerScroll->setText(_game->getLanguage()->getString("STR_TRIGGER_SCROLL"));
 
-	_txtAutoScroll->setColor(Palette::blockOffset(0));
-	_txtAutoScroll->setHighContrast(true);
+	_txtAutoScroll->setColor(color);
 	_txtAutoScroll->setText(_game->getLanguage()->getString("STR_AUTO_SCROLL"));
 
-	_txtDragScroll->setColor(Palette::blockOffset(0));
-	_txtDragScroll->setHighContrast(true);
+	_txtDragScroll->setColor(color);
 	_txtDragScroll->setText(_game->getLanguage()->getString("STR_DRAG_SCROLL"));
 
-	_btnScrollType1->setColor(Palette::blockOffset(0));
-	_btnScrollType1->setHighContrast(true);
+	_btnScrollType1->setColor(color);
 	_btnScrollType1->setText(L"1");
 	_btnScrollType1->setGroup(&_scrollType);
 
-	_btnScrollType2->setColor(Palette::blockOffset(0));
-	_btnScrollType2->setHighContrast(true);
+	_btnScrollType2->setColor(color);
 	_btnScrollType2->setText(L"2");
 	_btnScrollType2->setGroup(&_scrollType);
 
-	_btnScrollType3->setColor(Palette::blockOffset(0));
-	_btnScrollType3->setHighContrast(true);
+	_btnScrollType3->setColor(color);
 	_btnScrollType3->setText(L"3");
 	_btnScrollType3->setGroup(&_scrollType);
 
-	_txtFireSpeed->setColor(Palette::blockOffset(0));
-	_txtFireSpeed->setHighContrast(true);
+	_txtFireSpeed->setColor(color);
 	_txtFireSpeed->setText(_game->getLanguage()->getString("STR_FIRE_SPEED"));
 
-	_btnFireSpeed1->setColor(Palette::blockOffset(0));
-	_btnFireSpeed1->setHighContrast(true);
+	_btnFireSpeed1->setColor(color);
 	_btnFireSpeed1->setText(L"1");
 	_btnFireSpeed1->setGroup(&_fireSpeed);
 
-	_btnFireSpeed2->setColor(Palette::blockOffset(0));
-	_btnFireSpeed2->setHighContrast(true);
+	_btnFireSpeed2->setColor(color);
 	_btnFireSpeed2->setText(L"2");
 	_btnFireSpeed2->setGroup(&_fireSpeed);
 
-	_btnFireSpeed3->setColor(Palette::blockOffset(0));
-	_btnFireSpeed3->setHighContrast(true);
+	_btnFireSpeed3->setColor(color);
 	_btnFireSpeed3->setText(L"3");
 	_btnFireSpeed3->setGroup(&_fireSpeed);
 
-	_btnFireSpeed4->setColor(Palette::blockOffset(0));
-	_btnFireSpeed4->setHighContrast(true);
+	_btnFireSpeed4->setColor(color);
 	_btnFireSpeed4->setText(L"4");
 	_btnFireSpeed4->setGroup(&_fireSpeed);
 
-	_btnFireSpeed5->setColor(Palette::blockOffset(0));
-	_btnFireSpeed5->setHighContrast(true);
+	_btnFireSpeed5->setColor(color);
 	_btnFireSpeed5->setText(L"5");
 	_btnFireSpeed5->setGroup(&_fireSpeed);
 
-	_btnFireSpeed6->setColor(Palette::blockOffset(0));
-	_btnFireSpeed6->setHighContrast(true);
+	_btnFireSpeed6->setColor(color);
 	_btnFireSpeed6->setText(L"6");
 	_btnFireSpeed6->setGroup(&_fireSpeed);
 
-	_txtXcomSpeed->setColor(Palette::blockOffset(0));
-	_txtXcomSpeed->setHighContrast(true);
+	_txtXcomSpeed->setColor(color);
 	_txtXcomSpeed->setText(_game->getLanguage()->getString("STR_XCOM_MOVEMENT_SPEED"));
 
-	_btnXcomSpeed1->setColor(Palette::blockOffset(0));
-	_btnXcomSpeed1->setHighContrast(true);
+	_btnXcomSpeed1->setColor(color);
 	_btnXcomSpeed1->setText(L"1");
 	_btnXcomSpeed1->setGroup(&_xcomSpeed);
 
-	_btnXcomSpeed2->setColor(Palette::blockOffset(0));
-	_btnXcomSpeed2->setHighContrast(true);
+	_btnXcomSpeed2->setColor(color);
 	_btnXcomSpeed2->setText(L"2");
 	_btnXcomSpeed2->setGroup(&_xcomSpeed);
 
-	_btnXcomSpeed3->setColor(Palette::blockOffset(0));
-	_btnXcomSpeed3->setHighContrast(true);
+	_btnXcomSpeed3->setColor(color);
 	_btnXcomSpeed3->setText(L"3");
 	_btnXcomSpeed3->setGroup(&_xcomSpeed);
 
-	_btnXcomSpeed4->setColor(Palette::blockOffset(0));
-	_btnXcomSpeed4->setHighContrast(true);
+	_btnXcomSpeed4->setColor(color);
 	_btnXcomSpeed4->setText(L"4");
 	_btnXcomSpeed4->setGroup(&_xcomSpeed);
 
-	_btnXcomSpeed5->setColor(Palette::blockOffset(0));
-	_btnXcomSpeed5->setHighContrast(true);
+	_btnXcomSpeed5->setColor(color);
 	_btnXcomSpeed5->setText(L"5");
 	_btnXcomSpeed5->setGroup(&_xcomSpeed);
 
-	_btnXcomSpeed6->setColor(Palette::blockOffset(0));
-	_btnXcomSpeed6->setHighContrast(true);
+	_btnXcomSpeed6->setColor(color);
 	_btnXcomSpeed6->setText(L"6");
 	_btnXcomSpeed6->setGroup(&_xcomSpeed);
 
-	_txtAlienSpeed->setColor(Palette::blockOffset(0));
-	_txtAlienSpeed->setHighContrast(true);
+	_txtAlienSpeed->setColor(color);
 	_txtAlienSpeed->setText(_game->getLanguage()->getString("STR_ALIEN_MOVEMENT_SPEED"));
 
-	_btnAlienSpeed1->setColor(Palette::blockOffset(0));
-	_btnAlienSpeed1->setHighContrast(true);
+	_btnAlienSpeed1->setColor(color);
 	_btnAlienSpeed1->setText(L"1");
 	_btnAlienSpeed1->setGroup(&_alienSpeed);
 
-	_btnAlienSpeed2->setColor(Palette::blockOffset(0));
-	_btnAlienSpeed2->setHighContrast(true);
+	_btnAlienSpeed2->setColor(color);
 	_btnAlienSpeed2->setText(L"2");
 	_btnAlienSpeed2->setGroup(&_alienSpeed);
 
-	_btnAlienSpeed3->setColor(Palette::blockOffset(0));
-	_btnAlienSpeed3->setHighContrast(true);
+	_btnAlienSpeed3->setColor(color);
 	_btnAlienSpeed3->setText(L"3");
 	_btnAlienSpeed3->setGroup(&_alienSpeed);
 
-	_btnAlienSpeed4->setColor(Palette::blockOffset(0));
-	_btnAlienSpeed4->setHighContrast(true);
+	_btnAlienSpeed4->setColor(color);
 	_btnAlienSpeed4->setText(L"4");
 	_btnAlienSpeed4->setGroup(&_alienSpeed);
 
-	_btnAlienSpeed5->setColor(Palette::blockOffset(0));
-	_btnAlienSpeed5->setHighContrast(true);
+	_btnAlienSpeed5->setColor(color);
 	_btnAlienSpeed5->setText(L"5");
 	_btnAlienSpeed5->setGroup(&_alienSpeed);
 
-	_btnAlienSpeed6->setColor(Palette::blockOffset(0));
-	_btnAlienSpeed6->setHighContrast(true);
+	_btnAlienSpeed6->setColor(color);
 	_btnAlienSpeed6->setText(L"6");
 	_btnAlienSpeed6->setGroup(&_alienSpeed);
 
-	_btnOk->setColor(Palette::blockOffset(0));
-	_btnOk->setHighContrast(true);
+	_btnOk->setColor(color);
 	_btnOk->setText(_game->getLanguage()->getString("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&BattlescapeOptionsState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&BattlescapeOptionsState::btnOkClick, (SDLKey)Options::getInt("keyCancel"));
 
-	_btnLoad->setColor(Palette::blockOffset(0));
-	_btnLoad->setHighContrast(true);
+	_btnLoad->setColor(color);
 	_btnLoad->setText(_game->getLanguage()->getString("STR_LOAD_GAME"));
 	_btnLoad->onMouseClick((ActionHandler)&BattlescapeOptionsState::btnLoadClick);
 
-	_btnSave->setColor(Palette::blockOffset(0));
-	_btnSave->setHighContrast(true);
+	_btnSave->setColor(color);
 	_btnSave->setText(_game->getLanguage()->getString("STR_SAVE_GAME"));
 	_btnSave->onMouseClick((ActionHandler)&BattlescapeOptionsState::btnSaveClick);
 }

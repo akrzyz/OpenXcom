@@ -54,6 +54,9 @@ namespace OpenXcom
  */
 NewBattleState::NewBattleState(Game *game) : State(game), _alienEquipLevel(0), _craft(0)
 {
+	std::string background;
+	Uint8 colors[3];
+
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0, POPUP_BOTH);
 	_txtTitle = new Text(320, 16, 0, 9);
@@ -76,8 +79,6 @@ NewBattleState::NewBattleState(Game *game) : State(game), _alienEquipLevel(0), _
 	
 	_txtItemLevel = new Text(136, 9, 110, 110);
 	_btnItemLevel = new TextButton(100, 20, 110, 120);
-	_txtDepth = new Text(100, 9, 5, 110);
-	_btnDepth = new TextButton(100, 20, 5, 120);
 
 	add(_window);
 	add(_txtTitle);
@@ -99,52 +100,85 @@ NewBattleState::NewBattleState(Game *game) : State(game), _alienEquipLevel(0), _
 	add(_btnCancel);
 	add(_txtItemLevel);
 	add(_btnItemLevel);
-	add(_txtDepth);
-	add(_btnDepth);
 
 	centerAllSurfaces();
 
-	// Set up objects
-	_window->setColor(Palette::blockOffset(8)+5);
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK01.SCR"));
+	if (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0)
+	{
+		_txtDepth = new Text(100, 9, 5, 110);
+		_btnDepth = new TextButton(100, 20, 5, 120);
 
-	_txtTitle->setColor(Palette::blockOffset(15)-1);
+		add(_txtDepth);
+		add(_btnDepth);
+
+		_txtDepth->setColor(Palette::blockOffset(8)+10);
+		_txtDepth->setText(_game->getLanguage()->getString("STR_DEPTH"));
+	
+		_depths.push_back("STR_GROUND");
+		_depths.push_back("STR_SHALLOW_DEPTH");
+		_depths.push_back("STR_MEDIUM_DEPTH");
+		_depths.push_back("STR_DEEP_SEA");
+
+		_selDepth = Options::getInt("NewBattleDepth");
+
+		_btnDepth->setColor(Palette::blockOffset(15)-1);
+		_btnDepth->setText(_game->getLanguage()->getString(_depths[_selDepth]));
+		_btnDepth->onMouseClick((ActionHandler)&NewBattleState::btnDepthClick, 0);
+	}
+
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_BACK01.SCR";
+
+		colors[0] = colors[1] = colors[2] = Palette::blockOffset(0)+1;
+
+		_txtDepth->setColor(colors[1]);
+		_btnDepth->setColor(colors[2]);
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "BACK01.SCR";
+
+		colors[0] = Palette::blockOffset(8)+5;
+		colors[1] = Palette::blockOffset(8)+10;
+		colors[2] = Palette::blockOffset(15)-1;
+	}
+
+	// Set up objects
+	_window->setColor(colors[0]);
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
+
+	_txtTitle->setColor(colors[2]);
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setBig();
 	_txtTitle->setText(_game->getLanguage()->getString("STR_GAME_OPTIONS"));
 
-	_txtMissionType->setColor(Palette::blockOffset(8)+10);
+	_txtMissionType->setColor(colors[1]);
 	_txtMissionType->setText(_game->getLanguage()->getString("STR_MISSION"));
 
-	_txtTerrainType->setColor(Palette::blockOffset(8)+10);
+	_txtTerrainType->setColor(colors[1]);
 	_txtTerrainType->setText(_game->getLanguage()->getString("STR_TERRAIN"));
 
-	_txtAlienRace->setColor(Palette::blockOffset(8)+10);
+	_txtAlienRace->setColor(colors[1]);
 	_txtAlienRace->setText(_game->getLanguage()->getString("STR_RACE"));
 
-	_txtDifficulty->setColor(Palette::blockOffset(8)+10);
+	_txtDifficulty->setColor(colors[1]);
 	_txtDifficulty->setText(_game->getLanguage()->getString("STR_DIFFICULTY_LEVEL"));
 
-	_txtDarkness->setColor(Palette::blockOffset(8)+10);
+	_txtDarkness->setColor(colors[1]);
 	_txtDarkness->setText(_game->getLanguage()->getString("STR_DARKNESS"));
 
-	_txtCraft->setColor(Palette::blockOffset(8)+10);
+	_txtCraft->setColor(colors[1]);
 	_txtCraft->setText(_game->getLanguage()->getString("STR_CRAFT"));
 	
-	_txtItemLevel->setColor(Palette::blockOffset(8)+10);
+	_txtItemLevel->setColor(colors[1]);
 	_txtItemLevel->setText(_game->getLanguage()->getString("STR_ENEMY_WEAPON_LEVEL"));
 
-	_txtDepth->setColor(Palette::blockOffset(8)+10);
-	_txtDepth->setText(_game->getLanguage()->getString("STR_DEPTH"));
-	
 	_itemLevels.push_back("STR_LOW");
 	_itemLevels.push_back("STR_MEDIUM");
 	_itemLevels.push_back("STR_HIGH");
-
-	_depths.push_back("STR_GROUND");
-	_depths.push_back("STR_SHALLOW_DEPTH");
-	_depths.push_back("STR_MEDIUM_DEPTH");
-	_depths.push_back("STR_DEEP_SEA");
 
 	_missionTypes = _game->getRuleset()->getDeploymentsList();
 
@@ -190,54 +224,49 @@ NewBattleState::NewBattleState(Game *game) : State(game), _alienEquipLevel(0), _
 	_selDifficulty = Options::getInt("NewBattleDifficulty");
 	_selDarkness = Options::getInt("NewBattleDarkness");
 	_selCraft = Options::getInt("NewBattleCraft");
-	_selDepth = Options::getInt("NewBattleDepth");
 
-	_btnMissionType->setColor(Palette::blockOffset(15)-1);
+	_btnMissionType->setColor(colors[2]);
 	_btnMissionType->setText(_game->getLanguage()->getString(_missionTypes[_selMission]));
 	_btnMissionType->onMouseClick((ActionHandler)&NewBattleState::btnMissionTypeClick, 0);
 
-	_btnTerrainType->setColor(Palette::blockOffset(15)-1);
+	_btnTerrainType->setColor(colors[2]);
 	_btnTerrainType->setText(_game->getLanguage()->getString(_terrainTypes[_selTerrain]));
 	_btnTerrainType->onMouseClick((ActionHandler)&NewBattleState::btnTerrainTypeClick, 0);
 
-	_btnItemLevel->setColor(Palette::blockOffset(15)-1);
+	_btnItemLevel->setColor(colors[2]);
 	_btnItemLevel->setText(_game->getLanguage()->getString(_itemLevels[_selItemLevel]));
 	_btnItemLevel->onMouseClick((ActionHandler)&NewBattleState::btnItemLevelClick, 0);
 
-	_btnAlienRace->setColor(Palette::blockOffset(15)-1);
+	_btnAlienRace->setColor(colors[2]);
 	_btnAlienRace->setText(_game->getLanguage()->getString(_alienRaces[_selAlien]));
 	_btnAlienRace->onMouseClick((ActionHandler)&NewBattleState::btnAlienRaceClick, 0);
 
-	_btnDifficulty->setColor(Palette::blockOffset(15)-1);
+	_btnDifficulty->setColor(colors[2]);
 	_btnDifficulty->setText(_game->getLanguage()->getString(_difficulty[_selDifficulty]));
 	_btnDifficulty->onMouseClick((ActionHandler)&NewBattleState::btnDifficultyClick, 0);
 
-	_btnDarkness->setColor(Palette::blockOffset(15)-1);
+	_btnDarkness->setColor(colors[2]);
 	_btnDarkness->setText(Language::utf8ToWstr(_darkness[_selDarkness]));
 	_btnDarkness->onMouseClick((ActionHandler)&NewBattleState::btnDarknessClick, 0);
 
-	_btnCraft->setColor(Palette::blockOffset(15)-1);
+	_btnCraft->setColor(colors[2]);
 	_btnCraft->setText(_game->getLanguage()->getString(_crafts[_selCraft]));
 	_btnCraft->onMouseClick((ActionHandler)&NewBattleState::btnCraftClick, 0);
 
-	_btnDepth->setColor(Palette::blockOffset(15)-1);
-	_btnDepth->setText(_game->getLanguage()->getString(_depths[_selDepth]));
-	_btnDepth->onMouseClick((ActionHandler)&NewBattleState::btnDepthClick, 0);
-
-	_btnEquip->setColor(Palette::blockOffset(8)+5);
+	_btnEquip->setColor(colors[0]);
 	_btnEquip->setText(_game->getLanguage()->getString("STR_EQUIP_CRAFT"));
 	_btnEquip->onMouseClick((ActionHandler)&NewBattleState::btnEquipClick);
 
-	_btnRandom->setColor(Palette::blockOffset(8)+5);
+	_btnRandom->setColor(colors[0]);
 	_btnRandom->setText(_game->getLanguage()->getString("STR_RANDOM_BATTLE"));
 	_btnRandom->onMouseClick((ActionHandler)&NewBattleState::btnRandomClick);
 
-	_btnOk->setColor(Palette::blockOffset(8)+5);
+	_btnOk->setColor(colors[0]);
 	_btnOk->setText(_game->getLanguage()->getString("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&NewBattleState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&NewBattleState::btnOkClick, (SDLKey)Options::getInt("keyOk"));
 
-	_btnCancel->setColor(Palette::blockOffset(8)+5);
+	_btnCancel->setColor(colors[0]);
 	_btnCancel->setText(_game->getLanguage()->getString("STR_CANCEL_UC"));
 	_btnCancel->onMouseClick((ActionHandler)&NewBattleState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&NewBattleState::btnCancelClick, (SDLKey)Options::getInt("keyCancel"));
@@ -282,8 +311,20 @@ void NewBattleState::updateIndex(size_t &index, std::vector<std::string> &list, 
  */
 void NewBattleState::init()
 {
+	std::string palette;
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		palette = "TFTD_PALETTES.DAT_0";
+	}
+	else
+	{
+		// Basic properties for display in TFTD style
+		palette = "PALETTES.DAT_0";
+	}
+
 	// Set palette
-	_game->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
+	_game->setPalette(_game->getResourcePack()->getPalette(palette)->getColors());
 
 	// Set music
 	if (!_music)

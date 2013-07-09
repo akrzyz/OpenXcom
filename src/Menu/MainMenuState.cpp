@@ -55,10 +55,9 @@ MainMenuState::MainMenuState(Game *game) : State(game)
 	_btnQuit = new TextButton(192, 20, 64, 146);
 	_txtTitle = new Text(256, 30, 32, 45);
 
-	if ( ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_game->getResourcePack()->getPalette("PALETTES.DAT_0") == 0) ) || ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "xcom2") ) )
+	if (Options::getString("GUIstyle") == "xcom2")
 	{
 		// Basic properties for display in TFTD style
-		Options::setString("GUIstyle", "xcom2");
 		palette = "TFTD_PALETTES.DAT_0";
 		backpalette = "TFTD_BACKPALS.DAT";
 		colors[0] = colors[1] = Palette::blockOffset(0)+1;
@@ -68,7 +67,6 @@ MainMenuState::MainMenuState(Game *game) : State(game)
 	else
 	{
 		// Basic properties for display in UFO style
-		Options::setString("GUIstyle", "xcom1");
 		palette = "PALETTES.DAT_0";
 		backpalette = "BACKPALS.DAT";
 		colors[0] = Palette::blockOffset(8)+5;
@@ -142,10 +140,10 @@ MainMenuState::~MainMenuState()
 void MainMenuState::init()
 {
 	// Set palette
-	if (_game->getResourcePack()->getPalette("BACKPALS.DAT"))
-		_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(0)), Palette::backPos, 16);
-	else
+	if (Options::getString("GUIstyle") == "xcom2")
 		_game->setPalette(_game->getResourcePack()->getPalette("TFTD_BACKPALS.DAT")->getColors(Palette::blockOffset(0)), Palette::backPos, 16);
+	else
+		_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(0)), Palette::backPos, 16);
 }
 
 /**
