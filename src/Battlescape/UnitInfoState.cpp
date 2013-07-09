@@ -50,6 +50,8 @@ namespace OpenXcom
  */
 UnitInfoState::UnitInfoState(Game *game, BattleUnit *unit) : State(game), _unit(unit)
 {
+	std::string background;
+
 	// Create objects
 	_bg = new Surface(320, 200, 0, 0);
 	_txtName = new Text(312, 192, 4, 4);
@@ -195,8 +197,19 @@ UnitInfoState::UnitInfoState(Game *game, BattleUnit *unit) : State(game), _unit(
 
 	centerAllSurfaces();
 
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_UNIBORD.SCR";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "UNIBORD.SCR";
+	}
+
 	// Set up objects
-	_game->getResourcePack()->getSurface("UNIBORD.PCK")->blit(_bg);
+	_game->getResourcePack()->getSurface(background)->blit(_bg);
 
 	_txtName->setAlign(ALIGN_CENTER);
 	_txtName->setBig();

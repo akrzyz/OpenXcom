@@ -19,6 +19,7 @@
 #include "ActionMenuItem.h"
 #include "../Interface/Text.h"
 #include "../Engine/Palette.h"
+#include "../Engine/Options.h"
 
 namespace OpenXcom
 {
@@ -33,24 +34,35 @@ namespace OpenXcom
  */
 ActionMenuItem::ActionMenuItem(int id, Font *big, Font *small, int x, int y) : InteractiveSurface(270, 40, x + 25, y - (id*40)), _id(id), _highlighted(false), _action(BA_NONE), _tu(0)
 {
+	Uint8 color;
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		color = Palette::blockOffset(0)+1;
+	}
+	else
+	{
+		color = Palette::blockOffset(0);
+
+		_txtDescription->setHighContrast(true);
+		_txtAcc->setHighContrast(true);
+		_txtTU->setHighContrast(true);
+	}
+
 	_txtDescription = new Text(200, 20, 10, 13);
 	_txtDescription->setFonts(big, small);
 	_txtDescription->setBig();
-	_txtDescription->setHighContrast(true);
-	_txtDescription->setColor(Palette::blockOffset(0));
+	_txtDescription->setColor(color);
 	_txtDescription->setVisible(true);
 
 	_txtAcc = new Text(100, 20, 140, 13);
 	_txtAcc->setFonts(big, small);
 	_txtAcc->setBig();
-	_txtAcc->setHighContrast(true);
-	_txtAcc->setColor(Palette::blockOffset(0));
+	_txtAcc->setColor(color);
 
 	_txtTU = new Text(80, 20, 210, 13);
 	_txtTU->setFonts(big, small);
 	_txtTU->setBig();
-	_txtTU->setHighContrast(true);
-	_txtTU->setColor(Palette::blockOffset(0));
+	_txtTU->setColor(color);
 }
 
 /**
@@ -119,7 +131,15 @@ void ActionMenuItem::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 void ActionMenuItem::draw()
 {
 	SDL_Rect square;
-	Uint8 color = 11;
+	Uint8 color;
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		color = Palette::blockOffset(3)+11;
+	}
+	else
+	{
+		color = 11;
+	}
 
 	clear();
 

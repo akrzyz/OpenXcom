@@ -209,6 +209,16 @@ void Map::draw()
  */
 void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
+	std::string background;
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		background = "TFTD_TAC00.SCR";
+	}
+	else
+	{
+		background = "TAC00.SCR";
+	}
+
 	if (_res->getPalette(_terrorPalette) != 0)
 		_res->setPaletteTerror(_res->getPalette(_terrorPalette)->getColors());
 	for (std::vector<MapDataSet*>::const_iterator i = _save->getMapDataSets()->begin(); i != _save->getMapDataSets()->end(); ++i)
@@ -217,7 +227,7 @@ void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 			(*i)->getSurfaceset()->setPalette(_res->getPalette(_terrorPalette)->getColors());
 	}
 	_message->setPalette(colors, firstcolor, ncolors);
-	_message->setBackground(_res->getSurface("TAC00.SCR"));
+	_message->setBackground(_res->getSurface(background));
 	_message->setFonts(_res->getFont("Big.fnt"), _res->getFont("Small.fnt"));
 	_message->setText(_game->getLanguage()->getString("STR_HIDDEN_MOVEMENT"));
 }
