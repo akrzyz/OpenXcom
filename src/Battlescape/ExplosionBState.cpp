@@ -47,7 +47,7 @@ namespace OpenXcom
  * @param unit Unit involved in the explosion (eg unit throwing the grenade)
  * @param tile Tile the explosion is on.
  */
-ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, BattleItem *item, BattleUnit *unit, Tile *tile, bool lowerWeapon) : BattleState(parent), _unit(unit), _center(center), _item(item), _tile(tile), _power(0), _areaOfEffect(false), _lowerWeapon(lowerWeapon)
+ExplosionBState::ExplosionBState(BattlescapeGame *parent, Position center, BattleItem *item, BattleUnit *unit, int depth, Tile *tile, bool lowerWeapon) : BattleState(parent), _unit(unit), _center(center), _item(item), _tile(tile), _power(0), _depth(depth), _areaOfEffect(false), _lowerWeapon(lowerWeapon)
 {
 
 }
@@ -101,9 +101,12 @@ void ExplosionBState::init()
 			{
 				int X = RNG::generate(-_power/2,_power/2);
 				int Y = RNG::generate(-_power/2,_power/2);
+				int underwater = 0;
+				if ((_depth == 0) && (_item->getRules()->getTerrorPrefix() != ""))
+					underwater = 8;
 				Position p = _center;
 				p.x += X; p.y += Y;
-				Explosion *explosion = new Explosion(p, RNG::generate(0,6), true, prefix);
+				Explosion *explosion = new Explosion(p, underwater + RNG::generate(0,6), true, prefix);
 				// add the explosion on the map
 				_parent->getMap()->getExplosions()->insert(explosion);
 			}
@@ -219,7 +222,7 @@ void ExplosionBState::explode()
 	if (t)
 	{
 		Position p = Position(t->getPosition().x * 16, t->getPosition().y * 16, t->getPosition().z * 24);
-		_parent->statePushFront(new ExplosionBState(_parent, p, 0, _unit, t));
+		_parent->statePushFront(new ExplosionBState(_parent, p, 0, _unit, _depth, t));
 	}
 
 	if (_item && (_item->getRules()->getBattleType() == BT_GRENADE || _item->getRules()->getBattleType() == BT_PROXIMITYGRENADE))

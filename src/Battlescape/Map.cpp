@@ -820,7 +820,7 @@ void Map::drawTerrain()
 					_camera->convertMapToScreen(mapPosition, &screenPosition);
 					screenPosition += _camera->getMapOffset();
 
-					// only render cells that are inside the _mapUfoPalette
+					// only render cells that are inside the map
 					if (screenPosition.x > -_spriteWidth && screenPosition.x < _surface->w + _spriteWidth &&
 						screenPosition.y > -_spriteHeight && screenPosition.y < _surface->h + _spriteHeight )
 					{

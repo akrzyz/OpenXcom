@@ -41,11 +41,12 @@ private:
 	BattleItem *_item;
 	Tile *_tile;
 	int _power;
+	int _depth;
 	bool _areaOfEffect, _lowerWeapon;
 	void explode();
 public:
 	/// Creates a new ExplosionBState class
-	ExplosionBState(BattlescapeGame *parent, Position center, BattleItem *item, BattleUnit *unit, Tile *tile = 0, bool lowerWeapon = false);
+	ExplosionBState(BattlescapeGame *parent, Position center, BattleItem *item, BattleUnit *unit, int depth, Tile *tile = 0, bool lowerWeapon = false);
 	/// Cleans up the ExplosionBState.
 	~ExplosionBState();
 	/// Initializes the state.

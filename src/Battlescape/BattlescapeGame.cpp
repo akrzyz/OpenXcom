@@ -326,7 +326,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
             }
         }
 
-		statePushBack(new UnitWalkBState(this, action, finalFacing, usePathfinding));
+		statePushBack(new UnitWalkBState(this, action, _save->getDepth(), finalFacing, usePathfinding));
 	}
 
 	if (action.type == BA_SNAPSHOT || action.type == BA_AUTOSHOT || action.type == BA_THROW || action.type == BA_HIT || action.type == BA_MINDCONTROL || action.type == BA_PANIC || action.type == BA_LAUNCH)
@@ -345,7 +345,7 @@ void BattlescapeGame::handleAI(BattleUnit *unit)
 		ss << L"Attack type=" << action.type << " target="<< action.target.x << " "<< action.target.y << " "<< action.target.z << " weapon=" << action.weapon->getRules()->getName().c_str();
 		_parentState->debug(ss.str());
 
-		statePushBack(new ProjectileFlyBState(this, action));
+		statePushBack(new ProjectileFlyBState(this, action, _save->getDepth()));
 		if (action.type == BA_MINDCONTROL || action.type == BA_PANIC)
 		{
 			bool success = _save->getTileEngine()->psiAttack(&action);
@@ -449,7 +449,7 @@ void BattlescapeGame::endTurn()
 				p.x = _save->getTiles()[i]->getPosition().x*16 + 8;
 				p.y = _save->getTiles()[i]->getPosition().y*16 + 8;
 				p.z = _save->getTiles()[i]->getPosition().z*24 - _save->getTiles()[i]->getTerrainLevel();
-				statePushNext(new ExplosionBState(this, p, (*it), (*it)->getPreviousOwner()));
+				statePushNext(new ExplosionBState(this, p, (*it), (*it)->getPreviousOwner(), _save->getDepth()));
 				_save->removeItem((*it));
 				statePushBack(0);
 				return;
@@ -463,7 +463,7 @@ void BattlescapeGame::endTurn()
 	if (t)
 	{
 		Position p = Position(t->getPosition().x * 16, t->getPosition().y * 16, t->getPosition().z * 24);
-		statePushNext(new ExplosionBState(this, p, 0, 0, t));
+		statePushNext(new ExplosionBState(this, p, 0, 0, _save->getDepth(), t));
 		t = _save->getTileEngine()->checkForTerrainExplosions();
 		statePushBack(0);
 		return;
@@ -731,7 +731,7 @@ void BattlescapeGame::handleNonTargetAction()
 							{
 								Position voxel = Position(tile->getPosition().x*16,tile->getPosition().y*16,tile->getPosition().z*24);
 								voxel.x += 8;voxel.y += 8;voxel.z += 8;
-								statePushNext(new ExplosionBState(this, voxel, _currentAction.weapon, _currentAction.actor));
+								statePushNext(new ExplosionBState(this, voxel, _currentAction.weapon, _currentAction.actor, _save->getDepth()));
 								break;
 							}
 						}
@@ -1134,7 +1134,7 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 			if (_save->getTile(ba.target)) // only walk towards it when the place exists
 			{
 				_save->getPathfinding()->calculate(ba.actor, ba.target);
-				statePushBack(new UnitWalkBState(this, ba));
+				statePushBack(new UnitWalkBState(this, ba, _save->getDepth()));
 			}
 		}
 		break;
@@ -1164,7 +1164,7 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 						// fire shots until unit runs out of TUs
 						if (!ba.actor->spendTimeUnits(tu))
 							break;
-						statePushBack(new ProjectileFlyBState(this, ba));
+						statePushBack(new ProjectileFlyBState(this, ba, _save->getDepth()));
 					}
 				}
 				else if (ba.weapon->getRules()->getBattleType() == BT_GRENADE)
@@ -1174,7 +1174,7 @@ bool BattlescapeGame::handlePanickingUnit(BattleUnit *unit)
 						ba.weapon->setExplodeTurn(_save->getTurn());
 					}
 					ba.type = BA_THROW;
-					statePushBack(new ProjectileFlyBState(this, ba));
+					statePushBack(new ProjectileFlyBState(this, ba, _save->getDepth()));
 				}
 			}
 		}
@@ -1302,7 +1302,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 				getMap()->setCursorType(CT_NONE);
 				_parentState->getGame()->getCursor()->setVisible(false);
 				_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
-				statePushBack(new ProjectileFlyBState(this, _currentAction));
+				statePushBack(new ProjectileFlyBState(this, _currentAction, _save->getDepth()));
 				if (_currentAction.TU <= _currentAction.actor->getTimeUnits())
 				{
 					if (getTileEngine()->psiAttack(&_currentAction))
@@ -1338,7 +1338,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 			getMap()->setCursorType(CT_NONE);
 			_parentState->getGame()->getCursor()->setVisible(false);
 			_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
-			_states.push_back(new ProjectileFlyBState(this, _currentAction));
+			_states.push_back(new ProjectileFlyBState(this, _currentAction, _save->getDepth()));
 			statePushFront(new UnitTurnBState(this, _currentAction)); // first of all turn towards the target
 		}
 	}
@@ -1383,7 +1383,7 @@ void BattlescapeGame::primaryAction(const Position &pos)
 				//  -= start walking =-
 				getMap()->setCursorType(CT_NONE);
 				_parentState->getGame()->getCursor()->setVisible(false);
-				statePushBack(new UnitWalkBState(this, _currentAction));
+				statePushBack(new UnitWalkBState(this, _currentAction, _save->getDepth()));
 			}
 		}
 	}
@@ -1413,7 +1413,7 @@ void BattlescapeGame::launchAction()
 	getMap()->setCursorType(CT_NONE);
 	_parentState->getGame()->getCursor()->setVisible(false);
 	_currentAction.cameraPosition = getMap()->getCamera()->getMapOffset();
-	_states.push_back(new ProjectileFlyBState(this, _currentAction));
+	_states.push_back(new ProjectileFlyBState(this, _currentAction, _save->getDepth()));
 	statePushFront(new UnitTurnBState(this, _currentAction)); // first of all turn towards the target
 }
 
@@ -1453,7 +1453,7 @@ void BattlescapeGame::moveUpDown(BattleUnit *unit, int dir)
 		kneel(_save->getSelectedUnit());
 	}
 	_save->getPathfinding()->calculate(_currentAction.actor, _currentAction.target);
-	statePushBack(new UnitWalkBState(this, _currentAction));
+	statePushBack(new UnitWalkBState(this, _currentAction, _save->getDepth()));
 }
 
 /**

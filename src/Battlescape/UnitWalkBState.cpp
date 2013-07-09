@@ -44,7 +44,7 @@ namespace OpenXcom
 /**
  * Sets up an UnitWalkBState.
  */
-UnitWalkBState::UnitWalkBState(BattlescapeGame *parent, BattleAction action, const Position finalFacing, const bool pathfindForFinalTurn) : BattleState(parent, action), _unit(0), _pf(0), _terrain(0), _falling(false), _finalFacing(finalFacing), _pathfindForFinalTurn(pathfindForFinalTurn), _numUnitsSpotted(0)
+UnitWalkBState::UnitWalkBState(BattlescapeGame *parent, BattleAction action, int depth, const Position finalFacing, const bool pathfindForFinalTurn) : BattleState(parent, action), _unit(0), _pf(0), _terrain(0), _depth(depth), _falling(false), _finalFacing(finalFacing), _pathfindForFinalTurn(pathfindForFinalTurn), _numUnitsSpotted(0)
 {
 
 }
@@ -205,7 +205,7 @@ void UnitWalkBState::think()
 									p.x = t->getPosition().x*16 + 8;
 									p.y = t->getPosition().y*16 + 8;
 									p.z = t->getPosition().z*24 + t->getTerrainLevel();
-									_parent->statePushNext(new ExplosionBState(_parent, p, (*i), (*i)->getPreviousOwner()));
+									_parent->statePushNext(new ExplosionBState(_parent, p, (*i), (*i)->getPreviousOwner(), _depth));
 									t->getInventory()->erase(i);
 									_unit->setCache(0);
 									_parent->getMap()->cacheUnit(_unit);
@@ -495,7 +495,7 @@ void UnitWalkBState::postPathProcedures()
 				action.TU = _unit->getActionTUs(action.type, action.weapon);
 				action.targeting = true;
 				_unit->setCharging(0);
-				_parent->statePushBack(new ProjectileFlyBState(_parent, action));
+				_parent->statePushBack(new ProjectileFlyBState(_parent, action, _depth));
 			}
 		} // check that _finalFacing points to a valid tile; out of bounds value indicates no final turn
 		else if (_parent->getSave()->getTile(_finalFacing) != 0 && (visibility == -1|| visibility == 4))

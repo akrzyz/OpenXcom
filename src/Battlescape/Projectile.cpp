@@ -479,7 +479,12 @@ int Projectile::getParticle(int i) const
 	if (_action.weapon->getRules()->getBulletSprite() == -1)
 		return -1;
 	else
-		return _action.weapon->getRules()->getBulletSprite() + i;
+	{
+		Uint8 underwater = 0;
+		if ((_save->getDepth() > 0) && (getShootingItem()->getRules()->getTerrorPrefix() != ""))
+			underwater = 36;
+		return _action.weapon->getRules()->getBulletSprite() + underwater + i;
+	}
 }
 
 /**
