@@ -148,7 +148,7 @@ BattlescapeState::BattlescapeState(Game *game) : State(game), _popups()
 
 	_txtDebug = new Text(300, 10, 20, 0);
 
-	if ( ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_game->getResourcePack()->getPalette("PALETTES.DAT_0") == 0) ) || ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "xcom2") ) )
+	if (Options::getString("GUIstyle") == "xcom2")
 	{
 		// Basic properties for display in TFTD style
 		palette << "TFTD_PALETTES.DAT_" << _save->getDepth() + 3;

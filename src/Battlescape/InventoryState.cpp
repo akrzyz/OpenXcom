@@ -111,7 +111,7 @@ InventoryState::InventoryState(Game *game, bool tu, BattlescapeState *parent) : 
 
 	centerAllSurfaces();
 
-	if ( ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_game->getResourcePack()->getPalette("PALETTES.DAT_0") == 0) ) || ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "xcom2") ) )
+	if (Options::getString("GUIstyle") == "xcom2")
 	{
 		// Basic properties for display in TFTD style
 		background = "TFTD_TAC01.BDY";
@@ -438,6 +438,12 @@ void InventoryState::btnRankClick(Action *)
  */
 void InventoryState::invClick(Action *)
 {
+	int color;
+	if (Options::getString("GUIstyle") == "xcom2")
+		color = Palette::blockOffset(0) + 5;
+	else
+		color = Palette::blockOffset(0) + 8;
+
 	BattleItem *item = _inv->getSelectedItem();
 	_txtItem->setText(L"");
 	_txtAmmo->setText(L"");
@@ -468,7 +474,7 @@ void InventoryState::invClick(Action *)
 			r.y = 0;
 			r.w = RuleInventory::HAND_W * RuleInventory::SLOT_W;
 			r.h = RuleInventory::HAND_H * RuleInventory::SLOT_H;
-			_selAmmo->drawRect(&r, Palette::blockOffset(0)+8);
+			_selAmmo->drawRect(&r, color);
 			r.x++;
 			r.y++;
 			r.w -= 2;

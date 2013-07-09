@@ -55,6 +55,7 @@ private:
 	bool _quit, _init;
 	FpsCounter *_fpsCounter;
 	bool _mouseActive;
+	std::string _GUIstyle;
 public:
 	/// Creates a new game and initializes SDL.
 	Game(const std::string &title);

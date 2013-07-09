@@ -126,7 +126,7 @@ void createDefault()
 	setBool("battleAutoEnd", false);
 	setBool("allowPsionicCapture", false);
 	setBool("borderless", false);
-	setString("GUIstyle", "ufo");
+	setString("GUIstyle", "xcom1");
 
 	// new battle mode data
 	setInt("NewBattleMission", 0);

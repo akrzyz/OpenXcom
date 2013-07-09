@@ -61,14 +61,12 @@ Inventory::Inventory(Game *game, int width, int height, int x, int y) : Interact
 	_warning = new WarningMessage(224, 24, 48, 176);
 	_stackNumber = new NumberText(15, 15, 0, 0);
 
-	if ( ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_game->getResourcePack()->getPalette("PALETTES.DAT_0") == 0) ) || ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "xcom2") ) )
+	if (Options::getString("GUIstyle") == "xcom2")
 	{
-		_GUIstyle = "xcom2";
 		colors[0] = colors[1] = Palette::blockOffset(3);
 	}
 	else
 	{
-		_GUIstyle = "xcom1";
 		colors[0] = Palette::blockOffset(2);
 		colors[1] = Palette::blockOffset(1) - 1;
 	}
@@ -149,7 +147,7 @@ void Inventory::drawGrid()
 	text.setPalette(_grid->getPalette());
 	text.setFonts(_game->getResourcePack()->getFont("Big.fnt"), _game->getResourcePack()->getFont("Small.fnt"));
 
-	if (_GUIstyle == "xcom2")
+	if (Options::getString("GUIstyle") == "xcom2")
 	{
 		colors[0] = Palette::blockOffset(0) + 1;
 		colors[1] = Palette::blockOffset(0) + 5;
@@ -232,7 +230,7 @@ void Inventory::drawGrid()
 void Inventory::drawItems()
 {
 	Uint8 color;
-	if (_GUIstyle == "xcom2")
+	if (Options::getString("GUIstyle") == "xcom2")
 		color = Palette::blockOffset(0) + 1;
 	else
 		color = Palette::blockOffset(4) + 2;

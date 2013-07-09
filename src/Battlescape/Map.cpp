@@ -123,7 +123,7 @@ void Map::init()
 {
 	// load the tiny arrow into a surface
 	std::string palette;
-	if ((Options::getString("GUIstyle") == "xcom2") && (_res->getPalette("TFTD_PALETTES.DAT_3") != 0))
+	if (Options::getString("GUIstyle") == "xcom2")
 	{
 		palette = _terrorPalette;
 	}

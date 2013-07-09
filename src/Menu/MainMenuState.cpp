@@ -58,6 +58,7 @@ MainMenuState::MainMenuState(Game *game) : State(game)
 	if ( ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_game->getResourcePack()->getPalette("PALETTES.DAT_0") == 0) ) || ( (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "xcom2") ) )
 	{
 		// Basic properties for display in TFTD style
+		Options::setString("GUIstyle", "xcom2");
 		palette = "TFTD_PALETTES.DAT_0";
 		backpalette = "TFTD_BACKPALS.DAT";
 		colors[0] = colors[1] = Palette::blockOffset(0)+1;
@@ -67,6 +68,7 @@ MainMenuState::MainMenuState(Game *game) : State(game)
 	else
 	{
 		// Basic properties for display in UFO style
+		Options::setString("GUIstyle", "xcom1");
 		palette = "PALETTES.DAT_0";
 		backpalette = "BACKPALS.DAT";
 		colors[0] = Palette::blockOffset(8)+5;
