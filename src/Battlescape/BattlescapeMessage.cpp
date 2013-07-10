@@ -20,6 +20,7 @@
 #include "../Interface/Window.h"
 #include "../Interface/Text.h"
 #include "../Engine/Palette.h"
+#include "../Engine/Options.h"
 
 namespace OpenXcom
 {
@@ -33,15 +34,30 @@ namespace OpenXcom
  */
 BattlescapeMessage::BattlescapeMessage(int width, int height, int x, int y) : Surface(width, height, x, y)
 {
-	_window = new Window(0, width, height, 0, 0, POPUP_NONE);
-	_window->setColor(Palette::blockOffset(0));
-	_window->setHighContrast(true);
+	Uint8 color;
 
+	_window = new Window(0, width, height, 0, 0, POPUP_NONE);
 	_text = new Text(width, height, 0, 0);
-	_text->setColor(Palette::blockOffset(0));
+
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		color = Palette::blockOffset(0)+1;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		Palette::blockOffset(0);
+
+		_window->setHighContrast(true);
+		_text->setHighContrast(true);
+	}
+
+	_window->setColor(color);
+
+	_text->setColor(color);
 	_text->setAlign(ALIGN_CENTER);
 	_text->setVerticalAlign(ALIGN_MIDDLE);
-	_text->setHighContrast(true);
 }
 
 /**
