@@ -69,7 +69,8 @@ State::~State()
 void State::add(Surface *surface)
 {
 	// Set palette
-	surface->setPalette(_game->getScreen()->getPalette());
+	if (surface->getSurface()->format->BitsPerPixel != 32)
+		surface->setPalette(_game->getScreen()->getPalette());
 
 	// Set default fonts
 	Text *t = dynamic_cast<Text*>(surface);

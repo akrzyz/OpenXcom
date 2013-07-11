@@ -102,8 +102,9 @@ void ExplosionBState::init()
 				int X = RNG::generate(-_power/2,_power/2);
 				int Y = RNG::generate(-_power/2,_power/2);
 				int underwater = 0;
-				if ((_depth == 0) && (_item->getRules()->getTerrorPrefix() != ""))
-					underwater = 8;
+				if (_item != 0)
+					if ((_depth == 0) && (_item->getRules()->getTerrorPrefix() != ""))
+						underwater = 8;
 				Position p = _center;
 				p.x += X; p.y += Y;
 				Explosion *explosion = new Explosion(p, underwater + RNG::generate(0,6), true, prefix);

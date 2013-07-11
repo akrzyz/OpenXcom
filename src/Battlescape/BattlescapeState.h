@@ -75,6 +75,7 @@ private:
 	Text *_txtDebug;
 	std::vector<State*> _popups;
 	BattlescapeGame *_battleGame;
+	std::string _palette;
 	bool firstInit;
 	bool isMouseScrolling;
 	bool isMouseScrolled;

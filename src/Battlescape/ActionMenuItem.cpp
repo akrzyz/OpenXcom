@@ -35,6 +35,11 @@ namespace OpenXcom
 ActionMenuItem::ActionMenuItem(int id, Font *big, Font *small, int x, int y) : InteractiveSurface(270, 40, x + 25, y - (id*40)), _id(id), _highlighted(false), _action(BA_NONE), _tu(0)
 {
 	Uint8 color;
+
+	_txtDescription = new Text(200, 20, 10, 13);
+	_txtAcc = new Text(100, 20, 140, 13);
+	_txtTU = new Text(80, 20, 210, 13);
+
 	if (Options::getString("GUIstyle") == "xcom2")
 	{
 		color = Palette::blockOffset(0)+1;
@@ -48,18 +53,15 @@ ActionMenuItem::ActionMenuItem(int id, Font *big, Font *small, int x, int y) : I
 		_txtTU->setHighContrast(true);
 	}
 
-	_txtDescription = new Text(200, 20, 10, 13);
 	_txtDescription->setFonts(big, small);
 	_txtDescription->setBig();
 	_txtDescription->setColor(color);
 	_txtDescription->setVisible(true);
 
-	_txtAcc = new Text(100, 20, 140, 13);
 	_txtAcc->setFonts(big, small);
 	_txtAcc->setBig();
 	_txtAcc->setColor(color);
 
-	_txtTU = new Text(80, 20, 210, 13);
 	_txtTU->setFonts(big, small);
 	_txtTU->setBig();
 	_txtTU->setColor(color);

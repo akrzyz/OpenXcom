@@ -412,6 +412,7 @@ BattlescapeState::BattlescapeState(Game *game) : State(game), _popups()
 		colors[8] = Palette::blockOffset(5)+2;
 	}
 
+	_palette = palette.str();
 	_reserve = _btnReserveNone;
 
 	// Fix system colors
@@ -828,7 +829,7 @@ void BattlescapeState::btnShowMapClick(Action *)
 {
 	//MiniMapState
 	if (allowButtons())
-		_game->pushState (new MiniMapState (_game, _map->getCamera(), _save));
+		_game->pushState (new MiniMapState (_game, _map->getCamera(), _save, _game->getResourcePack()->getPalette(_palette)->getColors()));
 }
 
 /**

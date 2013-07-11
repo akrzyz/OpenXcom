@@ -144,6 +144,8 @@ NewBattleState::NewBattleState(Game *game) : State(game), _alienEquipLevel(0), _
 		colors[0] = Palette::blockOffset(8)+5;
 		colors[1] = Palette::blockOffset(8)+10;
 		colors[2] = Palette::blockOffset(15)-1;
+
+		_selDepth = 0;
 	}
 
 	// Set up objects

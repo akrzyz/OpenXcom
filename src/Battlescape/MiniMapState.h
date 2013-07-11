@@ -43,7 +43,7 @@ class MiniMapState : public State
 	void animate();
 public:
 	/// Create the MiniMapState
-	MiniMapState (Game * game, Camera * camera, SavedBattleGame * battleGame);
+	MiniMapState (Game * game, Camera * camera, SavedBattleGame * battleGame, SDL_Color *palette);
 	/// Clean up the MiniMapState.
 	~MiniMapState();
 	/// Handler for the OK button

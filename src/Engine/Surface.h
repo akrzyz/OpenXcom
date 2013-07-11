@@ -76,7 +76,7 @@ public:
     /// Draws a filled rectangle on the surface.
     void drawRect(SDL_Rect *rect, Uint8 color);
     /// Draws a line on the surface.
-    void drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 color);
+    void drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
     /// Draws a filled circle on the surface.
     void drawCircle(Sint16 x, Sint16 y, Sint16 r, Uint8 color);
     /// Draws a filled circle on the 32 bit surface.

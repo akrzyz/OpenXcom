@@ -486,9 +486,12 @@ void Surface::drawRect(SDL_Rect *rect, Uint8 color)
  * @param y2 End y coordinate in pixels.
  * @param color Color of the line.
  */
-void Surface::drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 color)
+void Surface::drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color)
 {
-	lineColor(_surface, x1, y1, x2, y2, Palette::getRGBA(getPalette(), color));
+	if (_surface->format->BitsPerPixel != 32)
+		lineColor(_surface, x1, y1, x2, y2, Palette::getRGBA(getPalette(), color));
+	else
+		lineColor(_surface, x1, y1, x2, y2, color);
 }
 
 /**

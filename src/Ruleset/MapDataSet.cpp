@@ -188,7 +188,7 @@ void MapDataSet::loadData(SDL_Color *palette)
 
 	while (mapFile.read((char*)&mcd, sizeof(MCD)))
 	{
-		MapData *to = new MapData(this);
+		MapData *to = new MapData(this, _game);
 		_objects.push_back(to);
 
 		// set all the terrainobject properties:
