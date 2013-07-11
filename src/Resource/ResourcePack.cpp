@@ -1171,16 +1171,19 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const
 		// Load Battlescape Terrain (only blacks are loaded, others are loaded just in time)
 		std::string bsets[] = {"BLANKS.PCK"};
 
-		for (int i = 0; i < 1; ++i)
+		if (_sets.find("BLANKS.PCK") == _sets.end())
 		{
-			std::stringstream s;
-			s << gameFolder << "TERRAIN/" << bsets[i];
-			std::string tab = bsets[i].substr(0, bsets[i].length()-4) + ".TAB";
-			std::stringstream s2;
-			s2 << gameFolder << "TERRAIN/" << tab;
-			_sets[bsets[i]] = new SurfaceSet(32, 40);
-			_sets[bsets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-			_sets[bsets[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+			for (int i = 0; i < 1; ++i)
+			{
+				std::stringstream s;
+				s << gameFolder << "TERRAIN/" << bsets[i];
+				std::string tab = bsets[i].substr(0, bsets[i].length()-4) + ".TAB";
+				std::stringstream s2;
+				s2 << gameFolder << "TERRAIN/" << tab;
+				_sets[bsets[i]] = new SurfaceSet(32, 40);
+				_sets[bsets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+				_sets[bsets[i]]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
+			}
 		}
 
 		// Load Battlescape units
@@ -1356,17 +1359,20 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const
 		// Load Battlescape Terrain (only blacks are loaded, others are loaded just in time)
 		std::string bsets[] = {"BLANKS.PCK"};
 
-		for (int i = 0; i < 1; ++i)
+		if (_sets.find("BLANKS.PCK") == _sets.end())
 		{
-			s.str("");
-			std::stringstream s;
-			s << gameFolder << "TERRAIN/" << bsets[i];
-			std::string tab = bsets[i].substr(0, bsets[i].length()-4) + ".TAB";
-			s2.str("");
-			s2 << gameFolder << "TERRAIN/" << tab;
-			_sets["TFTD" + bsets[i]] = new SurfaceSet(32, 40);
-			_sets["TFTD" + bsets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
-			_sets["TFTD" + bsets[i]]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+			for (int i = 0; i < 1; ++i)
+			{
+				s.str("");
+				std::stringstream s;
+				s << gameFolder << "TERRAIN/" << bsets[i];
+				std::string tab = bsets[i].substr(0, bsets[i].length()-4) + ".TAB";
+				s2.str("");
+				s2 << gameFolder << "TERRAIN/" << tab;
+				_sets[bsets[i]] = new SurfaceSet(32, 40);
+				_sets[bsets[i]]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
+				_sets[bsets[i]]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
+			}
 		}
 
 		// Load Battlescape units

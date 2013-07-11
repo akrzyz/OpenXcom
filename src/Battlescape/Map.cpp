@@ -224,7 +224,7 @@ void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 	for (std::vector<MapDataSet*>::const_iterator i = _save->getMapDataSets()->begin(); i != _save->getMapDataSets()->end(); ++i)
 	{
 		if ((*i)->getGame() == "xcom2")
-			(*i)->getSurfaceset()->setPalette(_res->getPalette("TFTD_PALETTES.DAT_6")->getColors());
+			(*i)->getSurfaceset()->setPalette(_res->getPalette(_terrorPalette)->getColors());
 	}
 	_message->setPalette(colors, firstcolor, ncolors);
 	_message->setBackground(_res->getSurface(background));
