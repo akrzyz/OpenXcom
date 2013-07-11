@@ -642,15 +642,6 @@ void Surface::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
 	if (_surface->format->BitsPerPixel != 32)
 		SDL_SetColors(_surface, colors, firstcolor, ncolors);
-	else
-	{
-		for (int i = 0; i < ncolors; ++i)
-		{
-			_originalColors[i + firstcolor].r = colors[i].r;
-			_originalColors[i + firstcolor].g = colors[i].g;
-			_originalColors[i + firstcolor].b = colors[i].b;
-		}
-	}
 }
 
 /**
