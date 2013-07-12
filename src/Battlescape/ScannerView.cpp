@@ -24,6 +24,7 @@
 #include "../Engine/CrossPlatform.h"
 #include "../Engine/Language.h"
 #include "../Engine/Palette.h"
+#include "../Engine/Options.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/Tile.h"
 #include "../Savegame/SavedGame.h"
@@ -54,7 +55,20 @@ ScannerView::ScannerView (int w, int h, int x, int y, Game * game, BattleUnit *u
  */
 void ScannerView::draw()
 {
-	SurfaceSet *set = _game->getResourcePack()->getSurfaceSet("DETBLOB.DAT");
+	std::string setName;
+
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		setName = "TFTD_DETBLOB.DAT";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		setName = "DETBLOB.DAT";
+	}
+
+	SurfaceSet *set = _game->getResourcePack()->getSurfaceSet(setName);
 	Surface *surface = 0;
 
 	clear();

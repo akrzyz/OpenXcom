@@ -40,6 +40,9 @@ namespace OpenXcom
  */
 PromotionsState::PromotionsState(Game *game) : State(game)
 {
+	std::string background, backpalette;
+	Uint8 colors[4];
+
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(288, 16, 16, 176);
@@ -49,8 +52,29 @@ PromotionsState::PromotionsState(Game *game) : State(game)
 	_txtBase = new Text(80, 9, 220, 32);
 	_lstSoldiers = new TextList(288, 128, 8, 40);
 
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_BACK01.SCR";
+		backpalette = "TFTD_BACKPALS.DAT";
+
+		colors[0] = Palette::blockOffset(4);
+		colors[1] = colors[2] = colors[3] = Palette::blockOffset(0)+1;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "BACK01.SCR";
+		backpalette = "BACKPALS.DAT";
+
+		colors[0] = Palette::blockOffset(0);
+		colors[1] = Palette::blockOffset(15)-1;
+		colors[2] = Palette::blockOffset(8)+5;
+		colors[3] = Palette::blockOffset(8)+10;
+	}
+
 	// Set palette
-	_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(0)), Palette::backPos, 16);
+	_game->setPalette(_game->getResourcePack()->getPalette(backpalette)->getColors(colors[0]), Palette::backPos, 16);
 	add(_window);
 	add(_btnOk);
 	add(_txtTitle);
@@ -62,30 +86,30 @@ PromotionsState::PromotionsState(Game *game) : State(game)
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setColor(Palette::blockOffset(15)-1);
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK01.SCR"));
+	_window->setColor(colors[1]);
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
 
-	_btnOk->setColor(Palette::blockOffset(15)-1);
+	_btnOk->setColor(colors[1]);
 	_btnOk->setText(_game->getLanguage()->getString("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&PromotionsState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&PromotionsState::btnOkClick, (SDLKey)Options::getInt("keyOk"));
 	_btnOk->onKeyboardPress((ActionHandler)&PromotionsState::btnOkClick, (SDLKey)Options::getInt("keyCancel"));
 
-	_txtTitle->setColor(Palette::blockOffset(8)+5);
+	_txtTitle->setColor(colors[2]);
 	_txtTitle->setText(_game->getLanguage()->getString("STR_PROMOTIONS"));
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setBig();
 
-	_txtName->setColor(Palette::blockOffset(15)-1);
+	_txtName->setColor(colors[1]);
 	_txtName->setText(_game->getLanguage()->getString("STR_NAME"));
 
-	_txtRank->setColor(Palette::blockOffset(15)-1);
+	_txtRank->setColor(colors[1]);
 	_txtRank->setText(_game->getLanguage()->getString("STR_NEW_RANK"));
 
-	_txtBase->setColor(Palette::blockOffset(15)-1);
+	_txtBase->setColor(colors[1]);
 	_txtBase->setText(_game->getLanguage()->getString("STR_BASE"));
 
-	_lstSoldiers->setColor(Palette::blockOffset(8)+10);
+	_lstSoldiers->setColor(colors[3]);
 	_lstSoldiers->setColumns(3, 114, 90, 84);
 	_lstSoldiers->setSelectable(true);
 	_lstSoldiers->setBackground(_window);

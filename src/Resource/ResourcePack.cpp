@@ -1418,10 +1418,14 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const
 		_sets["TFTD_BIGOBS.PCK"]->loadPck(CrossPlatform::getDataFile(s.str()), CrossPlatform::getDataFile(s2.str()));
 		_sets["TFTD_BIGOBS.PCK"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
 
-/*		s.str("");
+		s.str("");
 		s << gameFolder << "GEODATA/" << "LOFTEMPS.DAT";
+		if (!_voxelData.empty())
+		{
+			_voxelData.erase(_voxelData.begin(), _voxelData.end());
+		}
 		MapDataSet::loadLOFTEMPS(CrossPlatform::getDataFile(s.str()), &_voxelData);
-*/
+
 		std::string scrs[] = {"TAC00.SCR"};
 
 		for (int i = 0; i < 1; ++i)
