@@ -47,6 +47,9 @@ namespace OpenXcom
  */
 BriefingState::BriefingState(Game *game, Craft *craft, Base *base) : State(game)
 {
+	std::string background, backpalette, palette;
+	Uint8 colors[4];
+
 	_screen = false;
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
@@ -58,22 +61,66 @@ BriefingState::BriefingState(Game *game, Craft *craft, Base *base) : State(game)
 
 	std::string mission = _game->getSavedGame()->getSavedBattle()->getMissionType();
 	
-	_game->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		palette = "TFTD_PALETTES.DAT_0";
+		backpalette = "TFTD_BACKPALS.DAT";
+
+		colors[0] = Palette::blockOffset(7);
+		colors[1] = Palette::blockOffset(4);
+		colors[2] = colors[3] = Palette::blockOffset(0)+1;
+
+		if (mission == "STR_TERROR_MISSION")
+		{
+			background = "TFTD_BACK03.SCR";
+		}
+		else if (mission == "STR_ALIEN_BASE_ASSAULT" || mission == "STR_MARS_THE_FINAL_ASSAULT")
+		{
+			background = "TFTD_BACK01.SCR";
+		}
+		else
+		{
+			background = "TFTD_BACK16.SCR";
+		}
+	}	
+	else
+	{
+		// Basic properties for display in UFO style
+		palette = "PALETTES.DAT_0";
+		backpalette = "BACKPALS.DAT";
+
+		colors[0] = Palette::blockOffset(2);
+		colors[1] = Palette::blockOffset(0);
+		colors[2] = Palette::blockOffset(15)-1;
+		colors[3] = Palette::blockOffset(8)+5;
+
+		if (mission == "STR_ALIEN_BASE_ASSAULT" || mission == "STR_MARS_THE_FINAL_ASSAULT")
+		{
+			background = "BACK01.SCR";
+		}
+		else
+		{
+			background = "BACK16.SCR";
+		}
+	}
+
+	_game->setPalette(_game->getResourcePack()->getPalette(palette)->getColors());
 
 	// Set palette
 	if (mission == "STR_TERROR_MISSION" || mission == "STR_BASE_DEFENSE")
 	{
-		_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(2)), Palette::backPos, 16);
+		_game->getResourcePack()->getSurface(background)->setPalette(_game->getResourcePack()->getPalette(backpalette)->getColors(colors[0]), Palette::backPos, 16);
 		_game->getResourcePack()->getMusic("GMENBASE")->play();
 	}
 	else if (mission == "STR_MARS_CYDONIA_LANDING" || mission == "STR_MARS_THE_FINAL_ASSAULT")
 	{
-		_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(0)), Palette::backPos, 16);
+		_game->getResourcePack()->getSurface(background)->setPalette(_game->getResourcePack()->getPalette(backpalette)->getColors(colors[1]), Palette::backPos, 16);
 		_game->getResourcePack()->getMusic("GMNEWMAR")->play();
 	}
 	else
 	{
-		_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(0)), Palette::backPos, 16);
+		_game->getResourcePack()->getSurface(background)->setPalette(_game->getResourcePack()->getPalette(backpalette)->getColors(colors[1]), Palette::backPos, 16);
 		_game->getResourcePack()->getMusic("GMDEFEND")->play();
 	}
 
@@ -98,21 +145,21 @@ BriefingState::BriefingState(Game *game, Craft *craft, Base *base) : State(game)
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setColor(Palette::blockOffset(15)-1);
+	_window->setColor(colors[2]);
 
-	_btnOk->setColor(Palette::blockOffset(8)+5);
+	_btnOk->setColor(colors[3]);
 	_btnOk->setText(_game->getLanguage()->getString("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&BriefingState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&BriefingState::btnOkClick, (SDLKey)Options::getInt("keyOk"));
 	_btnOk->onKeyboardPress((ActionHandler)&BriefingState::btnOkClick, (SDLKey)Options::getInt("keyCancel"));
 
-	_txtTitle->setColor(Palette::blockOffset(8)+5);
+	_txtTitle->setColor(colors[3]);
 	_txtTitle->setBig();
 
-	_txtTarget->setColor(Palette::blockOffset(8)+5);
+	_txtTarget->setColor(colors[3]);
 	_txtTarget->setBig();
 	
-	_txtCraft->setColor(Palette::blockOffset(8)+5);
+	_txtCraft->setColor(colors[3]);
 	_txtCraft->setBig();
 	std::wstringstream ss;
 	if (craft)
@@ -130,18 +177,10 @@ BriefingState::BriefingState(Game *game, Craft *craft, Base *base) : State(game)
 	}
 	_txtCraft->setText(ss.str());
 
-	_txtBriefing->setColor(Palette::blockOffset(8)+5);
+	_txtBriefing->setColor(colors[3]);
 	_txtBriefing->setWordWrap(true);
 
-	// Show respective mission briefing
-	if (mission == "STR_ALIEN_BASE_ASSAULT" || mission == "STR_MARS_THE_FINAL_ASSAULT")
-	{
-		_window->setBackground(_game->getResourcePack()->getSurface("BACK01.SCR"));
-	}
-	else
-	{
-		_window->setBackground(_game->getResourcePack()->getSurface("BACK16.SCR"));
-	}
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
 
 	_txtTitle->setText(_game->getLanguage()->getString(mission));
 	std::stringstream briefingtext;

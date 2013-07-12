@@ -41,6 +41,9 @@ namespace OpenXcom
  */
 CannotReequipState::CannotReequipState(Game *game, std::vector<ReequipStat> missingItems) : State(game)
 {
+	std::string background, backpalette;
+	Uint8 colors[4];
+
 	// Create objects
 	_window = new Window(this, 320, 200, 0, 0);
 	_btnOk = new TextButton(120, 18, 100, 174);
@@ -50,8 +53,27 @@ CannotReequipState::CannotReequipState(Game *game, std::vector<ReequipStat> miss
 	_txtCraft = new Text(50, 9, 200, 50);
 	_lstItems = new TextList(288, 112, 8, 58);
 
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		backpalette = "TFTD_BACKPALS.DAT";
+		colors[0] = Palette::blockOffset(4);
+		colors[1] = colors[2] = colors[3] = Palette::blockOffset(0)+1;
+		background = "TFTD_BACK01.SCR";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		backpalette = "BACKPALS.DAT";
+		colors[0] = Palette::blockOffset(0);
+		colors[1] = Palette::blockOffset(15)-1;
+		colors[2] = Palette::blockOffset(8)+5;
+		colors[3] = Palette::blockOffset(8)+10;
+		background = "BACK01.SCR";
+	}
+
 	// Set palette
-	_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(0)), Palette::backPos, 16);
+	_game->getResourcePack()->getSurface(background)->setPalette(_game->getResourcePack()->getPalette(backpalette)->getColors(colors[0]), Palette::backPos, 16);
 	add(_window);
 	add(_btnOk);
 	add(_txtTitle);
@@ -63,31 +85,31 @@ CannotReequipState::CannotReequipState(Game *game, std::vector<ReequipStat> miss
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setColor(Palette::blockOffset(15)-1);
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK01.SCR"));
+	_window->setColor(colors[1]);
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
 
-	_btnOk->setColor(Palette::blockOffset(8)+5);
+	_btnOk->setColor(colors[2]);
 	_btnOk->setText(_game->getLanguage()->getString("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&CannotReequipState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&CannotReequipState::btnOkClick, (SDLKey)Options::getInt("keyOk"));
 	_btnOk->onKeyboardPress((ActionHandler)&CannotReequipState::btnOkClick, (SDLKey)Options::getInt("keyCancel"));
 
-	_txtTitle->setColor(Palette::blockOffset(8)+5);
+	_txtTitle->setColor(colors[2]);
 	_txtTitle->setText(_game->getLanguage()->getString("STR_NOT_ENOUGH_EQUIPMENT_TO_FULLY_RE_EQUIP_SQUAD"));
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setBig();
 	_txtTitle->setWordWrap(true);
 
-	_txtItem->setColor(Palette::blockOffset(15)-1);
+	_txtItem->setColor(colors[1]);
 	_txtItem->setText(_game->getLanguage()->getString("STR_ITEM"));
 
-	_txtQuantity->setColor(Palette::blockOffset(15)-1);
+	_txtQuantity->setColor(colors[1]);
 	_txtQuantity->setText(_game->getLanguage()->getString("STR_QUANTITY_UC"));
 
-	_txtCraft->setColor(Palette::blockOffset(15)-1);
+	_txtCraft->setColor(colors[1]);
 	_txtCraft->setText(_game->getLanguage()->getString("STR_CRAFT"));
 
-	_lstItems->setColor(Palette::blockOffset(8)+10);
+	_lstItems->setColor(colors[3]);
 	_lstItems->setColumns(3, 114, 70, 104);
 	_lstItems->setSelectable(true);
 	_lstItems->setBackground(_window);

@@ -56,7 +56,7 @@ class MedikitTitle : public Text
 {
 public:
 	/// Create a medikit title
-	MedikitTitle(int y, const std::wstring & title);
+	MedikitTitle(int x, int y, const std::wstring & title);
 };
 
 /**
@@ -64,7 +64,7 @@ public:
  * @param y the Title y origin
  * @param title the title
  */
-MedikitTitle::MedikitTitle (int y, const std::wstring & title) : Text (60, 16, 192, y)
+MedikitTitle::MedikitTitle (int x, int y, const std::wstring & title) : Text (60, 16, x, y)
 {
 	this->setText(title);
 	this->setHighContrast(true);
@@ -78,18 +78,32 @@ class MedikitTxt : public Text
 {
 public:
 	/// Create a medikit text
-	MedikitTxt(int y);
+	MedikitTxt(int x, int y);
 };
 
 /**
  * Initialize a Medikit text
  * @param y the Text y origin
  */
-MedikitTxt::MedikitTxt(int y) : Text(30, 22, 220, y)
+MedikitTxt::MedikitTxt(int x, int y) : Text(30, 22, x, y)
 {
+	Uint8 color;
+
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		color = Palette::blockOffset(5);
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		color = Palette::blockOffset(1);
+
+		this->setHighContrast(true);
+	}
+
 	// Note: we can't set setBig here. The needed font is only setted when added to State
-	this->setColor(Palette::blockOffset(1));
-	this->setHighContrast(true);
+	this->setColor(color);
 	this->setAlign(ALIGN_CENTER);
 	this->setVerticalAlign(ALIGN_MIDDLE);
 }
@@ -101,14 +115,14 @@ class MedikitButton : public InteractiveSurface
 {
 public:
 	/// Create a medikit button
-	MedikitButton(int y);
+	MedikitButton(int x, int y);
 };
 
 /**
  * Initialize a Medikit button
  * @param y the button y origin
  */
-MedikitButton::MedikitButton(int y) : InteractiveSurface(30, 20, 190, y)
+MedikitButton::MedikitButton(int x, int y) : InteractiveSurface(30, 20, x, y)
 {
 }
 
@@ -120,9 +134,50 @@ MedikitButton::MedikitButton(int y) : InteractiveSurface(30, 20, 190, y)
  */
 MedikitState::MedikitState (Game * game, BattleUnit * targetUnit, BattleAction *action) : State (game), _targetUnit(targetUnit), _action(action)
 {
+	std::string background;
+	Uint8 color;
+	InteractiveSurface *endButton, *stimulantButton, *pkButton, *healButton;
+
 	_unit = action->actor;
 	_item = action->weapon;
 	_surface = new InteractiveSurface(320, 200);
+
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_MEDIBORD.BDY";
+
+		color = Palette::blockOffset(5);
+
+		_partTxt = new Text(50, 15, 85, 115);
+		_woundTxt = new Text(10, 15, 140, 115);
+		_medikitView = new MedikitView(52, 58, 90, 55, _game, _targetUnit, _partTxt, _woundTxt);
+		endButton = new InteractiveSurface(20, 20, 220, 140);
+		stimulantButton = new MedikitButton(187, 80);
+		pkButton = new MedikitButton(187, 44);
+		healButton = new MedikitButton(187, 116);
+		_pkText = new MedikitTxt (215, 46);
+		_stimulantTxt = new MedikitTxt (215, 81);
+		_healTxt = new MedikitTxt (215, 116);
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "MEDIBORD.PCK";
+
+		color = Palette::blockOffset(2);
+
+		_partTxt = new Text(50, 15, 90, 120);
+		_woundTxt = new Text(10, 15, 145, 120);
+		_medikitView = new MedikitView(52, 58, 95, 60, _game, _targetUnit, _partTxt, _woundTxt);
+		endButton = new InteractiveSurface(20, 20, 220, 140);
+		stimulantButton = new MedikitButton(190, 84);
+		pkButton = new MedikitButton(190, 48);
+		healButton = new MedikitButton(190, 120);
+		_pkText = new MedikitTxt (220, 50);
+		_stimulantTxt = new MedikitTxt (220, 85);
+		_healTxt = new MedikitTxt (220, 120);
+	}
 
 	if (Screen::getDY() > 50)
 	{
@@ -134,25 +189,9 @@ MedikitState::MedikitState (Game * game, BattleUnit * targetUnit, BattleAction *
 		current.y = 44;
 		_surface->drawRect(&current, Palette::blockOffset(15)+15);
 	}
-	_partTxt = new Text(50, 15, 90, 120);
-	_woundTxt = new Text(10, 15, 145, 120);
-	_medikitView = new MedikitView(52, 58, 95, 60, _game, _targetUnit, _partTxt, _woundTxt);
-	InteractiveSurface *endButton = new InteractiveSurface(20, 20,
-							       220, 140);
-
-	InteractiveSurface *stimulantButton = new MedikitButton(84);
-
-	InteractiveSurface *pkButton = new MedikitButton(48);
-	InteractiveSurface *healButton = new MedikitButton(120);
-	_pkText = new MedikitTxt (50);
-	_stimulantTxt = new MedikitTxt (85);
-	_healTxt = new MedikitTxt (120);
 	add(_surface);
 	add(_medikitView);
 	add(endButton);
-	add(new MedikitTitle (37, _game->getLanguage()->getString("STR_PAIN_KILLER")));
-	add(new MedikitTitle (73, _game->getLanguage()->getString("STR_STIMULANT")));
-	add(new MedikitTitle (109, _game->getLanguage()->getString("STR_HEAL")));
 	add(healButton);
 	add(stimulantButton);
 	add(pkButton);
@@ -164,13 +203,26 @@ MedikitState::MedikitState (Game * game, BattleUnit * targetUnit, BattleAction *
 
 	centerAllSurfaces();
 
-	_game->getResourcePack()->getSurface("MEDIBORD.PCK")->blit(_surface);
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		add(new MedikitTitle (187, 33, _game->getLanguage()->getString("STR_PAIN_KILLER")));
+		add(new MedikitTitle (187, 69, _game->getLanguage()->getString("STR_STIMULANT")));
+		add(new MedikitTitle (187, 105, _game->getLanguage()->getString("STR_HEAL")));
+	}
+	else
+	{
+		add(new MedikitTitle (192, 37, _game->getLanguage()->getString("STR_PAIN_KILLER")));
+		add(new MedikitTitle (192, 73, _game->getLanguage()->getString("STR_STIMULANT")));
+		add(new MedikitTitle (192, 109, _game->getLanguage()->getString("STR_HEAL")));
+	}
+
+	_game->getResourcePack()->getSurface(background)->blit(_surface);
 	_pkText->setBig();
 	_stimulantTxt->setBig();
 	_healTxt->setBig();
-	_partTxt->setColor(Palette::blockOffset(2));
+	_partTxt->setColor(color);
 	_partTxt->setHighContrast(true);
-	_woundTxt->setColor(Palette::blockOffset(2));
+	_woundTxt->setColor(color);
 	_woundTxt->setHighContrast(true);
 	endButton->onMouseClick((ActionHandler)&MedikitState::onEndClick);
 	endButton->onKeyboardPress((ActionHandler)&MedikitState::onEndClick, (SDLKey)Options::getInt("keyCancel"));
