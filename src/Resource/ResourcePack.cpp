@@ -1091,7 +1091,7 @@ void ResourcePack::loadGeoscapeResources(const std::string &gameFolder, const st
 		std::stringstream scang;
 		scang << gameFolder << "GEODATA/" << "SCANG.DAT";
 		_sets["TFTD_SCANG.DAT"]->loadDat (CrossPlatform::getDataFile(scang.str()));
-		_sets["TFTD_SCANG.DAT"]->setPalette(_palettes["PALETTES.DAT_3"]->getColors());
+		_sets["TFTD_SCANG.DAT"]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
 		// Load polygons
 		s.str("");
 		s << gameFolder << "GEODATA/" << "WORLD.DAT";

@@ -82,7 +82,7 @@ MiniMapState::MiniMapState (Game * game, Camera * camera, SavedBattleGame * batt
 
 		mapHeight = 148;
 		mapX = 47;
-		mapY = 15;
+		mapY = 16;
 		textX = 282;
 		textY = 28;
 
