@@ -27,7 +27,6 @@
 #include "BattleAIState.h"
 #include "AggroBAIState.h"
 #include "UnitTurnBState.h"
-#include "EndBattleBState.h"
 #include "Map.h"
 #include "Camera.h"
 #include "../Savegame/SavedBattleGame.h"
@@ -281,20 +280,18 @@ bool TileEngine::calculateFOV(BattleUnit *unit)
 						BattleUnit *visibleUnit = _save->getTile(test)->getUnit();
 						if (visibleUnit && !visibleUnit->isOut() && visible(unit, _save->getTile(test)))
 						{
+							if (unit->getFaction() == FACTION_PLAYER)
+							{
+								visibleUnit->getTile()->setVisible(+1);
+								visibleUnit->setVisible(true);
+							}
 							if ((visibleUnit->getFaction() == FACTION_HOSTILE && unit->getFaction() != FACTION_HOSTILE)
 								|| (visibleUnit->getFaction() != FACTION_HOSTILE && unit->getFaction() == FACTION_HOSTILE))
 							{
 								unit->addToVisibleUnits(visibleUnit);
 								unit->addToVisibleTiles(visibleUnit->getTile());
-								if (unit->getFaction() == FACTION_PLAYER)
-								{
-									visibleUnit->getTile()->setVisible(+1);
-								}
-								if (unit->getFaction() == FACTION_PLAYER)
-								{
-									visibleUnit->setVisible(true);
-								}
-								else if (unit->getFaction() == FACTION_HOSTILE && visibleUnit->getFaction() == FACTION_PLAYER && unit->getIntelligence() > visibleUnit->getTurnsExposed())
+
+								if (unit->getFaction() == FACTION_HOSTILE && visibleUnit->getFaction() == FACTION_PLAYER && unit->getIntelligence() > visibleUnit->getTurnsExposed())
 								{
 									visibleUnit->setTurnsExposed(unit->getIntelligence());
 									_save->updateExposedUnits();
@@ -588,23 +585,29 @@ bool TileEngine::visible(BattleUnit *currentUnit, Tile *tile)
 	if (unitSeen)
 	{
 		// now check if we really see it taking into account smoke tiles
-		// initial smoke "density" of a smoke grenade is around 10 per tile
-		// we do density/2 to get the decay of visibility, so in fresh smoke we only have 4 tiles of visibility
+		// initial smoke "density" of a smoke grenade is around 15 per tile
+		// we do density/3 to get the decay of visibility
+		// so in fresh smoke we should only have 4 tiles of visibility
+		// this is traced in voxel space, with smoke affecting visibility every step of the way
 		_trajectory.clear();
 		calculateLine(originVoxel, scanVoxel, true, &_trajectory, currentUnit);
 		Tile *t = _save->getTile(currentUnit->getPosition());
-		int maxViewDistance = MAX_VIEW_DISTANCE - (2 * t->getSmoke() / 3);
+		int visibleDistance = _trajectory.size();
 		for (unsigned int i = 0; i < _trajectory.size(); i++)
 		{
 			if (t != _save->getTile(Position(_trajectory.at(i).x/16,_trajectory.at(i).y/16, _trajectory.at(i).z/24)))
 			{
 				t = _save->getTile(Position(_trajectory.at(i).x/16,_trajectory.at(i).y/16, _trajectory.at(i).z/24));
-				maxViewDistance -= 2 * t->getSmoke() / 3;
 			}
-		}
-		if (distance(currentUnit->getPosition(), tile->getPosition()) > maxViewDistance)
-		{
-			unitSeen = false;
+			if (t->getFire() == 0)
+			{
+				visibleDistance += t->getSmoke() / 3;
+			}
+			if (visibleDistance > MAX_VOXEL_VIEW_DISTANCE)
+			{
+				unitSeen = false;
+				break;
+			}
 		}
 	}
 	return unitSeen;
@@ -820,6 +823,10 @@ bool TileEngine::canTargetTile(Position *originVoxel, Tile *tile, int part, Posi
 		spiralCount = 41;
 		minZfound = true; minZ=0;
 		maxZfound = true; maxZ=0;
+	}
+	else
+	{
+		return false;
 	}
 
 // find out height range
@@ -1146,6 +1153,7 @@ BattleUnit *TileEngine::hit(const Position &center, int power, ItemDamageType ty
 	{
 		// power 0 - 200%
 		const int rndPower = RNG::generate(0, power*2); // RNG::boxMuller(power, power/3)
+		int verticaloffset = 0;
 		if (!bu)
 		{
 			// it's possible we have a unit below the actual tile, when he stands on a stairs and sticks his head out to the next tile
@@ -1156,14 +1164,15 @@ BattleUnit *TileEngine::hit(const Position &center, int power, ItemDamageType ty
 				if (buBelow)
 				{
 					bu = buBelow;
+					verticaloffset = 24;
 				}
 			}
 		}
 		if (bu)
 		{
 			const int sz = bu->getArmor()->getSize() * 8;
-			const Position target = bu->getPosition() * Position(16,16,24) + Position(sz,sz,bu->getHeight() + bu->getFloatHeight() - tile->getTerrainLevel());
-			const Position relative = center - target;
+			const Position target = bu->getPosition() * Position(16,16,24) + Position(sz,sz, bu->getFloatHeight() - tile->getTerrainLevel());
+			const Position relative = (center - target) - Position(0,0,verticaloffset);
 
 			adjustedDamage = bu->damage(relative, rndPower, type);
 
@@ -2437,7 +2446,7 @@ bool TileEngine::psiAttack(BattleAction *action)
 				_save->getBattleState()->getBattleGame()->tallyUnits(liveAliens, liveSoldiers, false);
 				if (liveAliens == 0 || liveSoldiers == 0)
 				{
-					_save->getBattleState()->getBattleGame()->statePushBack(new EndBattleBState(_save->getBattleState()->getBattleGame(), liveSoldiers, _save->getBattleState()));
+					_save->getBattleState()->getBattleGame()->statePushBack(0);
 				}
 			}
 		}

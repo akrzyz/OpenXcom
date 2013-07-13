@@ -140,8 +140,10 @@ void NextTurnState::handle(Action *action)
 		{
 			_state->finishBattle(false, liveSoldiers);
 		}
-
-		_state->btnCenterClick(0);
+		else
+		{
+			_state->btnCenterClick(0);
+		}
 	}
 }
 

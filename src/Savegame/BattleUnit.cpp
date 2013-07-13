@@ -553,15 +553,14 @@ void BattleUnit::keepWalking(Tile *tileBelowMe, bool cache)
 				middle = 1;
 		}
 	}
+	if (!cache)
+	{
+		_pos = _destination;
+		end = 1;
+	}
 
 	_walkPhase++;
 	
-	if (!cache)
-	{
-		_walkPhase = 1;
-		middle = 1;
-		end = 1;
-	}
 
 	if (_walkPhase == middle)
 	{
@@ -570,7 +569,7 @@ void BattleUnit::keepWalking(Tile *tileBelowMe, bool cache)
 		_pos = _destination;
 	}
 
-	if (_walkPhase == end)
+	if (_walkPhase >= end)
 	{
 		if (_floating && !_tile->hasNoFloor(tileBelowMe))
 		{
@@ -662,7 +661,10 @@ void BattleUnit::lookAt(int direction, bool force)
 	{
 		if (direction < 0 || direction >= 8) return;
 		_toDirection = direction;
-		_status = STATUS_TURNING;
+		if (_toDirection != _direction)
+		{
+			_status = STATUS_TURNING;
+		}
 	}
 	else
 	{
@@ -944,7 +946,6 @@ int BattleUnit::getMorale() const
 int BattleUnit::damage(const Position &relative, int power, ItemDamageType type, bool ignoreArmor)
 {
 	UnitSide side = SIDE_FRONT;
-	int impactheight;
 	UnitBodyPart bodypart = BODYPART_TORSO;
 
 	if (power <= 0)

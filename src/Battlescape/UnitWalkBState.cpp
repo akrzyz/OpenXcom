@@ -44,7 +44,7 @@ namespace OpenXcom
 /**
  * Sets up an UnitWalkBState.
  */
-UnitWalkBState::UnitWalkBState(BattlescapeGame *parent, BattleAction action, int depth, const Position finalFacing, const bool pathfindForFinalTurn) : BattleState(parent, action), _unit(0), _pf(0), _terrain(0), _depth(depth), _falling(false), _finalFacing(finalFacing), _pathfindForFinalTurn(pathfindForFinalTurn), _numUnitsSpotted(0)
+UnitWalkBState::UnitWalkBState(BattlescapeGame *parent, BattleAction action, int depth, const Position finalFacing, const bool pathfindForFinalTurn) : BattleState(parent, action), _unit(0), _pf(0), _terrain(0), _depth(depth), _falling(false), _beforeFirstStep(false), _finalFacing(finalFacing), _pathfindForFinalTurn(pathfindForFinalTurn), _numUnitsSpotted(0)
 {
 
 }
@@ -66,6 +66,11 @@ void UnitWalkBState::init()
 	_terrain = _parent->getTileEngine();
 	_target = _action.target;
 	if (_parent->getSave()->getTraceSetting()) { Log(LOG_INFO) << "Walking from: " << _unit->getPosition().x << "," << _unit->getPosition().y << "," << _unit->getPosition().z << "," << " to " << _target.x << "," << _target.y << "," << _target.z;}
+	int dir = _pf->getStartDirection();
+	if (!_action.strafe && dir != -1 && dir != _unit->getDirection())
+	{
+		_beforeFirstStep = true;
+	}
 }
 
 void UnitWalkBState::think()
@@ -177,12 +182,8 @@ void UnitWalkBState::think()
 			if (_unit->getFaction() != FACTION_PLAYER)
 			{
 				_unit->setVisible(false);
-				_terrain->calculateFOV(_unit->getPosition());
 			}
-			else
-			{
-				_terrain->calculateFOV(_unit);
-			}
+			_terrain->calculateFOV(_unit->getPosition());
 			unitSpotted = (_parent->getPanicHandled() && _numUnitsSpotted != _unit->getUnitsSpottedThisTurn().size());
 
 			// check for proximity grenades (1 tile around the unit in every direction) (for large units, we need to check every tile it occupies)
@@ -219,7 +220,6 @@ void UnitWalkBState::think()
 			}
 			if (unitSpotted)
 			{
-				_terrain->calculateFOV(_unit->getPosition());
 				_unit->setCache(0);
 				_parent->getMap()->cacheUnit(_unit);
 				_pf->abortPath();
@@ -409,7 +409,8 @@ void UnitWalkBState::think()
 				if (_unit->spendEnergy(energy))
 				{
 					Tile *tileBelow = _parent->getSave()->getTile(_unit->getPosition() + Position(0,0,-1));
-					_unit->startWalking(dir, destination, tileBelow, onScreen);
+					_unit->startWalking(dir, destination, tileBelow, onScreen);					
+					_beforeFirstStep = false;
 				}
 			}
 			// make sure the unit sprites are up to date
@@ -435,7 +436,25 @@ void UnitWalkBState::think()
 	// turning during walking costs no tu
 	if (_unit->getStatus() == STATUS_TURNING)
 	{
-		_unit->turn();
+		// except before the first step.
+		if (_beforeFirstStep)
+		{
+			if (_unit->spendTimeUnits(1))
+			{
+				_unit->turn();
+			}
+			else
+			{
+				_action.result = "STR_NOT_ENOUGH_TIME_UNITS";
+				_pf->abortPath();
+				_parent->popState();
+				return;
+			}
+		}
+		else
+		{
+			_unit->turn();
+		}
 
 		// calculateFOV is unreliable for setting the unitSpotted bool, as it can be called from various other places
 		// in the code, ie: doors opening, and this messes up the result.

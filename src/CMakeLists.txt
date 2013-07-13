@@ -89,8 +89,6 @@ set ( battlescape_src
   Battlescape/Map.cpp
   Battlescape/Pathfinding.h
   Battlescape/Pathfinding.cpp
-  Battlescape/EndBattleBState.h
-  Battlescape/EndBattleBState.cpp
   Battlescape/ExplosionBState.h
   Battlescape/ExplosionBState.cpp
   Battlescape/UnitTurnBState.cpp
@@ -519,6 +517,8 @@ set ( savegame_src
   Savegame/WeightedOptions.h
   Savegame/AlienStrategy.cpp
   Savegame/AlienStrategy.h
+  Savegame/SerializationHelper.cpp
+  Savegame/SerializationHelper.h
 )
 
 set ( ufopedia_src

@@ -100,6 +100,8 @@
 #include <functional>
 
 #include <assert.h>
+#include "../Menu/SaveState.h"
+#include "../Menu/LoadState.h"
 
 namespace OpenXcom
 {
@@ -419,6 +421,11 @@ void GeoscapeState::handle(Action *action)
 				_txtDebug->setText(L"");
 			}
 		}
+		// quick save and quick load
+		else if (action->getDetails()->key.keysym.sym == Options::getInt("keyQuickSave") && Options::getInt("autosave") == 1)
+			_game->pushState(new SaveState(_game, true, true));
+		else if (action->getDetails()->key.keysym.sym == Options::getInt("keyQuickLoad") && Options::getInt("autosave") == 1)
+			_game->pushState(new LoadState(_game, true, true));
 	}
 	if(!_dogfights.empty())
 	{
@@ -1231,6 +1238,7 @@ void GeoscapeState::time30Minutes()
 				if (!detected)
 				{
 					(*u)->setDetected(false);
+					(*u)->setHyperDetected(false); // i'm not 100% sure this is correct, need verification.
 					if (!(*u)->getFollowers()->empty())
 					{
 						popup(new UfoLostState(_game, (*u)->getName(_game->getLanguage())));
@@ -1507,6 +1515,10 @@ void GeoscapeState::time1Day()
 	// Handle resupply of alien bases.
 	std::for_each(_game->getSavedGame()->getAlienBases()->begin(), _game->getSavedGame()->getAlienBases()->end(),
 		      GenerateSupplyMission(*_game->getRuleset(), *_game->getSavedGame()));
+
+	// Autosave
+	if (Options::getInt("autosave") >= 2)
+		_game->pushState(new SaveState(_game, true, false));
 }
 
 /**

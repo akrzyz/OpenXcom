@@ -583,6 +583,35 @@ bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarge
 			if (unit == _unit || unit == missileTarget || unit->isOut()) return false;
 			if (_unit && _unit->getFaction() == FACTION_PLAYER && unit->getVisible()) return true;		// player know all visible units
 		}
+		else if (tile->hasNoFloor(0) && _movementType != MT_FLY) // this whole section is devoted to making large units not take part in any kind of falling behaviour
+		{
+			Position pos = tile->getPosition();
+			while (pos.z >= 0)
+			{
+				Tile *t = _save->getTile(pos);
+				BattleUnit *unit = t->getUnit();
+
+				if (unit != 0)
+				{
+					// don't let large units fall on other units
+					if (_unit && _unit->getArmor()->getSize() > 1)
+					{
+						return true;
+					}
+					// don't let any units fall on large units
+					if (unit != _unit && unit != missileTarget && !unit->isOut() && unit->getArmor()->getSize() > 1)
+					{
+						return true;
+					}
+				}
+				// not gonna fall any further, so we can stop checking.
+				if (!t->hasNoFloor(0))
+				{
+					break;
+				}
+				pos.z--;
+			}
+		}
 	}
 	// missiles can't pathfind through closed doors.
 	if (missileTarget != 0 && tile->getMapData(part) &&
@@ -604,7 +633,7 @@ bool Pathfinding::isBlocked(Tile *tile, const int part, BattleUnit *missileTarge
  * @param missileTarget Target for a missile.
  * @return true/false
  */
-bool Pathfinding::isBlocked(Tile *startTile, Tile *endTile, const int direction, BattleUnit *missileTarget)
+bool Pathfinding::isBlocked(Tile *startTile, Tile * /* endTile */, const int direction, BattleUnit *missileTarget)
 {
 
 	// check if the difference in height between start and destination is not too high
@@ -811,11 +840,12 @@ bool Pathfinding::previewPath(bool bRemove)
 		switchBack = true;
 		_save->getBattleState()->getBattleGame()->setTUReserved(BA_AUTOSHOT);
 	}
+	bool running = (SDL_GetModState() & KMOD_CTRL) != 0 && _unit->getArmor()->getSize() == 1 && _path.size() > 1;
 	for (std::vector<int>::reverse_iterator i = _path.rbegin(); i != _path.rend(); ++i)
 	{
 		int dir = *i;
 		int tu = getTUCost(pos, dir, &destination, _unit, 0, false); // gets tu cost, but also gets the destination position.
-		if ((SDL_GetModState() & KMOD_CTRL) != 0 && _unit->getArmor()->getSize() == 1)
+		if (running)
 		{
 			tu *= 0.75;
 		}

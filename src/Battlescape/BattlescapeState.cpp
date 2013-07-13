@@ -82,6 +82,8 @@
 #include "../lodepng.h"
 #include "../Engine/Logger.h"
 #include "../Engine/CrossPlatform.h"
+#include "../Menu/SaveState.h"
+#include "../Menu/LoadState.h"
 
 namespace OpenXcom
 {
@@ -1417,6 +1419,17 @@ inline void BattlescapeState::handle(Action *action)
 					SaveAIMap();
 				}
 			}
+			// quick save and quick load
+			// not works in debug mode to prevent conflict in hotkeys by default
+			else if (action->getDetails()->key.keysym.sym == (SDLKey)Options::getInt("keyQuickSave") && Options::getInt("autosave") == 1)
+			{
+				_game->pushState(new SaveState(_game, false, true));
+			}
+			else if (action->getDetails()->key.keysym.sym == (SDLKey)Options::getInt("keyQuickLoad") && Options::getInt("autosave") == 1)
+			{
+				_game->pushState(new LoadState(_game, false, true));
+			}
+
 			// voxel view dump
 			if (action->getDetails()->key.keysym.sym == (SDLKey)Options::getInt("keyBattleVoxelView"))
 			{
@@ -1563,7 +1576,6 @@ void BattlescapeState::SaveVoxelView()
 
 	BattleUnit * bu = _save->getSelectedUnit();
 	if (bu==0) return; //no unit selected
-	Position viewPos = _save->getSelectedUnit()->getPosition();
 	std::vector<Position> _trajectory;
 
 	double ang_x,ang_y;
@@ -1856,11 +1868,11 @@ BattlescapeGame *BattlescapeState::getBattleGame()
 	return _battleGame;
 }
 
-void BattlescapeState::mouseInIcons(Action *action)
+void BattlescapeState::mouseInIcons(Action * /* action */)
 {
 	_mouseOverIcons = true;
 }
-void BattlescapeState::mouseOutIcons(Action *action)
+void BattlescapeState::mouseOutIcons(Action * /* action */)
 {
 	_mouseOverIcons = false;
 }

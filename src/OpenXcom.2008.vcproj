@@ -1139,14 +1139,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\Battlescape\EndBattleBState.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\Battlescape\EndBattleBState.h"
-				>
-			</File>
-			<File
 				RelativePath=".\Battlescape\Explosion.cpp"
 				>
 			</File>
@@ -2128,6 +2120,14 @@
 			</File>
 			<File
 				RelativePath=".\Savegame\SavedGame.h"
+				>
+			</File>
+			<File
+				RelativePath=".\Savegame\SerializationHelper.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\Savegame\SerializationHelper.h"
 				>
 			</File>
 			<File
