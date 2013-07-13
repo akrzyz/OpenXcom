@@ -45,7 +45,7 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param unit the current unit
  */
-ScannerView::ScannerView (int w, int h, int x, int y, Game * game, BattleUnit *unit) : InteractiveSurface(w, h, x, y), _game(game), _unit(unit), _frame(0)
+ScannerView::ScannerView (int w, int h, int x, int y, Game * game, BattleUnit *unit, const std::string &terrorPrefix) : InteractiveSurface(w, h, x, y), _game(game), _unit(unit), _frame(0), _terrorPrefix(terrorPrefix)
 {
 	_redraw = true;
 }
@@ -57,7 +57,7 @@ void ScannerView::draw()
 {
 	std::string setName;
 
-	if (Options::getString("GUIstyle") == "xcom2")
+	if (_terrorPrefix != "")
 	{
 		// Basic properties for display in TFTD style
 		setName = "TFTD_DETBLOB.DAT";

@@ -49,7 +49,7 @@ ScannerState::ScannerState (Game * game, BattleAction *action) : State (game), _
 
 	_surface1 = new InteractiveSurface(320, 200);
 	_surface2 = new InteractiveSurface(320, 200);
-	_scannerView = new ScannerView(152, 152, 56, 24, _game, _action->actor);
+	_scannerView = new ScannerView(152, 152, 56, 24, _game, _action->actor, action->weapon->getRules()->getTerrorPrefix());
 	
 	if (Screen::getDY() > 50)
 	{
@@ -62,7 +62,7 @@ ScannerState::ScannerState (Game * game, BattleAction *action) : State (game), _
 
 	centerAllSurfaces();
 	
-	if (Options::getString("GUIstyle") == "xcom2")
+	if (action->weapon->getRules()->getTerrorPrefix() != "")
 	{
 		// Basic properties for display in TFTD style
 		background[0] = "TFTD_DETBORD.BDY";

@@ -78,18 +78,18 @@ class MedikitTxt : public Text
 {
 public:
 	/// Create a medikit text
-	MedikitTxt(int x, int y);
+	MedikitTxt(int x, int y, const std::string &terrorPrefix);
 };
 
 /**
  * Initialize a Medikit text
  * @param y the Text y origin
  */
-MedikitTxt::MedikitTxt(int x, int y) : Text(30, 22, x, y)
+MedikitTxt::MedikitTxt(int x, int y, const std::string &terrorPrefix) : Text(30, 22, x, y)
 {
 	Uint8 color;
 
-	if (Options::getString("GUIstyle") == "xcom2")
+	if (terrorPrefix != "")
 	{
 		// Basic properties for display in TFTD style
 		color = Palette::blockOffset(5);
@@ -142,7 +142,7 @@ MedikitState::MedikitState (Game * game, BattleUnit * targetUnit, BattleAction *
 	_item = action->weapon;
 	_surface = new InteractiveSurface(320, 200);
 
-	if (Options::getString("GUIstyle") == "xcom2")
+	if (action->weapon->getRules()->getTerrorPrefix() != "")
 	{
 		// Basic properties for display in TFTD style
 		background = "TFTD_MEDIBORD.BDY";
@@ -156,9 +156,9 @@ MedikitState::MedikitState (Game * game, BattleUnit * targetUnit, BattleAction *
 		stimulantButton = new MedikitButton(187, 80);
 		pkButton = new MedikitButton(187, 44);
 		healButton = new MedikitButton(187, 116);
-		_pkText = new MedikitTxt (215, 46);
-		_stimulantTxt = new MedikitTxt (215, 81);
-		_healTxt = new MedikitTxt (215, 116);
+		_pkText = new MedikitTxt (215, 46, action->weapon->getRules()->getTerrorPrefix());
+		_stimulantTxt = new MedikitTxt (215, 81, action->weapon->getRules()->getTerrorPrefix());
+		_healTxt = new MedikitTxt (215, 116, action->weapon->getRules()->getTerrorPrefix());
 	}
 	else
 	{
@@ -174,9 +174,9 @@ MedikitState::MedikitState (Game * game, BattleUnit * targetUnit, BattleAction *
 		stimulantButton = new MedikitButton(190, 84);
 		pkButton = new MedikitButton(190, 48);
 		healButton = new MedikitButton(190, 120);
-		_pkText = new MedikitTxt (220, 50);
-		_stimulantTxt = new MedikitTxt (220, 85);
-		_healTxt = new MedikitTxt (220, 120);
+		_pkText = new MedikitTxt (220, 50, action->weapon->getRules()->getTerrorPrefix());
+		_stimulantTxt = new MedikitTxt (220, 85, action->weapon->getRules()->getTerrorPrefix());
+		_healTxt = new MedikitTxt (220, 120, action->weapon->getRules()->getTerrorPrefix());
 	}
 
 	if (Screen::getDY() > 50)
@@ -203,7 +203,7 @@ MedikitState::MedikitState (Game * game, BattleUnit * targetUnit, BattleAction *
 
 	centerAllSurfaces();
 
-	if (Options::getString("GUIstyle") == "xcom2")
+	if (action->weapon->getRules()->getTerrorPrefix() != "")
 	{
 		add(new MedikitTitle (187, 33, _game->getLanguage()->getString("STR_PAIN_KILLER")));
 		add(new MedikitTitle (187, 69, _game->getLanguage()->getString("STR_STIMULANT")));
