@@ -36,7 +36,7 @@ class Armor
 {
 private:
 	static const int DAMAGE_TYPES = 10;
-	std::string _type, _spriteSheet, _spriteInv, _corpseItem, _storeItem;
+	std::string _type, _spriteSheet, _spriteInv, _corpseItem, _storeItem, _folder, _terrorPrefix;
 	int _frontArmor, _sideArmor, _rearArmor, _underArmor, _drawingRoutine;
 	MovementType _movementType;
 	int _size;
@@ -44,7 +44,7 @@ private:
 	std::vector<int> _loftempsSet;
 public:
 	/// Creates a blank armor ruleset.
-	Armor(const std::string &type, std::string spriteSheet, int drawingRoutine, MovementType _movementType = MT_WALK, int size = 1);
+	Armor(const std::string &type, std::string spriteSheet, int drawingRoutine, const std::string &folder, const std::string &game, MovementType _movementType = MT_WALK, int size = 1);
 	/// Cleans up the armor ruleset.
 	~Armor();
 	/// Loads the armor data from YAML.
@@ -79,6 +79,9 @@ public:
 	float getDamageModifier(ItemDamageType dt);
 	/// Gets loftempSet
 	std::vector<int> getLoftempsSet() const;
+	/// get prefix indicating TFTD armor.
+	std::string getTerrorPrefix() const;
+	std::string getFolder() const;
 };
 
 }

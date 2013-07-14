@@ -36,6 +36,7 @@
 #include "Inventory.h"
 #include "../Ruleset/Ruleset.h"
 #include "../Ruleset/RuleItem.h"
+#include "../Ruleset/RuleSoldier.h"
 #include "../Ruleset/RuleInventory.h"
 #include "../Ruleset/Armor.h"
 #include "../Engine/Options.h"
@@ -217,7 +218,7 @@ void InventoryState::init()
 		texture->getFrame(s->getRankSprite())->setY(0);
 		texture->getFrame(s->getRankSprite())->blit(_btnRank);
 
-		std::string look = s->getArmor()->getSpriteInventory();
+		std::string look = s->getArmor()->getTerrorPrefix() + s->getArmor()->getSpriteInventory(), extension;
 		if (s->getGender() == GENDER_MALE)
 			look += "M";
 		else
@@ -230,10 +231,14 @@ void InventoryState::init()
 			look += "2";
 		if (s->getLook() == LOOK_AFRICAN)
 			look += "3";
-		look += ".SPK";
-		if (!CrossPlatform::fileExists(CrossPlatform::getDataFile("UFOGRAPH/" + look)) && !_game->getResourcePack()->getSurface(look))
+		if (s->getArmor()->getTerrorPrefix() != "")
+			extension = ".BDY";
+		else
+			extension = ".SPK";
+		look += extension;
+		if (!CrossPlatform::fileExists(CrossPlatform::getDataFile(s->getArmor()->getFolder() + "UFOGRAPH/" + look)) && !_game->getResourcePack()->getSurface(look) && (s->getArmor()->getTerrorPrefix() == ""))
 		{
-			look = s->getArmor()->getSpriteInventory() + ".SPK";
+			look = s->getArmor()->getTerrorPrefix() + s->getArmor()->getSpriteInventory() + extension;
 		}
 		_game->getResourcePack()->getSurface(look)->blit(_soldier);
 	}

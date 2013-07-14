@@ -1459,7 +1459,7 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const
 		_surfaces["TFTD_" + spks[6]]->loadSpk(CrossPlatform::getDataFile(s.str()));
 		_surfaces["TFTD_" + spks[6]]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
 
-/*		std::string invs[] = {"MAN_0",
+		std::string invs[] = {"MAN_0",
 							  "MAN_1",
 							  "MAN_2",
 							  "MAN_3"};
@@ -1474,32 +1474,17 @@ void ResourcePack::loadBattlescapeResources(const std::string &gameFolder, const
 
 		for (int i = 0; i < 4; ++i)
 		{
-			std::stringstream s1, s1full, s2, s2full;
-			s1 << invs[i] << ".SPK";
-			s1full << gameFolder << "UFOGRAPH/" << s1.str();
-			s2 << invs[i] << sets[0] << ".SPK";
-			s2full << gameFolder << "UFOGRAPH/" << s2.str();
-			// Load fixed inventory image
-			if (CrossPlatform::fileExists(CrossPlatform::getDataFile(s1full.str())))
-			{
-				_surfaces[s1.str()] = new Surface(320, 200);
-				_surfaces[s1.str()]->loadSpk(CrossPlatform::getDataFile(s1full.str()));
-				_surfaces[s1.str()]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
-			}
 			// Load gender-based inventory image
-			if (CrossPlatform::fileExists(CrossPlatform::getDataFile(s2full.str())))
+			for (int j = 0; j < 8; j++)
 			{
-				for (int j = 0; j < 8; j++)
-				{
-					std::stringstream s3, s3full;
-					s3 << invs[i] << sets[j] << ".SPK";
-					s3full << gameFolder << "UFOGRAPH/" << s3.str();
-					_surfaces[s3.str()] = new Surface(320, 200);
-					_surfaces[s3.str()]->loadSpk(CrossPlatform::getDataFile(s3full.str()));
-					_surfaces[s3.str()]->setPalette(_palettes["PALETTES.DAT_4"]->getColors());
-				}
+				std::stringstream s3, s3full;
+				s3 << invs[i] << sets[j] << ".BDY";
+				s3full << gameFolder << "UFOGRAPH/" << s3.str();
+				_surfaces["TFTD_" + s3.str()] = new Surface(320, 200);
+				_surfaces["TFTD_" + s3.str()]->loadBdy(CrossPlatform::getDataFile(s3full.str()));
+				_surfaces["TFTD_" + s3.str()]->setPalette(_palettes["TFTD_PALETTES.DAT_3"]->getColors());
 			}
-		}*/
+		}
 	}
 }
 

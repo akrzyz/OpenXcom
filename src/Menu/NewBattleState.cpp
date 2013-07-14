@@ -352,6 +352,7 @@ void NewBattleState::initSave()
 	SavedGame *save = new SavedGame();
 	Base *base = new Base(rule);
 	const YAML::Node &starter = _game->getRuleset()->getStartingBase();
+	std::string soldierData[2];
 	base->load(starter, save, true, true);
 	save->getBases()->push_back(base);
 	// kill everything we don't want in this base
@@ -365,9 +366,19 @@ void NewBattleState::initSave()
 	_craft = new Craft(rule->getCraft(_crafts[_selCraft]), base, 1);
 	base->getCrafts()->push_back(_craft);
 	// Generate soldiers
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		soldierData[0] = "XCOM2";
+		soldierData[1] = "STR_NONE_AQUA";
+	}
+	else
+	{
+		soldierData[0] = "XCOM";
+		soldierData[1] = "STR_NONE_UC";
+	}
 	for (int i = 0; i < 30; ++i)
 	{
-		Soldier *soldier = new Soldier(rule->getSoldier("XCOM"), rule->getArmor("STR_NONE_UC"), &rule->getPools(), save->getId("STR_SOLDIER"));
+		Soldier *soldier = new Soldier(rule->getSoldier(soldierData[0]), rule->getArmor(soldierData[1]), &rule->getPools(), save->getId("STR_SOLDIER"));
 
         for (int n = 0; n < 5; ++n) 
         {

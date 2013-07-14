@@ -47,7 +47,7 @@ BattlescapeMessage::BattlescapeMessage(int width, int height, int x, int y) : Su
 	else
 	{
 		// Basic properties for display in UFO style
-		Palette::blockOffset(0);
+		color = Palette::blockOffset(0);
 
 		_window->setHighContrast(true);
 		_text->setHighContrast(true);

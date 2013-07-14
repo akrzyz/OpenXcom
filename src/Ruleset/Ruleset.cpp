@@ -427,7 +427,7 @@ void Ruleset::loadFile(const std::string &filename, const std::string &folder, c
 				}
 				else
 				{
-					rule = new Armor(type, "", 0);
+					rule = new Armor(type, "", 0, folder, game);
 					_armors[type] = rule;
 					_armorsIndex.push_back(type);
 				}
@@ -974,6 +974,16 @@ SavedGame *Ruleset::newSave() const
 	for (int i = 0; i < soldiers; ++i)
 	{
 		Soldier *soldier = new Soldier(getSoldier("XCOM"), getArmor("STR_NONE_UC"), &_names, save->getId("STR_SOLDIER"));
+		soldier->setCraft(base->getCrafts()->front());
+		base->getSoldiers()->push_back(soldier);
+	}
+	if (const YAML::Node *pName = (*_startingBase->begin()).FindValue("randomAquanauts"))
+	{
+		(*pName) >> soldiers;
+	}
+	for (int i = 0; i < soldiers; ++i)
+	{
+		Soldier *soldier = new Soldier(getSoldier("XCOM2"), getArmor("STR_NONE_AQUA"), &_names, save->getId("STR_SOLDIER"));
 		soldier->setCraft(base->getCrafts()->front());
 		base->getSoldiers()->push_back(soldier);
 	}

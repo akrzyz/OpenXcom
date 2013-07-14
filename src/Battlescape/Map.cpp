@@ -1210,7 +1210,7 @@ void Map::cacheUnits()
  */
 void Map::cacheUnit(BattleUnit *unit)
 {
-	UnitSprite *unitSprite = new UnitSprite(_spriteWidth, _spriteHeight, 0, 0);
+	UnitSprite *unitSprite = new UnitSprite(_spriteWidth, _spriteHeight, 0, 0, _save->getDepth());
 	std::string palette;
 	palette = "PALETTES.DAT_4";
 /*	if (unit->getUnitRules() != 0)
