@@ -235,8 +235,8 @@ void UnitSprite::drawRoutine0()
 	}
 	else
 	{
-		die = 256; // aquanaut land death frame
-		// aquanaut land torso
+		die = 256; // terror unit death frame
+		// terror unit torso
 		maleTorso = 32;
 		femaleTorso = 267;
 		rarm1H = 248;

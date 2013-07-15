@@ -110,6 +110,8 @@ public:
 	void center(double lon, double lat);
 	/// Checks if a point is inside land.
 	bool insideLand(double lon, double lat) const;
+	/// Checks if a point is inside water.
+	bool insideWater(double lon, double lat) const;
 	/// Turns on/off the globe detail.
 	void toggleDetail();
 	/// Gets all the targets near a point on the globe.
@@ -172,6 +174,8 @@ public:
 	void toggleRadarLines();
 
 	void drawVHLine(double lon1, double lat1, double lon2, double lat2, int colour);
+
+	static void loadPolygon(int numberOfPolygons, short value[][10], std::list<Polygon*> *polygons);
 };
 
 }

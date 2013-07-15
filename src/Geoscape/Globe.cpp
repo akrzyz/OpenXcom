@@ -509,6 +509,29 @@ bool Globe::insideLand(double lon, double lat) const
 }
 
 /**
+ * Checks if a polar point is inside the water's landmass.
+ * @param lon Longitude of the point.
+ * @param lat Latitude of the point.
+ * @return True if it's inside, False if it's outside.
+ */
+bool Globe::insideWater(double lon, double lat) const
+{
+	bool inside = false;
+	// We're only temporarily changing cenLon/cenLat so the "const" is actually preserved
+	Globe* const globe = const_cast<Globe* const>(this); // WARNING: BAD CODING PRACTICE
+	double oldLon = _cenLon, oldLat = _cenLat;
+	globe->_cenLon = lon;
+	globe->_cenLat = lat;
+	for (std::list<Polygon*>::iterator i = _game->getResourcePack()->getPolygonsWater()->begin(); i != _game->getResourcePack()->getPolygonsWater()->end() && !inside; ++i)
+	{
+		inside = insidePolygon(lon, lat, *i);
+	}
+	globe->_cenLon = oldLon;
+	globe->_cenLat = oldLat;
+	return inside;
+}
+
+/**
  * Switches the amount of detail shown on the globe.
  * With detail on, country and city details are shown when zoomed in.
  */
@@ -1407,7 +1430,7 @@ void Globe::getPolygonTextureAndShade(double lon, double lat, int *texture, int 
 		}
 	polygons = _game->getResourcePack()->getPolygonsWater();
 	if (!polygons->empty())
-		for (std::list<Polygon*>::iterator i = polygons->begin(); i != polygons->end(); ++i)
+		for (std::list<Polygon*>::reverse_iterator i = polygons->rbegin(); i != polygons->rend(); ++i)
 		{
 			if (insidePolygon(lon, lat, *i))
 			{
@@ -1550,6 +1573,38 @@ void Globe::toggleRadarLines()
 {
 	_game->getSavedGame()->toggleRadarLines();
 	drawRadars();
+}
+
+void Globe::loadPolygon(int numberOfPolygons, short value[][10], std::list<Polygon*> *polygons)
+{
+	Polygon* poly;
+	int points;
+
+	for (int k = 0; k < numberOfPolygons; ++k)
+	{
+		if (value[k][6] != -1)
+		{
+			points = 4;
+		}
+		else
+		{
+			points = 3;
+		}
+		poly = new Polygon(points);
+
+		for (int i = 0, j = 0; i < points; ++i)
+		{
+			// Correct X-Com degrees and convert to radians
+			double lonRad = value[k][j++] * 0.125f * M_PI / 180;
+			double latRad = value[k][j++] * 0.125f * M_PI / 180;
+
+			poly->setLongitude(i, lonRad);
+			poly->setLatitude(i, latRad);
+		}
+		poly->setTexture(value[k][8]);
+
+		polygons->push_back(poly);
+	}
 }
 
 }//namespace OpenXcom

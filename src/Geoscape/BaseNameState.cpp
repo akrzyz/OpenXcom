@@ -42,6 +42,9 @@ namespace OpenXcom
  */
 BaseNameState::BaseNameState(Game *game, Base *base, Globe *globe, bool first) : State(game), _base(base), _globe(globe), _first(first)
 {
+	std::string background, palette, backpalette;
+	Uint8 colors[2];
+
 	_screen = false;
 
 	// Create objects
@@ -50,8 +53,27 @@ BaseNameState::BaseNameState(Game *game, Base *base, Globe *globe, bool first) :
 	_txtTitle = new Text(182, 16, 37, 70);
 	_edtName = new TextEdit(127, 16, 59, 94);
 
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_BACK01.SCR";
+		palette = "TFTD_PALETTES.DAT_0";
+		backpalette = "TFTD_BACKPALS.DAT";
+		colors[0] = Palette::blockOffset(0);
+		colors[1] = Palette::blockOffset(0)+1;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "BACK01.SCR";
+		palette = "PALETTES.DAT_0";
+		backpalette = "BACKPALS.DAT";
+		colors[0] = Palette::blockOffset(0);
+		colors[1] = Palette::blockOffset(8)+5;
+	}
+
 	// Set palette
-	_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(0)), Palette::backPos, 16);
+	_game->setPalette(_game->getResourcePack()->getPalette(backpalette)->getColors(colors[0]), Palette::backPos, 16);
 
 	add(_window);
 	add(_btnOk);
@@ -61,10 +83,10 @@ BaseNameState::BaseNameState(Game *game, Base *base, Globe *globe, bool first) :
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setColor(Palette::blockOffset(8)+5);
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK01.SCR"));
+	_window->setColor(colors[1]);
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
 
-	_btnOk->setColor(Palette::blockOffset(8)+5);
+	_btnOk->setColor(colors[1]);
 	_btnOk->setText(_game->getLanguage()->getString("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&BaseNameState::btnOkClick);
 	//_btnOk->onKeyboardPress((ActionHandler)&BaseNameState::btnOkClick, (SDLKey)Options::getInt("keyOk"));
@@ -73,12 +95,12 @@ BaseNameState::BaseNameState(Game *game, Base *base, Globe *globe, bool first) :
 	//something must be in the name before it is acceptable
 	_btnOk->setVisible(false);
 
-	_txtTitle->setColor(Palette::blockOffset(8)+5);
+	_txtTitle->setColor(colors[1]);
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setBig();
 	_txtTitle->setText(_game->getLanguage()->getString("STR_BASE_NAME"));
 
-	_edtName->setColor(Palette::blockOffset(8)+5);
+	_edtName->setColor(colors[1]);
 	_edtName->setBig();
 	_edtName->focus();
 	_edtName->onKeyboardPress((ActionHandler)&BaseNameState::edtNameKeyPress);

@@ -112,6 +112,9 @@ namespace OpenXcom
  */
 GeoscapeState::GeoscapeState(Game *game) : State(game), _pause(false), _music(false), _zoomInEffectDone(false), _zoomOutEffectDone(false), _battleMusic(false), _popups(), _dogfights(), _dogfightsToBeStarted(), _minimizedDogfights(0)
 {
+	std::string background, palette;
+	Uint8 colors[3];
+
 	int screenWidth = Options::getInt("baseXResolution");
 	int screenHeight = Options::getInt("baseYResolution");
 
@@ -171,12 +174,33 @@ GeoscapeState::GeoscapeState(Game *game) : State(game), _pause(false), _music(fa
 
 	_txtDebug = new Text(100, 8, 0, 0);
 
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_GEOBORD.SCR";
+		palette = "TFTD_PALETTES.DAT_0";
+
+		colors[0] = Palette::blockOffset(15)+12;
+		colors[1] = Palette::blockOffset(0)+1;
+		colors[2] = Palette::blockOffset(0)+1;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "GEOBORD.SCR";
+		palette = "PALETTES.DAT_0";
+
+		colors[0] = Palette::blockOffset(15)+12;
+		colors[1] = Palette::blockOffset(15)+5;
+		colors[2] = Palette::blockOffset(15)+4;
+	}
+
 	// Set palette
-	_game->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
+	_game->setPalette(_game->getResourcePack()->getPalette(palette)->getColors());
 
 	// Fix system colors
-	_game->getCursor()->setColor(Palette::blockOffset(15)+12);
-	_game->getFpsCounter()->setColor(Palette::blockOffset(15)+12);
+	_game->getCursor()->setColor(colors[0]);
+	_game->getFpsCounter()->setColor(colors[0]);
 
 	add(_bg);
 	add(_globe);
@@ -216,65 +240,65 @@ GeoscapeState::GeoscapeState(Game *game) : State(game), _pause(false), _music(fa
 	add(_txtDebug);
 
 	// Set up objects
-	_game->getResourcePack()->getSurface("GEOBORD.SCR")->blit(_bg);
+	_game->getResourcePack()->getSurface(background)->blit(_bg);
 
 	_btnIntercept->copy(_bg);
-	_btnIntercept->setColor(Palette::blockOffset(15)+5);
+	_btnIntercept->setColor(colors[1]);
 	_btnIntercept->onMouseClick((ActionHandler)&GeoscapeState::btnInterceptClick);
 	_btnIntercept->onKeyboardPress((ActionHandler)&GeoscapeState::btnInterceptClick, (SDLKey)Options::getInt("keyGeoIntercept"));
 
 	_btnBases->copy(_bg);
-	_btnBases->setColor(Palette::blockOffset(15)+5);
+	_btnBases->setColor(colors[1]);
 	_btnBases->onMouseClick((ActionHandler)&GeoscapeState::btnBasesClick);
 	_btnBases->onKeyboardPress((ActionHandler)&GeoscapeState::btnBasesClick, (SDLKey)Options::getInt("keyGeoBases"));
 
 	_btnGraphs->copy(_bg);
-	_btnGraphs->setColor(Palette::blockOffset(15)+5);
+	_btnGraphs->setColor(colors[1]);
 	_btnGraphs->onMouseClick((ActionHandler)&GeoscapeState::btnGraphsClick);
 	_btnGraphs->onKeyboardPress((ActionHandler)&GeoscapeState::btnGraphsClick, (SDLKey)Options::getInt("keyGeoGraphs"));
 
 	_btnUfopaedia->copy(_bg);
-	_btnUfopaedia->setColor(Palette::blockOffset(15)+5);
+	_btnUfopaedia->setColor(colors[1]);
 	_btnUfopaedia->onMouseClick((ActionHandler)&GeoscapeState::btnUfopaediaClick);
 	_btnUfopaedia->onKeyboardPress((ActionHandler)&GeoscapeState::btnUfopaediaClick, (SDLKey)Options::getInt("keyGeoUfopedia"));
 
 	_btnOptions->copy(_bg);
-	_btnOptions->setColor(Palette::blockOffset(15)+5);
+	_btnOptions->setColor(colors[1]);
 	_btnOptions->onMouseClick((ActionHandler)&GeoscapeState::btnOptionsClick);
 	_btnOptions->onKeyboardPress((ActionHandler)&GeoscapeState::btnOptionsClick, (SDLKey)Options::getInt("keyGeoOptions"));
 
 	_btnFunding->copy(_bg);
-	_btnFunding->setColor(Palette::blockOffset(15)+5);
+	_btnFunding->setColor(colors[1]);
 	_btnFunding->onMouseClick((ActionHandler)&GeoscapeState::btnFundingClick);
 	_btnFunding->onKeyboardPress((ActionHandler)&GeoscapeState::btnFundingClick, (SDLKey)Options::getInt("keyGeoFunding"));
 
 	_btn5Secs->copy(_bg);
-	_btn5Secs->setColor(Palette::blockOffset(15)+5);
+	_btn5Secs->setColor(colors[1]);
 	_btn5Secs->setGroup(&_timeSpeed);
 	_btn5Secs->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, (SDLKey)Options::getInt("keyGeoSpeed1"));
 
 	_btn1Min->copy(_bg);
-	_btn1Min->setColor(Palette::blockOffset(15)+5);
+	_btn1Min->setColor(colors[1]);
 	_btn1Min->setGroup(&_timeSpeed);
 	_btn1Min->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, (SDLKey)Options::getInt("keyGeoSpeed2"));
 
 	_btn5Mins->copy(_bg);
-	_btn5Mins->setColor(Palette::blockOffset(15)+5);
+	_btn5Mins->setColor(colors[1]);
 	_btn5Mins->setGroup(&_timeSpeed);
 	_btn5Mins->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, (SDLKey)Options::getInt("keyGeoSpeed3"));
 
 	_btn30Mins->copy(_bg);
-	_btn30Mins->setColor(Palette::blockOffset(15)+5);
+	_btn30Mins->setColor(colors[1]);
 	_btn30Mins->setGroup(&_timeSpeed);
 	_btn30Mins->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, (SDLKey)Options::getInt("keyGeoSpeed4"));
 
 	_btn1Hour->copy(_bg);
-	_btn1Hour->setColor(Palette::blockOffset(15)+5);
+	_btn1Hour->setColor(colors[1]);
 	_btn1Hour->setGroup(&_timeSpeed);
 	_btn1Hour->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, (SDLKey)Options::getInt("keyGeoSpeed5"));
 
 	_btn1Day->copy(_bg);
-	_btn1Day->setColor(Palette::blockOffset(15)+5);
+	_btn1Day->setColor(colors[1]);
 	_btn1Day->setGroup(&_timeSpeed);
 	_btn1Day->onKeyboardPress((ActionHandler)&GeoscapeState::btnTimerClick, (SDLKey)Options::getInt("keyGeoSpeed6"));
 
@@ -315,53 +339,53 @@ GeoscapeState::GeoscapeState(Game *game) : State(game), _pause(false), _music(fa
 	if (_showFundsOnGeoscape)
 	{
 		_txtFunds->setSmall();
-		_txtFunds->setColor(Palette::blockOffset(15)+4);
+		_txtFunds->setColor(colors[2]);
 		_txtFunds->setText(L"");
 		_txtFunds->setAlign(ALIGN_CENTER);
 	}
 
 	if (_showFundsOnGeoscape) _txtHour->setSmall(); else _txtHour->setBig();
-	_txtHour->setColor(Palette::blockOffset(15)+4);
+	_txtHour->setColor(colors[2]);
 	_txtHour->setAlign(ALIGN_RIGHT);
 	_txtHour->setText(L"");
 
 	if (_showFundsOnGeoscape) _txtHourSep->setSmall(); else _txtHourSep->setBig();
-	_txtHourSep->setColor(Palette::blockOffset(15)+4);
+	_txtHourSep->setColor(colors[2]);
 	_txtHourSep->setText(L":");
 
 	if (_showFundsOnGeoscape) _txtMin->setSmall(); else _txtMin->setBig();
-	_txtMin->setColor(Palette::blockOffset(15)+4);
+	_txtMin->setColor(colors[2]);
 	_txtMin->setText(L"");
 
 	if (_showFundsOnGeoscape) _txtMinSep->setSmall(); else _txtMinSep->setBig();
-	_txtMinSep->setColor(Palette::blockOffset(15)+4);
+	_txtMinSep->setColor(colors[2]);
 	_txtMinSep->setText(L":");
 
 	_txtSec->setSmall();
-	_txtSec->setColor(Palette::blockOffset(15)+4);
+	_txtSec->setColor(colors[2]);
 	_txtSec->setText(L"");
 
 	_txtWeekday->setSmall();
-	_txtWeekday->setColor(Palette::blockOffset(15)+4);
+	_txtWeekday->setColor(colors[2]);
 	_txtWeekday->setText(L"");
 	_txtWeekday->setAlign(ALIGN_CENTER);
 
 	_txtDay->setSmall();
-	_txtDay->setColor(Palette::blockOffset(15)+4);
+	_txtDay->setColor(colors[2]);
 	_txtDay->setText(L"");
 	_txtDay->setAlign(ALIGN_CENTER);
 
 	_txtMonth->setSmall();
-	_txtMonth->setColor(Palette::blockOffset(15)+4);
+	_txtMonth->setColor(colors[2]);
 	_txtMonth->setText(L"");
 	_txtMonth->setAlign(ALIGN_CENTER);
 
 	_txtYear->setSmall();
-	_txtYear->setColor(Palette::blockOffset(15)+4);
+	_txtYear->setColor(colors[2]);
 	_txtYear->setText(L"");
 	_txtYear->setAlign(ALIGN_CENTER);
 
-	_txtDebug->setColor(Palette::blockOffset(15)+4);
+	_txtDebug->setColor(colors[2]);
 
 	_timer->onTimer((StateHandler)&GeoscapeState::timeAdvance);
 	_timer->start();
@@ -443,8 +467,21 @@ void GeoscapeState::handle(Action *action)
  */
 void GeoscapeState::init()
 {
+	std::string palette;
+
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		palette = "TFTD_PALETTES.DAT_0";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		palette = "PALETTES.DAT_0";
+	}
+
 	// Set palette
-	_game->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
+	_game->setPalette(_game->getResourcePack()->getPalette(palette)->getColors());
 
 	timeDisplay();
 
