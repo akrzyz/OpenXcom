@@ -67,7 +67,7 @@ namespace OpenXcom
 		_image = new Surface(32, 48, 157, 5);
 		add(_image);
 
-		item->drawHandSprite(_game->getResourcePack()->getSurfaceSet("BIGOBS.PCK"), _image);
+		item->drawHandSprite(_game->getResourcePack()->getSurfaceSet(item->getTerrorPrefix() + "BIGOBS.PCK"), _image);
 
 		std::vector<std::string> *ammo_data = item->getCompatibleAmmo();
 
@@ -203,7 +203,7 @@ namespace OpenXcom
 							ss << ammo_rule->getPower();
 							_txtAmmoDamage[i]->setText(ss.str().c_str());
 
-							ammo_rule->drawHandSprite(_game->getResourcePack()->getSurfaceSet("BIGOBS.PCK"), _imageAmmo[i]);
+							ammo_rule->drawHandSprite(_game->getResourcePack()->getSurfaceSet(ammo_rule->getTerrorPrefix() + "BIGOBS.PCK"), _imageAmmo[i]);
 						}
 					}
 				}

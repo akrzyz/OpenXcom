@@ -53,15 +53,27 @@ namespace OpenXcom
  */
 Inventory::Inventory(Game *game, int width, int height, int x, int y) : InteractiveSurface(width, height, x, y), _game(game), _selUnit(0), _selItem(0), _tu(true), _groundOffset(0)
 {
+	Uint8 colors[2];
+
 	_grid = new Surface(width, height, x, y);
 	_items = new Surface(width, height, x, y);
 	_selection = new Surface(RuleInventory::HAND_W * RuleInventory::SLOT_W, RuleInventory::HAND_H * RuleInventory::SLOT_H, x, y);
 	_warning = new WarningMessage(224, 24, 48, 176);
 	_stackNumber = new NumberText(15, 15, 0, 0);
 
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		colors[0] = colors[1] = Palette::blockOffset(3);
+	}
+	else
+	{
+		colors[0] = Palette::blockOffset(2);
+		colors[1] = Palette::blockOffset(1) - 1;
+	}
+
 	_warning->setFonts(_game->getResourcePack()->getFont("Big.fnt"), _game->getResourcePack()->getFont("Small.fnt"));
-	_warning->setColor(Palette::blockOffset(2));
-	_warning->setTextColor(Palette::blockOffset(1)-1);
+	_warning->setColor(colors[0]);
+	_warning->setTextColor(colors[1]);
 }
 
 /**
@@ -128,14 +140,27 @@ void Inventory::draw()
  */
 void Inventory::drawGrid()
 {
+	Uint8 colors[2];
+
 	_grid->clear();
 	Text text = Text(80, 9, 0, 0);
 	text.setPalette(_grid->getPalette());
 	text.setFonts(_game->getResourcePack()->getFont("Big.fnt"), _game->getResourcePack()->getFont("Small.fnt"));
-	text.setColor(Palette::blockOffset(4)-1);
-	text.setHighContrast(true);
 
-	Uint8 color = Palette::blockOffset(0)+8;
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		colors[0] = Palette::blockOffset(0) + 1;
+		colors[1] = Palette::blockOffset(0) + 5;
+	}
+	else
+	{
+		colors[0] = Palette::blockOffset(4) - 1;
+		colors[1] = Palette::blockOffset(0) + 8;
+		text.setHighContrast(true);
+	}
+
+	text.setColor(colors[0]);
+
 	for (std::map<std::string, RuleInventory*>::iterator i = _game->getRuleset()->getInventories()->begin(); i != _game->getRuleset()->getInventories()->end(); ++i)
 	{
 		// Draw grid
@@ -148,7 +173,7 @@ void Inventory::drawGrid()
 				r.y = i->second->getY() + RuleInventory::SLOT_H * j->y;
 				r.w = RuleInventory::SLOT_W + 1;
 				r.h = RuleInventory::SLOT_H + 1;
-				_grid->drawRect(&r, color);
+				_grid->drawRect(&r, colors[1]);
 				r.x++;
 				r.y++;
 				r.w -= 2;
@@ -163,7 +188,7 @@ void Inventory::drawGrid()
 			r.y = i->second->getY();
 			r.w = RuleInventory::HAND_W * RuleInventory::SLOT_W;
 			r.h = RuleInventory::HAND_H * RuleInventory::SLOT_H;
-			_grid->drawRect(&r, color);
+			_grid->drawRect(&r, colors[1]);
 			r.x++;
 			r.y++;
 			r.w -= 2;
@@ -181,7 +206,7 @@ void Inventory::drawGrid()
 					r.y = y;
 					r.w = RuleInventory::SLOT_W + 1;
 					r.h = RuleInventory::SLOT_H + 1;
-					_grid->drawRect(&r, color);
+					_grid->drawRect(&r, colors[1]);
 					r.x++;
 					r.y++;
 					r.w -= 2;
@@ -204,13 +229,20 @@ void Inventory::drawGrid()
  */
 void Inventory::drawItems()
 {
+	Uint8 color;
+	if (Options::getString("GUIstyle") == "xcom2")
+		color = Palette::blockOffset(0) + 1;
+	else
+		color = Palette::blockOffset(4) + 2;
+
 	_items->clear();
 	if (_selUnit != 0)
 	{
-		SurfaceSet *texture = _game->getResourcePack()->getSurfaceSet("BIGOBS.PCK");
+		SurfaceSet *texture;
 		// Soldier items
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getInventory()->begin(); i != _selUnit->getInventory()->end(); ++i)
 		{
+			texture = _game->getResourcePack()->getSurfaceSet((*i)->getRules()->getTerrorPrefix() + "BIGOBS.PCK");
 			if ((*i) == _selItem)
 				continue;
 
@@ -227,11 +259,12 @@ void Inventory::drawItems()
 			}
 			texture->getFrame((*i)->getRules()->getBigSprite())->blit(_items);
 		}
-		Surface *stackLayer = new Surface(getWidth(), getHeight(), getX(), getY());
+		Surface *stackLayer = new Surface(getWidth(), getHeight(), 0, 0);
 		stackLayer->setPalette(getPalette());
 		// Ground items
 		for (std::vector<BattleItem*>::iterator i = _selUnit->getTile()->getInventory()->begin(); i != _selUnit->getTile()->getInventory()->end(); ++i)
 		{
+			texture = _game->getResourcePack()->getSurfaceSet((*i)->getRules()->getTerrorPrefix() + "BIGOBS.PCK");
 			// note that you can make items invisible by setting their width or height to 0 (for example used with tank corpse items)
 			if ((*i) == _selItem || (*i)->getSlotX() < _groundOffset || (*i)->getRules()->getInventoryHeight() == 0 || (*i)->getRules()->getInventoryWidth() == 0)
 				continue;
@@ -249,39 +282,27 @@ void Inventory::drawItems()
 				_stackNumber->setY(((*i)->getSlot()->getY() + ((*i)->getSlotY() + (*i)->getRules()->getInventoryHeight()) * RuleInventory::SLOT_H)-5);
 				_stackNumber->setValue(_stackLevel[(*i)->getSlotX()][(*i)->getSlotY()]);
 				_stackNumber->draw();
-
-				int originalX = _stackNumber->getX();
-				int originalY = _stackNumber->getY();
-				// give it a border
-				// this is the "darker" shade that goes in the corners.
-				_stackNumber->setColor(Palette::blockOffset(4)+13);
-				for (int x = -1; x <= 1; x += 2)
-				{
-					for (int y = -1; y <= 1; y += 2)
-					{
-						_stackNumber->setX(originalX + x);
-						_stackNumber->setY(originalY + y);
-						_stackNumber->blit(stackLayer);
-					}
-				}
-				// this is the "slightly darker" version that goes in four cardinals.
-				_stackNumber->setColor(Palette::blockOffset(4)+10);
-				for (int z = -1; z <= 1; z += 2)
-				{
-					_stackNumber->setX(originalX + z);
-					_stackNumber->setY(originalY);
-					_stackNumber->blit(stackLayer);
-					_stackNumber->setX(originalX);
-					_stackNumber->setY(originalY + z);
-					_stackNumber->blit(stackLayer);
-				}
-				// and finally the number itself
-				_stackNumber->setColor(Palette::blockOffset(4)+2);
-				_stackNumber->setX(originalX);
-				_stackNumber->setY(originalY);
+				_stackNumber->setColor(color);
 				_stackNumber->blit(stackLayer);
 			}
 		}
+
+		// give it a border
+		// this is the "darker" shade that goes in the corners.
+		for (int x = -1; x <= 1; x += 2)
+		{
+			for (int y = -1; y <= 1; y += 2)
+			{
+				stackLayer->blitNShade(_items, x, y, 11);
+			}
+		}
+		// this is the "slightly darker" version that goes in four cardinals.
+		for (int z = -1; z <= 1; z += 2)
+		{
+			stackLayer->blitNShade(_items, z, 0, 8);
+			stackLayer->blitNShade(_items, 0, z, 8);
+		}
+		// and finally the number itself
 		stackLayer->blit(_items);
 		delete stackLayer;
 	}
@@ -418,7 +439,7 @@ void Inventory::setSelectedItem(BattleItem *item)
 		{
 			_stackLevel[_selItem->getSlotX()][_selItem->getSlotY()] -= 1;
 		}
-		_selItem->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet("BIGOBS.PCK"), _selection);
+		_selItem->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet(item->getRules()->getTerrorPrefix() + "BIGOBS.PCK"), _selection);
 	}
 	drawItems();
 }
@@ -649,6 +670,10 @@ void Inventory::mouseClick(Action *action, State *state)
 							_selItem->moveToOwner(0);
 							setSelectedItem(0);
 							_game->getResourcePack()->getSound("BATTLE.CAT", 17)->play();
+							if (item->getSlot()->getType() == INV_GROUND)
+							{
+								arrangeGround(false);
+							}
 						}
 						else
 						{

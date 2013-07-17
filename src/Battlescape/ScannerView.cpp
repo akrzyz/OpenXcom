@@ -24,6 +24,7 @@
 #include "../Engine/CrossPlatform.h"
 #include "../Engine/Language.h"
 #include "../Engine/Palette.h"
+#include "../Engine/Options.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Savegame/Tile.h"
 #include "../Savegame/SavedGame.h"
@@ -44,7 +45,7 @@ namespace OpenXcom
  * @param game Pointer to the core game.
  * @param unit the current unit
  */
-ScannerView::ScannerView (int w, int h, int x, int y, Game * game, BattleUnit *unit) : InteractiveSurface(w, h, x, y), _game(game), _unit(unit), _frame(0)
+ScannerView::ScannerView (int w, int h, int x, int y, Game * game, BattleUnit *unit, const std::string &terrorPrefix) : InteractiveSurface(w, h, x, y), _game(game), _unit(unit), _frame(0), _terrorPrefix(terrorPrefix)
 {
 	_redraw = true;
 }
@@ -54,7 +55,20 @@ ScannerView::ScannerView (int w, int h, int x, int y, Game * game, BattleUnit *u
  */
 void ScannerView::draw()
 {
-	SurfaceSet *set = _game->getResourcePack()->getSurfaceSet("DETBLOB.DAT");
+	std::string setName;
+
+	if (_terrorPrefix != "")
+	{
+		// Basic properties for display in TFTD style
+		setName = "TFTD_DETBLOB.DAT";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		setName = "DETBLOB.DAT";
+	}
+
+	SurfaceSet *set = _game->getResourcePack()->getSurfaceSet(setName);
 	Surface *surface = 0;
 
 	clear();

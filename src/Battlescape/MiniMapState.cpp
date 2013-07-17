@@ -29,6 +29,7 @@
 #include "../Savegame/SavedGame.h"
 #include "../Ruleset/MapDataSet.h"
 #include "../Interface/Text.h"
+#include "../Interface/ImageButton.h"
 #include "MiniMapView.h"
 #include "Map.h"
 #include "Camera.h"
@@ -44,22 +45,17 @@ namespace OpenXcom
  * @param camera The Battlescape camera.
  * @param battleGame The Battlescape save.
 */
-MiniMapState::MiniMapState (Game * game, Camera * camera, SavedBattleGame * battleGame) : State(game)
+MiniMapState::MiniMapState (Game * game, Camera * camera, SavedBattleGame * battleGame, SDL_Color *palette) : State(game)
 {
-	_surface = new InteractiveSurface(320, 200);
-	_miniMapView = new MiniMapView(222, 150, 49, 15, game, camera, battleGame);
-	InteractiveSurface * btnLvlUp = new InteractiveSurface(18, 20, 24, 62);
-	InteractiveSurface * btnLvlDwn = new InteractiveSurface(18, 20, 24, 88);
-	InteractiveSurface * btnOk = new InteractiveSurface(32, 32, 275, 145);
-	_txtLevel = new Text (20, 25, 281, 75);
-	add(_surface);
-	add(_miniMapView);
-	add(btnLvlUp);
-	add(btnLvlDwn);
-	add(btnOk);
-	add(_txtLevel);
+	std::string background;
+	std::wstringstream s;
+	Uint8 colors[2];
+	int mapHeight, mapX, mapY, textX, textY;
 
-	centerAllSurfaces();
+	InteractiveSurface *btnLvlUp, *btnLvlDwn, *btnOk;
+	ImageButton *btnLvlUpTFTD, *btnLvlDwnTFTD, *btnOkTFTD;
+
+	_surface = new InteractiveSurface(320, 200);
 
 	if (Screen::getDY() > 50)
 	{
@@ -69,24 +65,98 @@ MiniMapState::MiniMapState (Game * game, Camera * camera, SavedBattleGame * batt
 		current.h = 151;
 		current.x = 46;
 		current.y = 14;
-		_surface->drawRect(&current, Palette::blockOffset(15)+15);
+		_surface->drawRect(&current, colors[0]);
 	}
 
-	_game->getResourcePack()->getSurface("SCANBORD.PCK")->blit(_surface);
-	btnLvlUp->onMouseClick((ActionHandler)&MiniMapState::btnLevelUpClick);
-	btnLvlDwn->onMouseClick((ActionHandler)&MiniMapState::btnLevelDownClick);
-	btnOk->onMouseClick((ActionHandler)&MiniMapState::btnOkClick);
-	btnOk->onKeyboardPress((ActionHandler)&MiniMapState::btnOkClick, (SDLKey)Options::getInt("keyCancel"));
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_SCANBORD.BDY";
+
+		btnLvlUpTFTD = new ImageButton(24, 12, 280, 98);
+		btnLvlDwnTFTD = new ImageButton(24, 12, 280, 115);
+		btnOkTFTD = new ImageButton(24, 12, 280, 144);
+
+		colors[0] = Palette::blockOffset(15)+15;
+		colors[1] = Palette::blockOffset(5);
+
+		mapHeight = 148;
+		mapX = 47;
+		mapY = 16;
+		textX = 282;
+		textY = 28;
+
+		s << "L";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "SCANBORD.PCK";
+
+		colors[0] = Palette::blockOffset(15)+15;
+		colors[1] = Palette::blockOffset(4);
+
+		mapHeight = 150;
+		mapX = 49;
+		mapY = 15;
+		textX = 281;
+		textY = 75;
+
+		btnLvlUp = new InteractiveSurface(18, 20, 24, 62);
+		btnLvlDwn = new InteractiveSurface(18, 20, 24, 88);
+		btnOk = new InteractiveSurface(32, 32, 275, 145);
+
+		add(btnLvlUp);
+		add(btnLvlDwn);
+		add(btnOk);
+
+		btnLvlUp->onMouseClick((ActionHandler)&MiniMapState::btnLevelUpClick);
+		btnLvlDwn->onMouseClick((ActionHandler)&MiniMapState::btnLevelDownClick);
+		btnOk->onMouseClick((ActionHandler)&MiniMapState::btnOkClick);
+		btnOk->onKeyboardPress((ActionHandler)&MiniMapState::btnOkClick, (SDLKey)Options::getInt("keyCancel"));
+	}
+
+	_miniMapView = new MiniMapView(222, mapHeight, mapX, mapY, 32, game, camera, battleGame, palette);
+	_txtLevel = new Text (20, 25, textX, textY);
+
+	add(_surface);
+	add(_miniMapView);
+	add(_txtLevel);
+
+	centerAllSurfaces();
+
 	_txtLevel->setBig();
-	_txtLevel->setColor(Palette::blockOffset(4));
-	_txtLevel->setHighContrast(true);
-	std::wstringstream s;
+	_txtLevel->setColor(colors[1]);
 	s << camera->getViewLevel();
 	_txtLevel->setText(s.str());
 	_timerAnimate = new Timer(125);
 	_timerAnimate->onTimer((StateHandler)&MiniMapState::animate);
 	_timerAnimate->start();
 	_miniMapView->draw();
+	_game->getResourcePack()->getSurface(background)->blit(_surface);
+
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		add(btnLvlUpTFTD);
+		add(btnLvlDwnTFTD);
+		add(btnOkTFTD);
+
+		btnLvlUpTFTD->copy(_game->getResourcePack()->getSurface("TFTD_SCANBORD.BDY"));
+		btnLvlUpTFTD->setColor(Palette::blockOffset(0)+6);
+		btnLvlDwnTFTD->copy(_game->getResourcePack()->getSurface("TFTD_SCANBORD.BDY"));
+		btnLvlDwnTFTD->setColor(Palette::blockOffset(0)+6);
+		btnOkTFTD->copy(_game->getResourcePack()->getSurface("TFTD_SCANBORD.BDY"));
+		btnOkTFTD->setColor(Palette::blockOffset(0)+6);
+
+		btnLvlUpTFTD->onMouseClick((ActionHandler)&MiniMapState::btnLevelUpClick);
+		btnLvlDwnTFTD->onMouseClick((ActionHandler)&MiniMapState::btnLevelDownClick);
+		btnOkTFTD->onMouseClick((ActionHandler)&MiniMapState::btnOkClick);
+		btnOkTFTD->onKeyboardPress((ActionHandler)&MiniMapState::btnOkClick, (SDLKey)Options::getInt("keyCancel"));
+	}
+	else
+	{
+		_txtLevel->setHighContrast(true);
+	}
 }
 
 /**
@@ -133,6 +203,8 @@ void MiniMapState::btnOkClick(Action *)
 void MiniMapState::btnLevelUpClick(Action *)
 {
 	std::wstringstream s;
+	if (Options::getString("GUIstyle") == "xcom2")
+		s << "L";
 	s << _miniMapView->up();
 	_txtLevel->setText(s.str());
 }
@@ -144,6 +216,8 @@ void MiniMapState::btnLevelUpClick(Action *)
 void MiniMapState::btnLevelDownClick(Action *)
 {
 	std::wstringstream s;
+	if (Options::getString("GUIstyle") == "xcom2")
+		s << "L";
 	s << _miniMapView->down ();
 	_txtLevel->setText(s.str());
 }

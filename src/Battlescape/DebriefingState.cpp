@@ -64,6 +64,9 @@ namespace OpenXcom
  */
 DebriefingState::DebriefingState(Game *game) : State(game), _region(0), _country(0), _noContainment(false), _destroyBase(false)
 {
+	std::string background, palette, backpalette;
+	Uint8 colors[4];
+
 	// Restore the cursor in case something weird happened
 	_game->getCursor()->setVisible(true);
 	_containmentLimit = Options::getBool("alienContainmentHasUpperLimit") ? 1 : 0;
@@ -80,9 +83,30 @@ DebriefingState::DebriefingState(Game *game) : State(game), _region(0), _country
 	_lstRecovery = new TextList(280, 80, 16, 32);
 	_lstTotal = new TextList(280, 9, 16, 12);
 
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		palette = "TFTD_PALETTES.DAT_0";
+		backpalette = "TFTD_BACKPALS.DAT";
+		colors[0] = Palette::blockOffset(4);
+		colors[1] = colors[2] = colors[3] = Palette::blockOffset(0)+1;
+		background = "TFTD_BACK01.SCR";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		palette = "PALETTES.DAT_0";
+		backpalette = "BACKPALS.DAT";
+		colors[0] = Palette::blockOffset(0);
+		colors[1] = Palette::blockOffset(15)-1;
+		colors[2] = Palette::blockOffset(8)+5;
+		colors[3] = Palette::blockOffset(8)+10;
+		background = "BACK01.SCR";
+	}
+
 	// Set palette
-	_game->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
-	_game->setPalette(_game->getResourcePack()->getPalette("BACKPALS.DAT")->getColors(Palette::blockOffset(0)), Palette::backPos, 16);
+	_game->setPalette(_game->getResourcePack()->getPalette(palette)->getColors());
+	_game->getResourcePack()->getSurface(background)->setPalette(_game->getResourcePack()->getPalette(backpalette)->getColors(colors[0]), Palette::backPos, 16);
 
 	add(_window);
 	add(_btnOk);
@@ -99,43 +123,43 @@ DebriefingState::DebriefingState(Game *game) : State(game), _region(0), _country
 	centerAllSurfaces();
 
 	// Set up objects
-	_window->setColor(Palette::blockOffset(15)-1);
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK01.SCR"));
+	_window->setColor(colors[1]);
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
 
-	_btnOk->setColor(Palette::blockOffset(15)-1);
+	_btnOk->setColor(colors[1]);
 	_btnOk->setText(_game->getLanguage()->getString("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&DebriefingState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&DebriefingState::btnOkClick, (SDLKey)Options::getInt("keyOk"));
 	_btnOk->onKeyboardPress((ActionHandler)&DebriefingState::btnOkClick, (SDLKey)Options::getInt("keyCancel"));
 
-	_txtTitle->setColor(Palette::blockOffset(8)+5);
+	_txtTitle->setColor(colors[2]);
 	_txtTitle->setBig();
 
-	_txtItem->setColor(Palette::blockOffset(8)+5);
+	_txtItem->setColor(colors[2]);
 	_txtItem->setText(_game->getLanguage()->getString("STR_LIST_ITEM"));
 
-	_txtQuantity->setColor(Palette::blockOffset(8)+5);
+	_txtQuantity->setColor(colors[2]);
 	_txtQuantity->setText(_game->getLanguage()->getString("STR_QUANTITY_UC"));
 
-	_txtScore->setColor(Palette::blockOffset(8)+5);
+	_txtScore->setColor(colors[2]);
 	_txtScore->setText(_game->getLanguage()->getString("STR_SCORE"));
 
-	_txtRecovery->setColor(Palette::blockOffset(8)+5);
+	_txtRecovery->setColor(colors[2]);
 	_txtRecovery->setText(_game->getLanguage()->getString("STR_UFO_RECOVERY"));
 
-	_txtRating->setColor(Palette::blockOffset(8)+5);
+	_txtRating->setColor(colors[2]);
 
-	_lstStats->setColor(Palette::blockOffset(15)-1);
-	_lstStats->setSecondaryColor(Palette::blockOffset(8)+10);
+	_lstStats->setColor(colors[1]);
+	_lstStats->setSecondaryColor(colors[3]);
 	_lstStats->setColumns(3, 184, 60, 64);
 	_lstStats->setDot(true);
 
-	_lstRecovery->setColor(Palette::blockOffset(15)-1);
-	_lstRecovery->setSecondaryColor(Palette::blockOffset(8)+10);
+	_lstRecovery->setColor(colors[1]);
+	_lstRecovery->setSecondaryColor(colors[3]);
 	_lstRecovery->setColumns(3, 184, 60, 64);
 	_lstRecovery->setDot(true);
 
-	_lstTotal->setColor(Palette::blockOffset(8)+5);
+	_lstTotal->setColor(colors[2]);
 	_lstTotal->setColumns(2, 244, 64);
 	_lstTotal->setDot(true);
 
@@ -234,7 +258,6 @@ DebriefingState::~DebriefingState()
  */
 void DebriefingState::btnOkClick(Action *)
 {
-	_game->getSavedGame()->setBattleGame(0);
 	_game->popState();
 	if (_game->getSavedGame()->getMonthsPassed() == -1)
 	{
@@ -559,7 +582,7 @@ void DebriefingState::prepareDebriefing()
 			else if (oldFaction == FACTION_NEUTRAL)
 			{
 				if ((*j)->killedBy() == FACTION_PLAYER)
-					addStat("STR_CIVILIANS_KILLED_BY_XCOM_OPERATIVES", 1, -(*j)->getValue() + (2 * ((*j)->getValue() / 3)));
+					addStat("STR_CIVILIANS_KILLED_BY_XCOM_OPERATIVES", 1, -(*j)->getValue() - (2 * ((*j)->getValue() / 3)));
 				else // if civilians happen to kill themselves XCOM shouldn't get penalty for it
 					addStat("STR_CIVILIANS_KILLED_BY_ALIENS", 1, -(*j)->getValue());
 			}
@@ -874,6 +897,8 @@ void DebriefingState::prepareDebriefing()
 			}
 		}
 	}
+	// Now ending the battle.
+	save->setBattleGame(0);
 }
 
 void DebriefingState::reequipCraft(Base *base, Craft *craft, bool vehicleItemsCanBeDestroyed)

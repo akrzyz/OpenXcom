@@ -37,6 +37,7 @@ private:
 	BattleUnit *_unit;
 	Pathfinding *_pf;
 	TileEngine *_terrain;
+	int _depth;
 	bool _falling;
     bool _beforeFirstStep;
 	void postPathProcedures();
@@ -47,7 +48,7 @@ private:
 	std::size_t _numUnitsSpotted;
 public:
 	/// Creates a new UnitWalkBState class
-	UnitWalkBState(BattlescapeGame *parent, BattleAction _action, const Position finalFacing = Position(0,0,INT_MAX), const bool pathfindForFinalTurn = true);
+	UnitWalkBState(BattlescapeGame *parent, BattleAction _action, int depth, const Position finalFacing = Position(0,0,INT_MAX), const bool pathfindForFinalTurn = true);
 	/// Cleans up the UnitWalkBState.
 	~UnitWalkBState();
 	/// Set the target to walk to.

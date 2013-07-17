@@ -36,9 +36,10 @@ class ScannerView : public InteractiveSurface
 	void mouseClick (Action *action, State *state);
 	BattleUnit *_unit;
 	int _frame;
+	std::string _terrorPrefix;
 public:
 	/// Create the ScannerView
-	ScannerView (int w, int h, int x, int y, Game * game, BattleUnit *unit);
+	ScannerView (int w, int h, int x, int y, Game * game, BattleUnit *unit, const std::string &terrorPrefix);
 	/// Draw the scanner view
 	void draw();
 	void animate();

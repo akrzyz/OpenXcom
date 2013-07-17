@@ -28,12 +28,13 @@ class ExtraSprites
 {
 private:
 	std::map<int, std::string> _sprites;
+	std::string _folder;
 	int _width, _height;
 	bool _singleImage;
 	int _modIndex, _subX, _subY;
 public:
 	/// Creates a blank external sprite set.
-	ExtraSprites();
+	ExtraSprites(const std::string &folder);
 	/// Cleans up the external sprite set.
 	virtual ~ExtraSprites();
 	/// Loads the data from yaml
@@ -41,15 +42,17 @@ public:
 	/// Gets the list of sprites defined by this mod
 	std::map<int, std::string> *getSprites();
 	/// get the width of the surfaces (used for single images and new spritesets)
-	const int getWidth() const;
+	int getWidth() const;
 	/// get the height of the surfaces (used for single images and new spritesets)
-	const int getHeight() const;
+	int getHeight() const;
 	/// is this a single surface, or a set of surfaces?
-	const bool getSingleImage() const;
+	bool getSingleImage() const;
+	/// Gets main directory with data for this external sprite set.
+	std::string getFolder();
 	/// get the mod index for this external sprite set.
-	const int getModIndex() const;
-	const int getSubX() const;
-	const int getSubY() const;
+	int getModIndex() const;
+	int getSubX() const;
+	int getSubY() const;
 
 };
 

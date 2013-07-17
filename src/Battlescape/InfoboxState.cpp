@@ -22,6 +22,7 @@
 #include "../Resource/ResourcePack.h"
 #include "../Engine/Language.h"
 #include "../Engine/Palette.h"
+#include "../Engine/Options.h"
 #include "../Engine/Timer.h"
 #include "../Interface/Text.h"
 #include "../Interface/Window.h"
@@ -37,6 +38,8 @@ namespace OpenXcom
  */
 InfoboxState::InfoboxState(Game *game, const std::wstring &msg) : State(game)
 {
+	Uint8 color;
+
 	_screen = false;
 
 	// Create objects
@@ -48,16 +51,28 @@ InfoboxState::InfoboxState(Game *game, const std::wstring &msg) : State(game)
 
 	centerAllSurfaces();
 
-	_window->setColor(Palette::blockOffset(0));
-	_window->setHighContrast(true);
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		color = Palette::blockOffset(0)+1;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		color = Palette::blockOffset(0);
+
+		_window->setHighContrast(true);
+		_text->setHighContrast(true);
+	}
+
+	_window->setColor(color);
 
 	_text->setAlign(ALIGN_CENTER);
 	_text->setVerticalAlign(ALIGN_MIDDLE);
 	_text->setBig();
 	_text->setWordWrap(true);
 	_text->setText(msg);
-	_text->setColor(Palette::blockOffset(0));
-	_text->setHighContrast(true);
+	_text->setColor(color);
 	_text->setPalette(_window->getPalette());
 
 	_timer = new Timer(INFOBOX_DELAY);

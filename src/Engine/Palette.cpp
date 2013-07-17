@@ -26,7 +26,7 @@ namespace OpenXcom
 /**
  * Initializes a brand new palette.
  */
-Palette::Palette() : _colors(0)
+Palette::Palette(SDL_Color *colors) : _colors(colors)
 {
 }
 
@@ -84,6 +84,31 @@ void Palette::loadDat(const std::string &filename, int ncolors, int offset)
 SDL_Color *Palette::getColors(int offset) const
 {
 	return _colors + offset;
+}
+
+/**
+ * Sets the palette colors (used for TFTD tactical palettes).
+ * @param colors Pointer to the set of colors.
+ */
+void Palette::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
+{
+	// Counter used to avoid multiple transparent colors
+	Uint8 transparencyCounter = 0;
+
+	_colors = new SDL_Color[ncolors];
+	for (int i = 0; i < ncolors; ++i)
+	{
+		_colors[i + firstcolor].r = colors[i].r;
+		_colors[i + firstcolor].g = colors[i].g;
+		_colors[i + firstcolor].b = colors[i].b;
+		// Check to avoid multiple transparent colors in battlescape TFTD palettes
+		if ((colors[i].r == 0) && (colors[i].g == 0) && (colors[i].b == 0))
+		{
+			if (transparencyCounter > 0)
+				_colors[i + firstcolor].r = _colors[i + firstcolor].g = _colors[i + firstcolor].b = 4;
+			++transparencyCounter;
+		}
+	}
 }
 
 /**

@@ -39,6 +39,7 @@
 #include "InteractiveSurface.h"
 #include "Options.h"
 #include "CrossPlatform.h"
+#include "../Menu/SaveState.h"
 
 namespace OpenXcom
 {
@@ -127,6 +128,12 @@ Game::Game(const std::string &title) : _screen(0), _cursor(0), _lang(0), _states
  */
 Game::~Game()
 {
+	if (_save != 0 && _save->getMonthsPassed() >= 0 && Options::getInt("autosave") == 3)
+	{
+		SaveState *ss = new SaveState(this, true, false);
+		delete ss;
+	}
+
 	Mix_HaltChannel(-1);
 
 	for (std::list<State*>::iterator i = _states.begin(); i != _states.end(); ++i)
@@ -398,20 +405,32 @@ Language *Game::getLanguage() const
 void Game::loadLanguage(const std::string &filename)
 {
 	std::stringstream ss, ss2;
+	std::string background;
 	ss << "Language/" << filename << ".lng";
 	ss2 << "Language/" << filename << ".geo";
+
+	if ( ( (_res->getPalette("TFTD_PALETTES.DAT_0") != 0) && (_res->getPalette("PALETTES.DAT_0") == 0) ) || ( (_res->getPalette("TFTD_PALETTES.DAT_0") != 0) && (Options::getString("GUIstyle") == "xcom2") ) )
+	{
+		Options::setString("GUIstyle", "xcom2");
+		background = "TFTD_GEOBORD.SCR";
+	}
+	else
+	{
+		Options::setString("GUIstyle", "xcom1");
+		background = "GEOBORD.SCR";
+	}
 
 	_lang->loadLng(CrossPlatform::getDataFile(ss.str()), _rules->getExtraStrings()[filename]);
 
 	std::auto_ptr<Surface> sidebar(new Surface(64, 154));
 	if (CrossPlatform::getDataFile(ss2.str()) != "")
 	{
-		sidebar->setPalette(_res->getSurface("GEOBORD.SCR")->getPalette());
+		sidebar->setPalette(_res->getSurface(background)->getPalette());
 		sidebar->loadScr(CrossPlatform::getDataFile(ss2.str()));
 	}
 	sidebar->setX(256);
 	sidebar->setY(0);
-	sidebar->blit(_res->getSurface("GEOBORD.SCR"));
+	sidebar->blit(_res->getSurface(background));
 
 	Options::setString("language", filename);
 }
@@ -469,12 +488,7 @@ Ruleset *Game::getRuleset() const
 void Game::loadRuleset()
 {
 	_rules = new Ruleset();
-	std::vector<std::string> rulesets = Options::getRulesets();
-	for (std::vector<std::string>::iterator i = rulesets.begin(); i != rulesets.end(); ++i)
-	{
-		_rules->load(*i);
-	}
-	_rules->sortLists();
+	_rules->load();
 }
 
 /**

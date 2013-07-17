@@ -26,6 +26,7 @@
 #include "../Engine/Palette.h"
 #include "../Engine/Timer.h"
 #include "../Engine/Screen.h"
+#include "../Engine/Options.h"
 #include "../Interface/Text.h"
 #include "../Savegame/BattleItem.h"
 #include "../Savegame/BattleUnit.h"
@@ -44,9 +45,11 @@ namespace OpenXcom
  */
 ScannerState::ScannerState (Game * game, BattleAction *action) : State (game), _action(action)
 {
+	std::string background[2];
+
 	_surface1 = new InteractiveSurface(320, 200);
 	_surface2 = new InteractiveSurface(320, 200);
-	_scannerView = new ScannerView(152, 152, 56, 24, _game, _action->actor);
+	_scannerView = new ScannerView(152, 152, 56, 24, _game, _action->actor, action->weapon->getRules()->getTerrorPrefix());
 	
 	if (Screen::getDY() > 50)
 	{
@@ -59,8 +62,21 @@ ScannerState::ScannerState (Game * game, BattleAction *action) : State (game), _
 
 	centerAllSurfaces();
 	
-	_game->getResourcePack()->getSurface("DETBORD.PCK")->blit(_surface1);
-	_game->getResourcePack()->getSurface("DETBORD2.PCK")->blit(_surface2);
+	if (action->weapon->getRules()->getTerrorPrefix() != "")
+	{
+		// Basic properties for display in TFTD style
+		background[0] = "TFTD_DETBORD.BDY";
+		background[1] = "TFTD_DETBORD2.BDY";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background[0] = "DETBORD.PCK";
+		background[1] = "DETBORD2.PCK";
+	}
+
+	_game->getResourcePack()->getSurface(background[0])->blit(_surface1);
+	_game->getResourcePack()->getSurface(background[1])->blit(_surface2);
 
 	_timerAnimate = new Timer(125);
 	_timerAnimate->onTimer((StateHandler)&ScannerState::animate);

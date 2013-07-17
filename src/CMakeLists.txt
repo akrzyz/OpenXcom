@@ -89,8 +89,6 @@ set ( battlescape_src
   Battlescape/Map.cpp
   Battlescape/Pathfinding.h
   Battlescape/Pathfinding.cpp
-  Battlescape/EndBattleBState.h
-  Battlescape/EndBattleBState.cpp
   Battlescape/ExplosionBState.h
   Battlescape/ExplosionBState.cpp
   Battlescape/UnitTurnBState.cpp
@@ -214,6 +212,8 @@ set ( engine_src
   Engine/OpenGL.h
   Engine/Options.cpp
   Engine/Options.h
+  Engine/OptionsFolders.cpp
+  Engine/OptionsFolders.h
   Engine/CrossPlatform.cpp
   Engine/CrossPlatform.h
   Engine/Sound.h
@@ -260,6 +260,10 @@ set ( geoscape_src
   Geoscape/ConfirmDestinationState.cpp
   Geoscape/Globe.cpp
   Geoscape/Globe.h
+  Geoscape/GlobeLand.cpp
+  Geoscape/GlobeLand.h
+  Geoscape/GlobeWater.cpp
+  Geoscape/GlobeWater.h
   Geoscape/SelectDestinationState.cpp
   Geoscape/SelectDestinationState.h
   Geoscape/FundingState.h
@@ -389,8 +393,6 @@ set ( menu_src
 set ( resource_src
   Resource/ResourcePack.h
   Resource/ResourcePack.cpp
-  Resource/XcomResourcePack.cpp
-  Resource/XcomResourcePack.h
 )
 
 set ( ruleset_src
@@ -515,6 +517,8 @@ set ( savegame_src
   Savegame/WeightedOptions.h
   Savegame/AlienStrategy.cpp
   Savegame/AlienStrategy.h
+  Savegame/SerializationHelper.cpp
+  Savegame/SerializationHelper.h
 )
 
 set ( ufopedia_src

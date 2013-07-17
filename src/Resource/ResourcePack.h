@@ -40,6 +40,8 @@ class Sound;
 class SavedBattleGame;
 class RuleTerrain;
 class MapBlock;
+class ExtraSprites;
+class ExtraSounds;
 
 /**
  * Packs of external game media.
@@ -61,7 +63,8 @@ protected:
 	std::map<std::string, Surface*> _surfaces;
 	std::map<std::string, SurfaceSet*> _sets;
 	std::map<std::string, SoundSet*> _sounds;
-	std::list<Polygon*> _polygons;
+	std::list<Polygon*> _polygonsLand;
+	std::list<Polygon*> _polygonsWater;
 	std::list<Polyline*> _polylines;
 	std::map<std::string, Music*> _musics;
 	std::vector<Uint16> _voxelData;
@@ -76,8 +79,10 @@ public:
 	Surface *getSurface(const std::string &name) const;
 	/// Gets a particular surface set.
 	SurfaceSet *getSurfaceSet(const std::string &name) const;
-	/// Gets the list of world polygons.
-	std::list<Polygon*> *getPolygons();
+	/// Gets the list of land polygons.
+	std::list<Polygon*> *getPolygonsLand();
+	/// Gets the list of water polygons.
+	std::list<Polygon*> *getPolygonsWater();
 	/// Gets the list of world polylines.
 	std::list<Polyline*> *getPolylines();
 	/// Gets a particular music.
@@ -90,8 +95,16 @@ public:
 	Palette *getPalette(const std::string &name) const;
 	/// Sets a new palette.
 	void setPalette(SDL_Color *colors, int firstcolor, int ncolors);
+	/// Sets a new palette for TFTD related files only.
+	void setPaletteTerror(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 	/// Gets list of voxel data.
 	std::vector<Uint16> *getVoxelData();
+	/// Loads geoscape specific resources
+	void loadGeoscapeResources(const std::string &gameFolder, const std::string &game);
+	/// Loads battlescape specific resources
+	void loadBattlescapeResources(const std::string &gameFolder, const std::string &game);
+	/// Loads extra resources specified in ruleset
+	void loadExtraResources(std::vector<std::pair<std::string, ExtraSprites *> > extraSprites, std::vector<std::pair<std::string, ExtraSounds *> > extraSounds);
 };
 
 }

@@ -36,13 +36,15 @@ private:
 	SDL_Color *_colors;
 public:
 	/// Creates a blank palette.
-	Palette();
+	Palette(SDL_Color *colors = 0);
 	/// Cleans up the palette.
 	~Palette();
 	/// Loads the colors from an X-Com palette.
 	void loadDat(const std::string &filename, int ncolors, int offset = 0);
 	// Gets a certain color from the palette.
 	SDL_Color *getColors(int offset = 0) const;
+	/// Sets the palette colors (used for TFTD tactical palettes).
+	void setPalette(SDL_Color *colors, int firstcolor = 0, int ncolors = 256);
 
 	/// Converts a given color into a RGBA color value.
 	static Uint32 getRGBA(SDL_Color* pal, Uint8 color);

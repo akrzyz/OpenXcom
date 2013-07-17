@@ -191,23 +191,33 @@ Ruleset::~Ruleset()
 
 /**
  * Loads a ruleset's contents from the given source.
+ * @param listRulesets List of folder names.
  * @param source The source to use.
  */
-void Ruleset::load(const std::string &source)
+void Ruleset::load()
 {
-	std::string dirname = CrossPlatform::getDataFolder("Ruleset/" + source + '/');
-	if (!CrossPlatform::folderExists(dirname))
-		loadFile(CrossPlatform::getDataFile("Ruleset/" + source + ".rul"));
-	else
-		loadFiles(dirname);
+	const std::map<std::string, OptionsFolders*> folders = Options::getOptionsFolders();
+	for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
+	{
+		std::vector<std::pair<std::string, std::string> > rulesets = i->second->getRulesets();
+		for (std::vector<std::pair<std::string, std::string> >::const_iterator j = rulesets.begin(); j != rulesets.end(); ++j)
+		{
+			std::string dirname = CrossPlatform::getDataFolder(Options::getOpenxcomFolder(i->first) + "Ruleset/" + j->first + '/');
+			if (!CrossPlatform::folderExists(dirname))
+				loadFile(CrossPlatform::getDataFile(Options::getOpenxcomFolder(i->first) + "Ruleset/" + j->first + ".rul"), CrossPlatform::getDataFolder(j->second), i->first);
+			else
+				loadFiles(dirname, CrossPlatform::getDataFolder(j->second), i->first);
+		}
+	}
 }
 
 /**
  * Loads a ruleset's contents from a YAML file.
  * Rules that match pre-existing rules overwrite them.
+ * @param folder Directory containing files for this ruleset.
  * @param filename YAML filename.
  */
-void Ruleset::loadFile(const std::string &filename)
+void Ruleset::loadFile(const std::string &filename, const std::string &folder, const std::string &game)
 {
 	std::ifstream fin(filename.c_str());
 	if (!fin)
@@ -296,7 +306,7 @@ void Ruleset::loadFile(const std::string &filename)
 				}
 				else
 				{
-					rule = new RuleCraft(type);
+					rule = new RuleCraft(type, folder, game);
 					_crafts[type] = rule;
 					_craftsIndex.push_back(type);
 				}
@@ -337,7 +347,7 @@ void Ruleset::loadFile(const std::string &filename)
 				}
 				else
 				{
-					rule = new RuleItem(type);
+					rule = new RuleItem(type, game);
 					_items[type] = rule;
 					_itemsIndex.push_back(type);
 				}
@@ -358,7 +368,7 @@ void Ruleset::loadFile(const std::string &filename)
 				}
 				else
 				{
-					rule = new RuleUfo(type);
+					rule = new RuleUfo(type, folder, game);
 					_ufos[type] = rule;
 					_ufosIndex.push_back(type);
 				}
@@ -397,7 +407,7 @@ void Ruleset::loadFile(const std::string &filename)
 				}
 				else
 				{
-					rule = new RuleTerrain(type);
+					rule = new RuleTerrain(type, folder, game);
 					_terrains[type] = rule;
 					_terrainIndex.push_back(type);
 				}
@@ -417,7 +427,7 @@ void Ruleset::loadFile(const std::string &filename)
 				}
 				else
 				{
-					rule = new Armor(type, "", 0);
+					rule = new Armor(type, "", 0, folder, game);
 					_armors[type] = rule;
 					_armorsIndex.push_back(type);
 				}
@@ -456,7 +466,7 @@ void Ruleset::loadFile(const std::string &filename)
 				}
 				else
 				{
-					rule = new Unit(type, "", "");
+					rule = new Unit(type, "", "", game);
 					_units[type] = rule;
 				}
 				rule->load(*j);
@@ -676,7 +686,7 @@ void Ruleset::loadFile(const std::string &filename)
 			{
 				std::string type;
 				(*j)["type"] >> type;
-				std::auto_ptr<ExtraSprites> extraSprites(new ExtraSprites());
+				std::auto_ptr<ExtraSprites> extraSprites(new ExtraSprites(folder));
 				extraSprites->load(*j, _modIndex);
 				_extraSprites.push_back(std::make_pair(type, extraSprites.release()));
 				_extraSpritesIndex.push_back(type);
@@ -688,7 +698,7 @@ void Ruleset::loadFile(const std::string &filename)
 			{
 				std::string type;
 				(*j)["type"] >> type;
-				std::auto_ptr<ExtraSounds> extraSounds(new ExtraSounds());
+				std::auto_ptr<ExtraSounds> extraSounds(new ExtraSounds(folder));
 				extraSounds->load(*j, _modIndex);
 				_extraSounds.push_back(std::make_pair(type, extraSounds.release()));
 				_extraSoundsIndex.push_back(type);
@@ -721,15 +731,17 @@ void Ruleset::loadFile(const std::string &filename)
 
 /**
  * Load the contents of all rule files in the given directory.
+ * @param shortFolder Short name of directory containing rule files.
+ * @param auxShortFolder Short name of backup directory containing rule files.
  * @param dirname The name of an existing directory containing rule files.
  */
-void Ruleset::loadFiles(const std::string &dirname)
+void Ruleset::loadFiles(const std::string &dirname, const std::string &shortFolder, const std::string &game)
 {
 	std::vector<std::string> names = CrossPlatform::getFolderContents(dirname, "rul");
 
 	for (std::vector<std::string>::iterator i = names.begin(); i != names.end(); ++i)
 	{
-		loadFile(dirname + *i);
+		loadFile(dirname + *i, shortFolder, game);
 	}
 }
 
@@ -934,6 +946,8 @@ SavedGame *Ruleset::newSave() const
 		ids[*i] = 1;
 	}
 	ids["STR_UFO"] = 1;
+	ids["STR_LANDING_SITE"] = 1;
+	ids["STR_CRASH_SITE"] = 1;
 	ids["STR_WAYPOINT"] = 1;
 	ids["STR_TERROR_SITE"] = 1;
 	ids["STR_ALIEN_BASE"] = 1;
@@ -960,6 +974,16 @@ SavedGame *Ruleset::newSave() const
 	for (int i = 0; i < soldiers; ++i)
 	{
 		Soldier *soldier = new Soldier(getSoldier("XCOM"), getArmor("STR_NONE_UC"), &_names, save->getId("STR_SOLDIER"));
+		soldier->setCraft(base->getCrafts()->front());
+		base->getSoldiers()->push_back(soldier);
+	}
+	if (const YAML::Node *pName = (*_startingBase->begin()).FindValue("randomAquanauts"))
+	{
+		(*pName) >> soldiers;
+	}
+	for (int i = 0; i < soldiers; ++i)
+	{
+		Soldier *soldier = new Soldier(getSoldier("XCOM2"), getArmor("STR_NONE_AQUA"), &_names, save->getId("STR_SOLDIER"));
 		soldier->setCraft(base->getCrafts()->front());
 		base->getSoldiers()->push_back(soldier);
 	}
@@ -1157,12 +1181,12 @@ RuleTerrain *Ruleset::getTerrain(const std::string &name) const
  * @param name datafile name.
  * @return Rules for the datafile.
  */
-MapDataSet *Ruleset::getMapDataSet(const std::string &name)
+MapDataSet *Ruleset::getMapDataSet(const std::string &name, const std::string &dataFolder, const std::string &game)
 {
 	std::map<std::string, MapDataSet*>::iterator map = _mapDataSets.find(name);
 	if (map == _mapDataSets.end())
 	{
-		MapDataSet *set = new MapDataSet(name);
+		MapDataSet *set = new MapDataSet(name, dataFolder, game);
 		_mapDataSets[name] = set;
 		return set;
 	}

@@ -44,14 +44,14 @@ public:
 		_off_x(0),
 		_off_y(0)
 	{
-			
+        setOffset(0, 0);
 	}
 	inline ShaderRepeat(const std::vector<Pixel>& f, int max_x, int max_y):
 		_base(f, max_x, max_y),
 		_off_x(0),
 		_off_y(0)
 	{
-			
+        setOffset(0, 0);
 	}
 	
 	inline void setOffset(int x, int y)

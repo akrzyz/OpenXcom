@@ -25,7 +25,7 @@ namespace OpenXcom
 /*
  * Creates a blank set of extra sprite data.
  */
-ExtraSprites::ExtraSprites() : _width(320), _height(200), _singleImage(false), _modIndex(0), _subX(0), _subY(0)
+ExtraSprites::ExtraSprites(const std::string &folder) : _folder(folder), _width(320), _height(200), _singleImage(false), _modIndex(0), _subX(0), _subY(0)
 {
 }
 
@@ -93,7 +93,7 @@ std::map<int, std::string> *ExtraSprites::getSprites()
 /*
  * @return the width of the surfaces (used for single images and new spritesets)
  */
-const int ExtraSprites::getWidth() const
+int ExtraSprites::getWidth() const
 {
 	return _width;
 }
@@ -101,7 +101,7 @@ const int ExtraSprites::getWidth() const
 /*
  * @return the height of the surfaces (used for single images and new spritesets)
  */
-const int ExtraSprites::getHeight() const
+int ExtraSprites::getHeight() const
 {
 	return _height;
 }
@@ -109,25 +109,33 @@ const int ExtraSprites::getHeight() const
 /*
  * @return is this a single surface, or a set of surfaces?
  */
-const bool ExtraSprites::getSingleImage() const
+bool ExtraSprites::getSingleImage() const
 {
 	return _singleImage;
 }
 
 /*
+ * @return directory with data for this external sprite set.
+ */
+std::string ExtraSprites::getFolder()
+{
+	return _folder;
+}
+
+/*
  * @return the mod index for this external sprite set.
  */
-const int ExtraSprites::getModIndex() const
+int ExtraSprites::getModIndex() const
 {
 	return _modIndex;
 }
 
-const int ExtraSprites::getSubX() const
+int ExtraSprites::getSubX() const
 {
 	return _subX;
 }
 
-const int ExtraSprites::getSubY() const
+int ExtraSprites::getSubY() const
 {
 	return _subY;
 }

@@ -46,6 +46,7 @@ private:
 	Text *_txtTitle;
 	TextButton *_btnCancel;
 	Timer *_hoverTimer;
+	std::string _palette;
 	bool _first;
 	bool _oldshowradar;
 	double _oldlat,_oldlon;

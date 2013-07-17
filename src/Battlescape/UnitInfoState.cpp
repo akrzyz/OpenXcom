@@ -50,6 +50,9 @@ namespace OpenXcom
  */
 UnitInfoState::UnitInfoState(Game *game, BattleUnit *unit) : State(game), _unit(unit)
 {
+	std::string background;
+	Uint8 colors[15];
+
 	// Create objects
 	_bg = new Surface(320, 200, 0, 0);
 	_txtName = new Text(312, 192, 4, 4);
@@ -195,183 +198,217 @@ UnitInfoState::UnitInfoState(Game *game, BattleUnit *unit) : State(game), _unit(
 
 	centerAllSurfaces();
 
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_UNIBORD.PCK";
+
+		colors[0] = colors[1] = Palette::blockOffset(0)+1;
+		colors[2] = colors[14] = Palette::blockOffset(6);
+		colors[3] = Palette::blockOffset(0)+9;
+		colors[4] = Palette::blockOffset(0)+5;
+		colors[5] = colors[11] = Palette::blockOffset(2);
+		colors[6] = Palette::blockOffset(14);
+		colors[7] = Palette::blockOffset(1);
+		colors[8] = Palette::blockOffset(8);
+		colors[9] = Palette::blockOffset(6);
+		colors[10] = colors[12] = Palette::blockOffset(5);
+		colors[13] = Palette::blockOffset(10);
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "UNIBORD.PCK";
+
+		colors[0] = colors[12] = Palette::blockOffset(4);
+		colors[1] = colors[6] = colors[11] = Palette::blockOffset(3);
+		colors[2] = colors[7] = colors[13] = colors[14] = Palette::blockOffset(9);
+		colors[3] = Palette::blockOffset(2);
+		colors[4] = Palette::blockOffset(5)+2;
+		colors[5] = Palette::blockOffset(12);
+		colors[8] = Palette::blockOffset(8);
+		colors[9] = Palette::blockOffset(6);
+		colors[10] = Palette::blockOffset(5);
+
+		_txtName->setHighContrast(true);
+		_txtTimeUnits->setHighContrast(true);
+		_txtEnergy->setHighContrast(true);
+		_txtHealth->setHighContrast(true);
+		_txtFatalWounds->setHighContrast(true);
+		_txtBravery->setHighContrast(true);
+		_txtMorale->setHighContrast(true);
+		_txtReactions->setHighContrast(true);
+		_txtFiring->setHighContrast(true);
+		_txtThrowing->setHighContrast(true);
+		_txtStrength->setHighContrast(true);
+		_txtPsiStrength->setHighContrast(true);
+		_txtPsiSkill->setHighContrast(true);
+		_txtFrontArmor->setHighContrast(true);
+		_txtLeftArmor->setHighContrast(true);
+		_txtRightArmor->setHighContrast(true);
+		_txtRearArmor->setHighContrast(true);
+		_txtUnderArmor->setHighContrast(true);
+	}
+
 	// Set up objects
-	_game->getResourcePack()->getSurface("UNIBORD.PCK")->blit(_bg);
+	_game->getResourcePack()->getSurface(background)->blit(_bg);
 
 	_txtName->setAlign(ALIGN_CENTER);
 	_txtName->setBig();
-	_txtName->setColor(Palette::blockOffset(4));
-	_txtName->setHighContrast(true);
+	_txtName->setColor(colors[0]);
 
-	_txtTimeUnits->setColor(Palette::blockOffset(3));
-	_txtTimeUnits->setHighContrast(true);
+	_txtTimeUnits->setColor(colors[1]);
 	_txtTimeUnits->setText(_game->getLanguage()->getString("STR_TIME_UNITS"));
 
-	_numTimeUnits->setColor(Palette::blockOffset(9));
+	_numTimeUnits->setColor(colors[2]);
 	_numTimeUnits->setHighContrast(true);
 
-	_barTimeUnits->setColor(Palette::blockOffset(4));
+	_barTimeUnits->setColor(colors[12]);
 	_barTimeUnits->setScale(1.0);
 
-	_txtEnergy->setColor(Palette::blockOffset(3));
-	_txtEnergy->setHighContrast(true);
+	_txtEnergy->setColor(colors[1]);
 	_txtEnergy->setText(_game->getLanguage()->getString("STR_ENERGY"));
 
-	_numEnergy->setColor(Palette::blockOffset(9));
+	_numEnergy->setColor(colors[14]);
 	_numEnergy->setHighContrast(true);
 
-	_barEnergy->setColor(Palette::blockOffset(9));
+	_barEnergy->setColor(colors[13]);
 	_barEnergy->setScale(1.0);
 
-	_txtHealth->setColor(Palette::blockOffset(3));
-	_txtHealth->setHighContrast(true);
+	_txtHealth->setColor(colors[1]);
 	_txtHealth->setText(_game->getLanguage()->getString("STR_HEALTH"));
 
-	_numHealth->setColor(Palette::blockOffset(9));
+	_numHealth->setColor(colors[2]);
 	_numHealth->setHighContrast(true);
 
-	_barHealth->setColor(Palette::blockOffset(2));
-	_barHealth->setColor2(Palette::blockOffset(5)+2);
+	_barHealth->setColor(colors[3]);
+	_barHealth->setColor2(colors[4]);
 	_barHealth->setScale(1.0);
 
-	_txtFatalWounds->setColor(Palette::blockOffset(3));
-	_txtFatalWounds->setHighContrast(true);
+	_txtFatalWounds->setColor(colors[1]);
 	_txtFatalWounds->setText(_game->getLanguage()->getString("STR_FATAL_WOUNDS"));
 
-	_numFatalWounds->setColor(Palette::blockOffset(9));
+	_numFatalWounds->setColor(colors[2]);
 	_numFatalWounds->setHighContrast(true);
 
-	_barFatalWounds->setColor(Palette::blockOffset(2));
+	_barFatalWounds->setColor(colors[3]);
 	_barFatalWounds->setScale(1.0);
 
-	_txtBravery->setColor(Palette::blockOffset(3));
-	_txtBravery->setHighContrast(true);
+	_txtBravery->setColor(colors[1]);
 	_txtBravery->setText(_game->getLanguage()->getString("STR_BRAVERY"));
 
-	_numBravery->setColor(Palette::blockOffset(9));
+	_numBravery->setColor(colors[2]);
 	_numBravery->setHighContrast(true);
 
-	_barBravery->setColor(Palette::blockOffset(12));
+	_barBravery->setColor(colors[5]);
 	_barBravery->setScale(1.0);
 
-	_txtMorale->setColor(Palette::blockOffset(3));
-	_txtMorale->setHighContrast(true);
+	_txtMorale->setColor(colors[1]);
 	_txtMorale->setText(_game->getLanguage()->getString("STR_MORALE"));
 
-	_numMorale->setColor(Palette::blockOffset(9));
+	_numMorale->setColor(colors[2]);
 	_numMorale->setHighContrast(true);
 
-	_barMorale->setColor(Palette::blockOffset(12));
+	_barMorale->setColor(colors[6]);
 	_barMorale->setScale(1.0);
 
-	_txtReactions->setColor(Palette::blockOffset(3));
-	_txtReactions->setHighContrast(true);
+	_txtReactions->setColor(colors[1]);
 	_txtReactions->setText(_game->getLanguage()->getString("STR_REACTIONS"));
 
-	_numReactions->setColor(Palette::blockOffset(9));
+	_numReactions->setColor(colors[2]);
 	_numReactions->setHighContrast(true);
 
-	_barReactions->setColor(Palette::blockOffset(9));
+	_barReactions->setColor(colors[7]);
 	_barReactions->setScale(1.0);
 
-	_txtFiring->setColor(Palette::blockOffset(3));
-	_txtFiring->setHighContrast(true);
+	_txtFiring->setColor(colors[1]);
 	_txtFiring->setText(_game->getLanguage()->getString("STR_FIRING_ACCURACY"));
 
-	_numFiring->setColor(Palette::blockOffset(9));
+	_numFiring->setColor(colors[2]);
 	_numFiring->setHighContrast(true);
 
-	_barFiring->setColor(Palette::blockOffset(8));
+	_barFiring->setColor(colors[8]);
 	_barFiring->setScale(1.0);
 
-	_txtThrowing->setColor(Palette::blockOffset(3));
-	_txtThrowing->setHighContrast(true);
+	_txtThrowing->setColor(colors[1]);
 	_txtThrowing->setText(_game->getLanguage()->getString("STR_THROWING_ACCURACY"));
 
-	_numThrowing->setColor(Palette::blockOffset(9));
+	_numThrowing->setColor(colors[2]);
 	_numThrowing->setHighContrast(true);
 
-	_barThrowing->setColor(Palette::blockOffset(6));
+	_barThrowing->setColor(colors[9]);
 	_barThrowing->setScale(1.0);
 
-	_txtStrength->setColor(Palette::blockOffset(3));
-	_txtStrength->setHighContrast(true);
+	_txtStrength->setColor(colors[1]);
 	_txtStrength->setText(_game->getLanguage()->getString("STR_STRENGTH"));
 
-	_numStrength->setColor(Palette::blockOffset(9));
+	_numStrength->setColor(colors[2]);
 	_numStrength->setHighContrast(true);
 
-	_barStrength->setColor(Palette::blockOffset(3));
+	_barStrength->setColor(colors[11]);
 	_barStrength->setScale(1.0);
 
-	_txtPsiStrength->setColor(Palette::blockOffset(3));
-	_txtPsiStrength->setHighContrast(true);
+	_txtPsiStrength->setColor(colors[1]);
 	_txtPsiStrength->setText(_game->getLanguage()->getString("STR_PSIONIC_STRENGTH"));
 
-	_numPsiStrength->setColor(Palette::blockOffset(9));
+	_numPsiStrength->setColor(colors[2]);
 	_numPsiStrength->setHighContrast(true);
 
-	_barPsiStrength->setColor(Palette::blockOffset(12));
+	_barPsiStrength->setColor(colors[5]);
 	_barPsiStrength->setScale(1.0);
 
-	_txtPsiSkill->setColor(Palette::blockOffset(3));
-	_txtPsiSkill->setHighContrast(true);
+	_txtPsiSkill->setColor(colors[1]);
 	_txtPsiSkill->setText(_game->getLanguage()->getString("STR_PSIONIC_SKILL"));
 
-	_numPsiSkill->setColor(Palette::blockOffset(9));
+	_numPsiSkill->setColor(colors[2]);
 	_numPsiSkill->setHighContrast(true);
 
-	_barPsiSkill->setColor(Palette::blockOffset(12));
+	_barPsiSkill->setColor(colors[5]);
 	_barPsiSkill->setScale(1.0);
 
-	_txtFrontArmor->setColor(Palette::blockOffset(3));
-	_txtFrontArmor->setHighContrast(true);
+	_txtFrontArmor->setColor(colors[1]);
 	_txtFrontArmor->setText(_game->getLanguage()->getString("STR_FRONT_ARMOR_UC"));
 
-	_numFrontArmor->setColor(Palette::blockOffset(9));
+	_numFrontArmor->setColor(colors[2]);
 	_numFrontArmor->setHighContrast(true);
 
-	_barFrontArmor->setColor(Palette::blockOffset(5));
+	_barFrontArmor->setColor(colors[10]);
 	_barFrontArmor->setScale(1.0);
 
-	_txtLeftArmor->setColor(Palette::blockOffset(3));
-	_txtLeftArmor->setHighContrast(true);
+	_txtLeftArmor->setColor(colors[1]);
 	_txtLeftArmor->setText(_game->getLanguage()->getString("STR_LEFT_ARMOR_UC"));
 
-	_numLeftArmor->setColor(Palette::blockOffset(9));
+	_numLeftArmor->setColor(colors[2]);
 	_numLeftArmor->setHighContrast(true);
 
-	_barLeftArmor->setColor(Palette::blockOffset(5));
+	_barLeftArmor->setColor(colors[10]);
 	_barLeftArmor->setScale(1.0);
 
-	_txtRightArmor->setColor(Palette::blockOffset(3));
-	_txtRightArmor->setHighContrast(true);
+	_txtRightArmor->setColor(colors[1]);
 	_txtRightArmor->setText(_game->getLanguage()->getString("STR_RIGHT_ARMOR_UC"));
 
-	_numRightArmor->setColor(Palette::blockOffset(9));
+	_numRightArmor->setColor(colors[2]);
 	_numRightArmor->setHighContrast(true);
 
-	_barRightArmor->setColor(Palette::blockOffset(5));
+	_barRightArmor->setColor(colors[10]);
 	_barRightArmor->setScale(1.0);
 
-	_txtRearArmor->setColor(Palette::blockOffset(3));
-	_txtRearArmor->setHighContrast(true);
+	_txtRearArmor->setColor(colors[1]);
 	_txtRearArmor->setText(_game->getLanguage()->getString("STR_REAR_ARMOR_UC"));
 
-	_numRearArmor->setColor(Palette::blockOffset(9));
+	_numRearArmor->setColor(colors[2]);
 	_numRearArmor->setHighContrast(true);
 
-	_barRearArmor->setColor(Palette::blockOffset(5));
+	_barRearArmor->setColor(colors[10]);
 	_barRearArmor->setScale(1.0);
 
-	_txtUnderArmor->setColor(Palette::blockOffset(3));
-	_txtUnderArmor->setHighContrast(true);
+	_txtUnderArmor->setColor(colors[1]);
 	_txtUnderArmor->setText(_game->getLanguage()->getString("STR_UNDER_ARMOR_UC"));
 
-	_numUnderArmor->setColor(Palette::blockOffset(9));
+	_numUnderArmor->setColor(colors[2]);
 	_numUnderArmor->setHighContrast(true);
 
-	_barUnderArmor->setColor(Palette::blockOffset(5));
+	_barUnderArmor->setColor(colors[10]);
 	_barUnderArmor->setScale(1.0);
 
 }

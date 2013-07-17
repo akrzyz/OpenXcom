@@ -38,14 +38,14 @@ class Ruleset;
 class RuleUfo
 {
 private:
-	std::string _type, _size;
+	std::string _type, _size, _folder, _game;
 	int _sprite;
 	int _damageMax, _speedMax, _accel, _power, _range, _score, _reload, _breakOffTime;
 	RuleTerrain *_battlescapeTerrainData;
 	std::string _modSprite;
 public:
 	/// Creates a blank UFO ruleset.
-	RuleUfo(const std::string &type);
+	RuleUfo(const std::string &type, const std::string &folder, const std::string &game);
 	/// Cleans up the UFO ruleset.
 	~RuleUfo();
 	/// Loads UFO data from YAML.

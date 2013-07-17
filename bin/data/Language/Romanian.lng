@@ -2267,6 +2267,8 @@ STR_CENTER_ON_ENEMY_8
 Centrare pe Inamicul 8
 STR_CENTER_ON_ENEMY_9
 Centrare pe Inamicul 9
+STR_CENTER_ON_ENEMY_10
+Centrare pe Inamicul 10
 STR_ENEMY_WEAPON_LEVEL
 Nivel Armament Inamic
 STR_GROUNDED
@@ -2279,6 +2281,10 @@ STR_LIST_ITEM
 ARTICOL
 STR_DISPLAY_FILTER
 Filtru Afișaj
+STR_QUICK_SAVE
+Quick Save
+STR_QUICK_LOAD
+Quick Load
 STR_ADVANCED
 AVANSAT
 STR_ADVANCED_OPTIONS
@@ -2371,6 +2377,10 @@ STR_BATTLEEXPLOSIONHEIGHT
 Înălțimea exploziilor
 STR_BATTLEEXPLOSIONHEIGHT_DESC
 Modifică înălțimea la care pot ajunge exploziile.{NEWLINE}(Plată: 0, Sferică: 3)
+STR_AUTOSAVE
+Autosave mode
+STR_AUTOSAVE_DESC
+0 - Disabled. 1 - Quick save and quick load. 2 - Autosave only at 00:00. All save and load buttons is disabled. 3 - Same as previous, as well autosave on exit of the game.
 STR_ALLOWPSIONICCAPTURE
 Permite captura psi
 STR_ALLOWPSIONICCAPTURE_DESC
@@ -2389,3 +2399,5 @@ STR_ARROWS
 SĂGEȚI
 STR_FULL
 COMPLETĂ
+STR_SAVE_VOXEL_VIEW
+Save First-Person Screenshot

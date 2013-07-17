@@ -24,6 +24,7 @@
 #include "../Engine/CrossPlatform.h"
 #include "../Engine/Language.h"
 #include "../Engine/Palette.h"
+#include "../Engine/Options.h"
 #include "../Savegame/BattleUnit.h"
 #include "../Interface/Text.h"
 #include "../Resource/ResourcePack.h"
@@ -65,7 +66,20 @@ MedikitView::MedikitView (int w, int h, int x, int y, Game * game, BattleUnit *u
  */
 void MedikitView::draw()
 {
-	SurfaceSet *set = _game->getResourcePack()->getSurfaceSet("MEDIBITS.DAT");
+	std::string background;
+
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_MEDIBITS.DAT";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "MEDIBITS.DAT";
+	}
+
+	SurfaceSet *set = _game->getResourcePack()->getSurfaceSet(background);
 	int fatal_wound = _unit->getFatalWound(_selectedPart);
 	std::wstringstream ss, ss1;
 	int red = 3;
@@ -98,6 +112,19 @@ void MedikitView::draw()
  */
 void MedikitView::mouseClick (Action *action, State *)
 {
+	std::string background;
+
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_MEDIBITS.DAT";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "MEDIBITS.DAT";
+	}
+
 	SurfaceSet *set = _game->getResourcePack()->getSurfaceSet("MEDIBITS.DAT");
 	int x = action->getRelativeXMouse() / action->getXScale();
 	int y = action->getRelativeYMouse() / action->getYScale();

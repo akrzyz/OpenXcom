@@ -248,8 +248,6 @@ openxcom_SOURCES = \
 	src/Battlescape/CannotReequipState.h \
 	src/Battlescape/DebriefingState.cpp \
 	src/Battlescape/DebriefingState.h \
-	src/Battlescape/EndBattleBState.cpp \
-	src/Battlescape/EndBattleBState.h \
 	src/Battlescape/ExplosionBState.cpp \
 	src/Battlescape/ExplosionBState.h \
 	src/Battlescape/Explosion.cpp \
@@ -350,6 +348,8 @@ openxcom_SOURCES = \
 	src/Engine/OpenGL.h \
 	src/Engine/Options.cpp \
 	src/Engine/Options.h \
+	src/Engine/OptionsFolders.cpp \
+	src/Engine/OptionsFolders.h \
 	src/Engine/Palette.cpp \
 	src/Engine/Palette.h \
 	src/Engine/RNG.cpp \
@@ -528,8 +528,6 @@ openxcom_SOURCES = \
 	src/resource.h \
 	src/Resource/ResourcePack.cpp \
 	src/Resource/ResourcePack.h \
-	src/Resource/XcomResourcePack.cpp \
-	src/Resource/XcomResourcePack.h \
 	src/Ruleset/AlienDeployment.cpp \
 	src/Ruleset/AlienDeployment.h \
 	src/Ruleset/AlienRace.cpp \
@@ -631,6 +629,7 @@ openxcom_SOURCES = \
 	src/Savegame/SavedGame.cpp \
 	src/Savegame/SavedGame.h \
 	src/Savegame/SerializationHelper.h \
+	src/Savegame/SerializationHelper.cpp \
 	src/Savegame/Soldier.cpp \
 	src/Savegame/Soldier.h \
 	src/Savegame/Target.cpp \

@@ -60,12 +60,13 @@ private:
 	int _block[6];
 	int _loftID[12];
 	unsigned short _miniMapIndex;
+	std::string _terrorPrefix;
 public:
 	static const int O_FLOOR = 0;
 	static const int O_WESTWALL = 1;
 	static const int O_NORTHWALL = 2;
 	static const int O_OBJECT = 3;
-	MapData(MapDataSet *dataset);
+	MapData(MapDataSet *dataset, const std::string &game);
 	~MapData();
 	/// Get the dataset this object belongs to.
 	MapDataSet *getDataset() const;
@@ -153,6 +154,7 @@ public:
 	void setTUWalk(const int TUWalk);
 	void setTUFly(const int TUFly);
 	void setTUSlide(const int TUSlide);
+	std::string getTerrorPrefix() const;
 };
 
 }

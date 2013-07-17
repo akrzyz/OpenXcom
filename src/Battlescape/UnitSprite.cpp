@@ -44,7 +44,7 @@ namespace OpenXcom
  * @param x X position in pixels.
  * @param y Y position in pixels.
  */
-UnitSprite::UnitSprite(int width, int height, int x, int y, int bpp) : Surface(width, height, x, y, bpp), _unit(0), _itemA(0), _itemB(0), _unitSurface(0), _itemSurfaceA(0), _itemSurfaceB(0), _part(0), _animationFrame(0)
+UnitSprite::UnitSprite(int width, int height, int x, int y, int depth) : Surface(width, height, x, y), _unit(0), _itemA(0), _itemB(0), _unitSurface(0), _itemSurfaceA(0), _itemSurfaceB(0), _part(0), _animationFrame(0), _depth(depth)
 {
 
 
@@ -177,6 +177,18 @@ void UnitSprite::draw()
 	case 10: // muton
 		drawRoutine0();
 		break;
+	case 11: // tftd tanks
+		drawRoutine10();
+		break;
+	case 12: // hallucinoid
+		drawRoutine11();
+		break;
+	case 13: // aquatoid
+		drawRoutine0();
+		break;
+	case 14: // aquanaut
+		drawRoutine0();
+		break;
 	}
 
 }
@@ -189,8 +201,49 @@ void UnitSprite::drawRoutine0()
 
 	Surface *torso = 0, *legs = 0, *leftArm = 0, *rightArm = 0, *itemA = 0, *itemB = 0;
 	// magic numbers
-	const int maleTorso = 32, femaleTorso = 267, legsStand = 16, legsKneel = 24, die = 264, legsFloat = 275;
-	const int larmStand = 0, rarmStand = 8, rarm1H = 232, larm2H = 240, rarm2H = 248, rarmShoot = 256;
+	const int legsStand = 16, legsKneel = 24, legsFloat = 275;
+	int maleTorso, femaleTorso, die, rarm1H, larm2H, rarm2H;
+	if (_drawingRoutine <= 10)
+	{
+		die = 264; // ufo:eu death frame
+		maleTorso = 32;
+		femaleTorso = 267;
+		rarm1H = 232;
+		larm2H = 240;
+		rarm2H = 248;
+	}
+	else if (_drawingRoutine == 14)
+	{
+		if (_depth > 0)
+		{
+			die = 259; // aquanaut underwater death frame
+			maleTorso = femaleTorso = 32; // aquanaut underwater torso
+			rarm1H = 248;
+			larm2H = 232;
+			rarm2H = 240;
+		}
+		else
+		{
+			die = 256; // aquanaut land death frame
+			// aquanaut land torso
+			maleTorso = 270;
+			femaleTorso = 262;
+			rarm1H = 248;
+			larm2H = 232;
+			rarm2H = 240;
+		}
+	}
+	else
+	{
+		die = 256; // terror unit death frame
+		// terror unit torso
+		maleTorso = 32;
+		femaleTorso = 267;
+		rarm1H = 248;
+		larm2H = 232;
+		rarm2H = 240;
+	}
+	const int larmStand = 0, rarmStand = 8, rarmShoot = 256;
 	const int legsWalk[8] = { 56, 56+24, 56+24*2, 56+24*3, 56+24*4, 56+24*5, 56+24*6, 56+24*7 };
 	const int larmWalk[8] = { 40, 40+24, 40+24*2, 40+24*3, 40+24*4, 40+24*5, 40+24*6, 40+24*7 };
 	const int rarmWalk[8] = { 48, 48+24, 48+24*2, 48+24*3, 48+24*4, 48+24*5, 48+24*6, 48+24*7 };
@@ -226,7 +279,7 @@ void UnitSprite::drawRoutine0()
 		{
 			SoldierLook look = _unit->getGeoscapeSoldier()->getLook();
 
-			if(look)
+			if(look && (!((_unit->getArmor()->getTerrorPrefix() != "") && (_depth > 0))) )
 			{
 				Uint8 face_color = ColorFace::Face;
 				Uint8 hair_color = ColorFace::Hair;
@@ -275,7 +328,7 @@ void UnitSprite::drawRoutine0()
 	if (_unit->getStatus() == STATUS_WALKING)
 	{
 		torso->setY(yoffWalk[_unit->getWalkingPhase()]);
-		if(_drawingRoutine == 10)
+		if ((_drawingRoutine == 10) || (_drawingRoutine >= 14))
 			torso->setY(alternateyoffWalk[_unit->getWalkingPhase()]);
 		legs = _unitSurface->getFrame(legsWalk[_unit->getDirection()] + _unit->getWalkingPhase());
 		leftArm = _unitSurface->getFrame(larmWalk[_unit->getDirection()] + _unit->getWalkingPhase());
@@ -315,7 +368,7 @@ void UnitSprite::drawRoutine0()
 		else
 		{
 			itemA = _itemSurfaceA->getFrame(_itemA->getRules()->getHandSprite() + _unit->getDirection());
-			if(_drawingRoutine == 10)
+			if ((_drawingRoutine == 10) || (_drawingRoutine >= 14))
 			{
 				if(_itemA->getRules()->isTwoHanded())
 				{
@@ -339,7 +392,7 @@ void UnitSprite::drawRoutine0()
 		if (_itemA->getRules()->isTwoHanded())
 		{
 			leftArm = _unitSurface->getFrame(larm2H + _unit->getDirection());
-			if (_unit->getStatus() == STATUS_AIMING)
+			if ((_unit->getStatus() == STATUS_AIMING) && (_drawingRoutine <= 10))
 			{
 				rightArm = _unitSurface->getFrame(rarmShoot + _unit->getDirection());
 			}
@@ -350,7 +403,7 @@ void UnitSprite::drawRoutine0()
 		}
 		else
 		{
-			if(_drawingRoutine == 10)
+			if ((_drawingRoutine == 10) || (_drawingRoutine >= 14))
 				rightArm = _unitSurface->getFrame(rarm2H + _unit->getDirection()); // missing/wrong arms on muton here, investigate spriteset
 			else
 				rightArm = _unitSurface->getFrame(rarm1H + _unit->getDirection());
@@ -360,7 +413,7 @@ void UnitSprite::drawRoutine0()
 		// the fixed arm(s) have to be animated up/down when walking
 		if (_unit->getStatus() == STATUS_WALKING)
 		{
-			if(_drawingRoutine == 10)
+			if ((_drawingRoutine == 10) || (_drawingRoutine >= 14))
 			{
 				itemA->setY(itemA->getY() + alternateyoffWalk[_unit->getWalkingPhase()]);
 				rightArm->setY(alternateyoffWalk[_unit->getWalkingPhase()]);
@@ -383,7 +436,7 @@ void UnitSprite::drawRoutine0()
 		itemB = _itemSurfaceB->getFrame(_itemB->getRules()->getHandSprite() + _unit->getDirection());
 		if (!_itemB->getRules()->isTwoHanded())
 		{
-			if(_drawingRoutine == 10)
+			if ((_drawingRoutine == 10) || (_drawingRoutine >= 14))
 			{
 				itemB->setX(offX4[_unit->getDirection()]);
 				itemB->setY(offY4[_unit->getDirection()]);
@@ -405,7 +458,7 @@ void UnitSprite::drawRoutine0()
 		{
 			int dir = (_unit->getDirection() + 2)%8;
 			itemB = _itemSurfaceB->getFrame(_itemB->getRules()->getHandSprite() + dir);
-			if(_drawingRoutine == 10)
+			if ((_drawingRoutine == 10) || (_drawingRoutine >= 14))
 			{
 				itemB->setX(offX7[_unit->getDirection()]);
 				itemB->setY(offY7[_unit->getDirection()]);
@@ -420,7 +473,7 @@ void UnitSprite::drawRoutine0()
 
 		if (_unit->getStatus() == STATUS_WALKING)
 		{
-			if(_drawingRoutine == 10)
+			if ((_drawingRoutine == 10) || (_drawingRoutine >= 14))
 			{
 				leftArm->setY(alternateyoffWalk[_unit->getWalkingPhase()]);
 				itemB->setY(itemB->getY() + alternateyoffWalk[_unit->getWalkingPhase()]);
@@ -470,7 +523,7 @@ void UnitSprite::drawRoutine0()
 	{
 		SoldierLook look = _unit->getGeoscapeSoldier()->getLook();
 		
-		if(look)
+		if(look && (!((_unit->getArmor()->getTerrorPrefix() != "") && (_depth > 0))) )
 		{
 			Uint8 face_color = ColorFace::Face;
 			Uint8 hair_color = ColorFace::Hair;
@@ -793,6 +846,8 @@ void UnitSprite::drawRoutine4()
 	if (_unit->getStatus() == STATUS_COLLAPSING)
 	{
 		s = _unitSurface->getFrame(die + _unit->getFallingPhase());
+		s->blit(this);
+		return;
 	}
 	else
 	if (_unit->getStatus() == STATUS_WALKING)
@@ -860,7 +915,7 @@ void UnitSprite::drawRoutine4()
 	switch (_unit->getDirection())
 	{
 	case 0: itemB?itemB->blit(this):void(); itemA?itemA->blit(this):void(); s->blit(this); break;
-	case 1:  itemB?itemB->blit(this):void(); s->blit(this); itemA?itemA->blit(this):void();break;
+	case 1: itemB?itemB->blit(this):void(); s->blit(this); itemA?itemA->blit(this):void(); break;
 	case 2: s->blit(this); itemB?itemB->blit(this):void(); itemA?itemA->blit(this):void(); break;
 	case 3: s->blit(this); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
 	case 4: s->blit(this); itemA?itemA->blit(this):void(); itemB?itemB->blit(this):void(); break;
@@ -1168,6 +1223,100 @@ void UnitSprite::drawRoutine9()
 		torso = _unitSurface->getFrame(die + _unit->getFallingPhase());
 
 	torso->blit(this);
+}
+
+/**
+ * Drawing routine for terror tanks.
+ */
+void UnitSprite::drawRoutine10()
+{
+	if (_unit->isOut())
+	{
+		// unit is drawn as an item
+		return;
+	}
+
+	int hoverTank = 0;
+	if (_unit->getArmor()->getMovementType() == MT_FLY)
+	{
+		hoverTank = 128;
+	}
+	const int offX[8] = { -2, -7, -5, 0, 5, 7, 2, 0 }; // turret offsets
+	const int offy[8] = { -1, -3, -4, -5, -4, -3, -1, -1 }; // turret offsets
+
+	Surface *s = 0;
+	int turret = _unit->getTurretType();
+
+	if (hoverTank != 0)
+	{
+		// draw the displacer
+		s = _unitSurface->getFrame(hoverTank + (_part * 4) + 16 * _unit->getDirection() + _animationFrame / 2);
+		s->blit(this);
+	}
+	else
+	{
+		// draw the coelacanth
+		if (_unit->getStatus() == STATUS_WALKING)
+		{
+			s = _unitSurface->getFrame(hoverTank + (_part * 4) + 16 * _unit->getDirection() + (_unit->getWalkingPhase() % 4));
+		}
+		else
+		{
+			s = _unitSurface->getFrame(hoverTank + (_part * 4) + 16 * _unit->getDirection());
+		}
+		s->blit(this);
+	}
+
+	int turretOffsetX;
+	int turretOffsetY;
+	switch (_part)
+	{
+	case 0:
+		turretOffsetX = 0;
+		turretOffsetY = 0;
+		break;
+	case 1:
+		turretOffsetX = -16;
+		turretOffsetY = -8;
+		break;
+	case 2:
+		turretOffsetX = 16;
+		turretOffsetY = -8;
+		break;
+	case 3:
+		turretOffsetY = -16;
+		break;
+	}
+
+	// draw the turret, overlapping all 4 parts
+	if (turret != -1)
+	{
+		s = _unitSurface->getFrame(256 + (turret * 8) + _unit->getTurretDirection());
+		turretOffsetX += offX[_unit->getDirection()];
+		turretOffsetY += offy[_unit->getDirection()];
+		s->setX(turretOffsetX);
+		s->setY(turretOffsetY);
+		s->blit(this);
+	}
+
+}
+
+/**
+ * Drawing routine for hallucinoids.
+ */
+void UnitSprite::drawRoutine11()
+{
+	if (_unit->isOut())
+	{
+		// unit is drawn as an item
+		return;
+	}
+
+	Surface *s = 0;
+
+	s = _unitSurface->getFrame((_part * 8) + _animationFrame);
+
+	s->blit(this);
 }
 
 /*

@@ -43,11 +43,12 @@ protected:
 	bool _visible, _hidden, _redraw;
 	SDL_Color *_originalColors;
 	void *_alignedBuffer;
+	std::string _paletteName;
 	int _dx, _dy;
 	std::vector<SDL_Color> _palette;
 public:
 	/// Creates a new surface with the specified size and position.
-	Surface(int width, int height, int x = 0, int y = 0, int bpp = 8);
+	Surface(int width, int height, int x = 0, int y = 0, int bpp = 8, std::string paletteName = "PALETTES.DAT_");
 	/// Creates a new surface from an existing one.
 	Surface(const Surface& other);
 	/// Cleans up the surface.
@@ -77,7 +78,7 @@ public:
     /// Draws a filled rectangle on the surface.
     void drawRect(SDL_Rect *rect, Uint8 color);
     /// Draws a line on the surface.
-    void drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 color);
+    void drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color);
     /// Draws a filled circle on the surface.
     void drawCircle(Sint16 x, Sint16 y, Sint16 r, Uint8 color);
     /// Draws a filled circle on the 32 bit surface.
@@ -134,6 +135,9 @@ public:
 	void blitNShade(Surface *surface, int x, int y, int off, bool half = false, int newBaseColor = 0);
 	/// Invalidate the surface: force it to be redrawn
 	void invalidate();
+	/// Gets palette's name
+	std::string getPaletteName();
+	void blitBattlescapeElement(Surface* surface, int x, int y);
 	void setDX(int dx);
 	void setDY(int dy);
 };

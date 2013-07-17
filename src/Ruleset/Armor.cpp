@@ -27,10 +27,13 @@ namespace OpenXcom
  * @param type String defining the type.
  * @param spriteSheet Spritesheet used to render the unit.
  */
-Armor::Armor(const std::string &type, std::string spriteSheet, int drawingRoutine, MovementType movementType, int size) : _type(type), _spriteSheet(spriteSheet), _spriteInv(""), _corpseItem(""), _storeItem(""), _frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0), _drawingRoutine(drawingRoutine), _movementType(movementType), _size(size)
+Armor::Armor(const std::string &type, std::string spriteSheet, int drawingRoutine, const std::string &folder, const std::string &game, MovementType movementType, int size) : _type(type), _spriteSheet(spriteSheet), _spriteInv(""), _corpseItem(""), _storeItem(""), _folder(folder), _terrorPrefix(""), _frontArmor(0), _sideArmor(0), _rearArmor(0), _underArmor(0), _drawingRoutine(drawingRoutine), _movementType(movementType), _size(size)
 {
 	for (int i=0; i < DAMAGE_TYPES; i++)
 		_damageModifier[i] = 1.0;
+
+	if (game == "xcom2")
+		_terrorPrefix = "TFTD_";
 }
 
 /**
@@ -284,6 +287,20 @@ float Armor::getDamageModifier(ItemDamageType dt)
 std::vector<int> Armor::getLoftempsSet() const
 {
 	return _loftempsSet;
+}
+
+/**
+ * Returns prefix used by TFTD armors. UFO:EU armors have empty prefix.
+ * @return terror prefix.
+ */
+std::string Armor::getTerrorPrefix() const
+{
+	return _terrorPrefix;
+}
+
+std::string Armor::getFolder() const
+{
+	return _folder;
 }
 
 }

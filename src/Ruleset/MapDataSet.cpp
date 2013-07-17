@@ -35,7 +35,7 @@ MapData *MapDataSet::_scorchedTile = 0;
 /**
 * MapDataSet construction.
 */
-MapDataSet::MapDataSet(const std::string &name) : _name(name), _objects(), _surfaceSet(0), _loaded(false)
+MapDataSet::MapDataSet(const std::string &name, const std::string &dataFolder, const std::string &game) : _name(name), _dataFolder(dataFolder), _game(game), _objects(), _surfaceSet(0), _loaded(false)
 {
 }
 
@@ -78,6 +78,15 @@ std::string MapDataSet::getName() const
 }
 
 /**
+* Gets the MapDataSet folder (string).
+* @return folder.
+*/
+std::string MapDataSet::getDataFolder() const
+{
+	return _dataFolder;
+}
+
+/**
 * Gets the MapDataSet size.
 * @return size in number of records.
 */
@@ -106,8 +115,9 @@ SurfaceSet *MapDataSet::getSurfaceset() const
 /**
  * Loads terraindata in X-Com format (MCD & PCK files)
  * @sa http://www.ufopaedia.org/index.php?title=MCD
+ * @palette Palette to use with this data.
  */
-void MapDataSet::loadData()
+void MapDataSet::loadData(SDL_Color *palette)
 {
 	// prevents loading twice
 	if (_loaded) return;
@@ -167,7 +177,7 @@ void MapDataSet::loadData()
 
 	// Load Terrain Data from MCD file
 	std::stringstream s;
-	s << "TERRAIN/" << _name << ".MCD";
+	s << _dataFolder + "TERRAIN/" << _name << ".MCD";
 
 	// Load file
 	std::ifstream mapFile (CrossPlatform::getDataFile(s.str()).c_str(), std::ios::in | std::ios::binary);
@@ -178,7 +188,7 @@ void MapDataSet::loadData()
 
 	while (mapFile.read((char*)&mcd, sizeof(MCD)))
 	{
-		MapData *to = new MapData(this);
+		MapData *to = new MapData(this, _game);
 		_objects.push_back(to);
 
 		// set all the terrainobject properties:
@@ -242,11 +252,11 @@ void MapDataSet::loadData()
 
 	// Load terrain sprites/surfaces/PCK files into a surfaceset
 	std::stringstream s1,s2;
-	s1 << "TERRAIN/" << _name << ".PCK";
-	s2 << "TERRAIN/" << _name << ".TAB";
+	s1 << _dataFolder + "TERRAIN/" << _name << ".PCK";
+	s2 << _dataFolder + "TERRAIN/" << _name << ".TAB";
 	_surfaceSet = new SurfaceSet(32, 40);
 	_surfaceSet->loadPck(CrossPlatform::getDataFile(s1.str()), CrossPlatform::getDataFile(s2.str()));
-
+	_surfaceSet->setPalette(palette);
 }
 
 void MapDataSet::unloadData()
@@ -289,6 +299,11 @@ void MapDataSet::loadLOFTEMPS(const std::string &filename, std::vector<Uint16> *
 	}
 
 	mapFile.close();
+}
+
+std::string MapDataSet::getGame() const
+{
+	return _game;
 }
 
 MapData *MapDataSet::getBlankFloorTile()

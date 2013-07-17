@@ -36,13 +36,14 @@ private:
 	BattleItem *_ammo;
 	BattleItem *_projectileItem;
 	Position _origin;
+	int _depth;
 	int _projectileImpact;
 	bool createNewProjectile();
 	bool _initialized;
 public:
 	/// Creates a new ProjectileFly class
-	ProjectileFlyBState(BattlescapeGame *parent, BattleAction action);
-	ProjectileFlyBState(BattlescapeGame *parent, BattleAction action, Position origin);
+	ProjectileFlyBState(BattlescapeGame *parent, BattleAction action, int depth);
+	ProjectileFlyBState(BattlescapeGame *parent, BattleAction action, Position origin, int depth);
 	/// Cleans up the ProjectileFly.
 	~ProjectileFlyBState();
 	/// Initializes the state.

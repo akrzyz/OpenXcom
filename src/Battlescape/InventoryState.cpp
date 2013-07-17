@@ -36,6 +36,7 @@
 #include "Inventory.h"
 #include "../Ruleset/Ruleset.h"
 #include "../Ruleset/RuleItem.h"
+#include "../Ruleset/RuleSoldier.h"
 #include "../Ruleset/RuleInventory.h"
 #include "../Ruleset/Armor.h"
 #include "../Engine/Options.h"
@@ -56,6 +57,9 @@ namespace OpenXcom
  */
 InventoryState::InventoryState(Game *game, bool tu, BattlescapeState *parent) : State(game), _tu(tu), _parent(parent)
 {
+	std::string background;
+	Uint8 colors[3];
+
 	_battleGame = _game->getSavedGame()->getSavedBattle();
 	_showMoreStatsInInventoryView = Options::getBool("showMoreStatsInInventoryView");
 
@@ -108,47 +112,65 @@ InventoryState::InventoryState(Game *game, bool tu, BattlescapeState *parent) : 
 
 	centerAllSurfaces();
 
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_TAC01.BDY";
+		colors[0] = Palette::blockOffset(0) + 1;
+		colors[1] = Palette::blockOffset(9);
+		colors[2] = Palette::blockOffset(0) + 1;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "TAC01.SCR";
+		colors[0] = Palette::blockOffset(4);
+		colors[1] = Palette::blockOffset(1);
+		colors[2] = Palette::blockOffset(3);
+
+		_txtName->setHighContrast(true);
+		_txtTus->setHighContrast(true);
+		_txtItem->setHighContrast(true);
+		_txtAmmo->setHighContrast(true);
+	}
+
 	// Set up objects
-	_game->getResourcePack()->getSurface("TAC01.SCR")->blit(_bg);
+	_game->getResourcePack()->getSurface(background)->blit(_bg);
 
-	_txtName->setColor(Palette::blockOffset(4));
+	_txtName->setColor(colors[0]);
 	_txtName->setBig();
-	_txtName->setHighContrast(true);
 
-	_txtTus->setColor(Palette::blockOffset(4));
-	_txtTus->setSecondaryColor(Palette::blockOffset(1));
-	_txtTus->setHighContrast(true);
+	_txtTus->setColor(colors[0]);
+	_txtTus->setSecondaryColor(colors[1]);
 
 	if (_showMoreStatsInInventoryView)
 	{
-		_txtWeight->setColor(Palette::blockOffset(4));
-		_txtWeight->setSecondaryColor(Palette::blockOffset(1));
+		_txtWeight->setColor(colors[0]);
+		_txtWeight->setSecondaryColor(colors[1]);
 		_txtWeight->setHighContrast(true);
 
-		_txtFAcc->setColor(Palette::blockOffset(4));
-		_txtFAcc->setSecondaryColor(Palette::blockOffset(1));
+		_txtFAcc->setColor(colors[0]);
+		_txtFAcc->setSecondaryColor(colors[1]);
 		_txtFAcc->setHighContrast(true);
 
-		_txtReact->setColor(Palette::blockOffset(4));
-		_txtReact->setSecondaryColor(Palette::blockOffset(1));
+		_txtReact->setColor(colors[0]);
+		_txtReact->setSecondaryColor(colors[1]);
 		_txtReact->setHighContrast(true);
 
-		_txtPSkill->setColor(Palette::blockOffset(4));
-		_txtPSkill->setSecondaryColor(Palette::blockOffset(1));
+		_txtPSkill->setColor(colors[0]);
+		_txtPSkill->setSecondaryColor(colors[1]);
 		_txtPSkill->setHighContrast(true);
 
-		_txtPStr->setColor(Palette::blockOffset(4));
-		_txtPStr->setSecondaryColor(Palette::blockOffset(1));
+		_txtPStr->setColor(colors[0]);
+		_txtPStr->setSecondaryColor(colors[1]);
 		_txtPStr->setHighContrast(true);
 	}
 
-	_txtItem->setColor(Palette::blockOffset(3));
-	_txtItem->setHighContrast(true);
+	_txtItem->setColor(colors[2]);
 
-	_txtAmmo->setColor(Palette::blockOffset(4));
-	_txtAmmo->setSecondaryColor(Palette::blockOffset(1));
+	_txtAmmo->setColor(colors[0]);
+	_txtAmmo->setSecondaryColor(colors[1]);
 	_txtAmmo->setAlign(ALIGN_CENTER);
-	_txtAmmo->setHighContrast(true);
 
 	_btnOk->onMouseClick((ActionHandler)&InventoryState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&InventoryState::btnOkClick, (SDLKey)Options::getInt("keyCancel"));
@@ -196,7 +218,7 @@ void InventoryState::init()
 		texture->getFrame(s->getRankSprite())->setY(0);
 		texture->getFrame(s->getRankSprite())->blit(_btnRank);
 
-		std::string look = s->getArmor()->getSpriteInventory();
+		std::string look = s->getArmor()->getTerrorPrefix() + s->getArmor()->getSpriteInventory(), extension;
 		if (s->getGender() == GENDER_MALE)
 			look += "M";
 		else
@@ -209,10 +231,14 @@ void InventoryState::init()
 			look += "2";
 		if (s->getLook() == LOOK_AFRICAN)
 			look += "3";
-		look += ".SPK";
-		if (!CrossPlatform::fileExists(CrossPlatform::getDataFile("UFOGRAPH/" + look)) && !_game->getResourcePack()->getSurface(look))
+		if (s->getArmor()->getTerrorPrefix() != "")
+			extension = ".BDY";
+		else
+			extension = ".SPK";
+		look += extension;
+		if (!CrossPlatform::fileExists(CrossPlatform::getDataFile(s->getArmor()->getFolder() + "UFOGRAPH/" + look)) && !_game->getResourcePack()->getSurface(look) && (s->getArmor()->getTerrorPrefix() == ""))
 		{
-			look = s->getArmor()->getSpriteInventory() + ".SPK";
+			look = s->getArmor()->getTerrorPrefix() + s->getArmor()->getSpriteInventory() + extension;
 		}
 		_game->getResourcePack()->getSurface(look)->blit(_soldier);
 	}
@@ -417,6 +443,12 @@ void InventoryState::btnRankClick(Action *)
  */
 void InventoryState::invClick(Action *)
 {
+	int color;
+	if (Options::getString("GUIstyle") == "xcom2")
+		color = Palette::blockOffset(0) + 5;
+	else
+		color = Palette::blockOffset(0) + 8;
+
 	BattleItem *item = _inv->getSelectedItem();
 	_txtItem->setText(L"");
 	_txtAmmo->setText(L"");
@@ -447,13 +479,13 @@ void InventoryState::invClick(Action *)
 			r.y = 0;
 			r.w = RuleInventory::HAND_W * RuleInventory::SLOT_W;
 			r.h = RuleInventory::HAND_H * RuleInventory::SLOT_H;
-			_selAmmo->drawRect(&r, Palette::blockOffset(0)+8);
+			_selAmmo->drawRect(&r, color);
 			r.x++;
 			r.y++;
 			r.w -= 2;
 			r.h -= 2;
 			_selAmmo->drawRect(&r, 0);
-			item->getAmmoItem()->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet("BIGOBS.PCK"), _selAmmo);
+			item->getAmmoItem()->getRules()->drawHandSprite(_game->getResourcePack()->getSurfaceSet(item->getRules()->getTerrorPrefix() + "BIGOBS.PCK"), _selAmmo);
 		}
 		else if (item->getAmmoQuantity() != 0 && item->needsAmmo())
 		{

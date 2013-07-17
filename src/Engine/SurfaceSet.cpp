@@ -70,7 +70,7 @@ SurfaceSet::~SurfaceSet()
  * @param tab Filename of the TAB offsets.
  * @sa http://www.ufopaedia.org/index.php?title=Image_Formats#PCK
  */
-void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
+void SurfaceSet::loadPck(const std::string &pck, const std::string &tab, int tabSize)
 {
 	int nframes = 0;
 
@@ -84,13 +84,27 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
 	}
 	else
 	{
-		Uint16 off;
-		while (offsetFile.read((char*)&off, sizeof(off)))
+		if (tabSize == 2)
 		{
-			off = SDL_SwapLE16(off);
-			Surface *surface = new Surface(_width, _height);
-			_frames[nframes] = surface;
-			nframes++;
+			Uint16 off;
+			while (offsetFile.read((char*)&off, sizeof(off)))
+			{
+				off = SDL_SwapLE16(off);
+				Surface *surface = new Surface(_width, _height);
+				_frames[nframes] = surface;
+				nframes++;
+			}
+		}
+		else
+		{
+			Uint32 off;
+			while (offsetFile.read((char*)&off, sizeof(off)))
+			{
+				off = SDL_SwapLE32(off);
+				Surface *surface = new Surface(_width, _height);
+				_frames[nframes] = surface;
+				nframes++;
+			}
 		}
 	}
 
@@ -149,6 +163,7 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
  * image with no offsets so these have to be figured out
  * manually, usually by splitting the image into equal portions.
  * @param filename Filename of the DAT image.
+ * @param game Game to load data from
  * @sa http://www.ufopaedia.org/index.php?title=Image_Formats#SCR_.26_DAT
  */
 void SurfaceSet::loadDat(const std::string &filename)

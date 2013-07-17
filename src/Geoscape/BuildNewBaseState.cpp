@@ -29,6 +29,7 @@
 #include "../Engine/Screen.h"
 #include "../Interface/Window.h"
 #include "Globe.h"
+#include "GlobeLand.h"
 #include "../Interface/Text.h"
 #include "../Interface/TextButton.h"
 #include "../Savegame/Base.h"
@@ -49,6 +50,9 @@ namespace OpenXcom
  */
 BuildNewBaseState::BuildNewBaseState(Game *game, Base *base, Globe *globe, bool first) : State(game), _base(base), _globe(globe), _first(first), _oldlat(0), _oldlon(0), _mousex(0), _mousey(0)
 {
+	std::string background;
+	Uint8 color;
+
 	int dx = Screen::getDX();
 	int dy = Screen::getDY();
 	_screen = false;
@@ -73,8 +77,23 @@ BuildNewBaseState::BuildNewBaseState(Game *game, Base *base, Globe *globe, bool 
 	_hoverTimer->onTimer((StateHandler)&BuildNewBaseState::hoverRedraw);
 	_hoverTimer->start();
 	
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		_palette = "TFTD_PALETTES.DAT_0";
+		color = Palette::blockOffset(0)+1;
+		background = "TFTD_BACK01.SCR";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		_palette = "PALETTES.DAT_0";
+		color = Palette::blockOffset(15)-1;
+		background = "BACK01.SCR";
+	}
+
 	// Set palette
-	_game->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
+	_game->setPalette(_game->getResourcePack()->getPalette(_palette)->getColors());
 
 	add(_btnRotateLeft);
 	add(_btnRotateRight);
@@ -125,15 +144,15 @@ BuildNewBaseState::BuildNewBaseState(Game *game, Base *base, Globe *globe, bool 
 	_btnRotateUp->setListButton();
 	_btnRotateDown->setListButton();
 
-	_window->setColor(Palette::blockOffset(15)-1);
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK01.SCR"));
+	_window->setColor(color);
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
 
-	_btnCancel->setColor(Palette::blockOffset(15)-1);
+	_btnCancel->setColor(color);
 	_btnCancel->setText(_game->getLanguage()->getString("STR_CANCEL_UC"));
 	_btnCancel->onMouseClick((ActionHandler)&BuildNewBaseState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&BuildNewBaseState::btnCancelClick, (SDLKey)Options::getInt("keyCancel"));
 
-	_txtTitle->setColor(Palette::blockOffset(15)-1);
+	_txtTitle->setColor(color);
 	_txtTitle->setText(_game->getLanguage()->getString("STR_SELECT_SITE_FOR_NEW_BASE"));
 	_txtTitle->setVerticalAlign(ALIGN_MIDDLE);
 	_txtTitle->setWordWrap(true);
@@ -161,7 +180,7 @@ BuildNewBaseState::~BuildNewBaseState()
  */
 void BuildNewBaseState::init()
 {
-	_game->setPalette(_game->getResourcePack()->getPalette("PALETTES.DAT_0")->getColors());
+	_game->setPalette(_game->getResourcePack()->getPalette(_palette)->getColors());
 	_globe->setNewBaseHover();
 }
 
@@ -233,6 +252,25 @@ void BuildNewBaseState::globeClick(Action *action)
 	if (action->getDetails()->button.button == SDL_BUTTON_LEFT)
 	{
 		if (_globe->insideLand(lon, lat))
+		{
+			_base->setLongitude(lon);
+			_base->setLatitude(lat);
+			for (std::vector<Craft*>::iterator i = _base->getCrafts()->begin(); i != _base->getCrafts()->end(); ++i)
+			{
+				(*i)->setLongitude(lon);
+				(*i)->setLatitude(lat);
+			}
+			if (_first)
+			{
+				_game->pushState(new BaseNameState(_game, _base, _globe, _first));
+			}
+			else
+			{
+				_game->pushState(new ConfirmNewBaseState(_game, _base, _globe));
+			}
+		}
+		// Clicking on water for a base location
+		else if (_globe->insideWater(lon, lat))
 		{
 			_base->setLongitude(lon);
 			_base->setLatitude(lat);

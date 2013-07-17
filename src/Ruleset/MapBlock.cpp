@@ -24,7 +24,7 @@ namespace OpenXcom
 /**
 * MapBlock construction
 */
-MapBlock::MapBlock(RuleTerrain *terrain, std::string name, int size_x, int size_y, MapBlockType type):_terrain(terrain), _name(name), _size_x(size_x), _size_y(size_y), _size_z(0), _type(type), _subType(MT_UNDEFINED), _frequency(1), _timesUsed(0), _maxCount(-1)
+MapBlock::MapBlock(RuleTerrain *terrain, std::string name, std::string folder, int size_x, int size_y, MapBlockType type):_terrain(terrain), _name(name), _folder(folder), _size_x(size_x), _size_y(size_y), _size_z(0), _type(type), _subType(MT_UNDEFINED), _frequency(1), _timesUsed(0), _maxCount(-1)
 {
 }
 
@@ -111,6 +111,15 @@ void MapBlock::save(YAML::Emitter &out) const
 std::string MapBlock::getName() const
 {
 	return _name;
+}
+
+/**
+* Gets the MapBlock data directory (string).
+* @return directory
+*/
+std::string MapBlock::getFolder() const
+{
+	return _folder;
 }
 
 /**

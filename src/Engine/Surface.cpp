@@ -51,7 +51,7 @@ namespace OpenXcom
  * @param y Y position in pixels.
  * @param bpp Bits-per-pixel depth.
  */
-Surface::Surface(int width, int height, int x, int y, int bpp) : _x(x), _y(y), _visible(true), _hidden(false), _redraw(false), _originalColors(0), _alignedBuffer(0), _palette(0)
+Surface::Surface(int width, int height, int x, int y, int bpp, std::string paletteName) : _x(x), _y(y), _visible(true), _hidden(false), _redraw(false), _originalColors(0), _paletteName(paletteName), _alignedBuffer(0), _palette(0)
 {
 	//_surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 8, 0, 0, 0, 0);
 	int pitch = (bpp/8) * ((width+15)& ~0xF);
@@ -501,9 +501,12 @@ void Surface::drawRect(SDL_Rect *rect, Uint8 color)
  * @param y2 End y coordinate in pixels.
  * @param color Color of the line.
  */
-void Surface::drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint8 color)
+void Surface::drawLine(Sint16 x1, Sint16 y1, Sint16 x2, Sint16 y2, Uint32 color)
 {
-	lineColor(_surface, x1, y1, x2, y2, Palette::getRGBA(getPalette(), color));
+	if (_surface->format->BitsPerPixel != 32)
+		lineColor(_surface, x1, y1, x2, y2, Palette::getRGBA(getPalette(), color));
+	else
+		lineColor(_surface, x1, y1, x2, y2, color);
 }
 
 /**
@@ -968,7 +971,6 @@ void Surface::blitNShade(Surface *surface, int x, int y, int off, bool half, int
 		else
 			ShaderDraw<StandartShade>(ShaderMove<SDL_Color>(surface), src, ShaderScalar(this->getPalette()), ShaderScalar(off));
 	}
-		
 }
 
 /**
@@ -977,6 +979,27 @@ void Surface::blitNShade(Surface *surface, int x, int y, int off, bool half, int
 void Surface::invalidate()
 {
 	_redraw = true;
+}
+
+/**
+ * Gets palette's name
+ */
+std::string Surface::getPaletteName()
+{
+	return _paletteName;
+}
+
+/**
+ * Special blit function for battlescape elements
+ */
+void Surface::blitBattlescapeElement(Surface* surface, int x, int y)
+{		
+	SDL_Rect cropper;
+	cropper.x = x;
+	cropper.y = y;
+	cropper.w = _surface->w;
+	cropper.h = _surface->h;
+	SDL_BlitSurface(_surface, 0, surface->getSurface(), &cropper);
 }
 
 void Surface::setDX(int dx)

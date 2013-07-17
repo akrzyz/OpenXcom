@@ -66,7 +66,7 @@ private:
 	Pathfinding *_pathfinding;
 	TileEngine *_tileEngine;
 	std::string _missionType;
-	int _globalShade;
+	int _globalShade, _depth;
 	UnitFaction _side;
 	int _turn;
 	bool _debugMode;
@@ -103,6 +103,10 @@ public:
 	void setGlobalShade(int shade);
 	/// Get the global shade.
 	int getGlobalShade() const;
+	/// Set the global shade.
+	void setDepth(int depth);
+	/// get battle depth
+	int getDepth() const;
 	/// Gets pointer to the tiles, a tile is the smallest component of battlescape.
 	Tile **getTiles() const;
 	/// Get pointer to the list of nodes.

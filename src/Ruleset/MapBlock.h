@@ -38,12 +38,12 @@ class MapBlock
 {
 private:
 	RuleTerrain *_terrain;
-	std::string _name;
+	std::string _name, _folder;
 	int _size_x, _size_y, _size_z;
 	MapBlockType _type, _subType;
 	int _frequency, _timesUsed, _maxCount;
 public:
-	MapBlock(RuleTerrain *terrain, std::string name, int size_x, int size_y, MapBlockType type);
+	MapBlock(RuleTerrain *terrain, std::string name, std::string folder, int size_x, int size_y, MapBlockType type);
 	~MapBlock();
 	/// Loads the map block from YAML.
 	void load(const YAML::Node& node);
@@ -51,6 +51,8 @@ public:
 	void save(YAML::Emitter& out) const;
 	/// Gets the mapblock's name (used for MAP generation).
 	std::string getName() const;
+	/// Gets the mapblock's data directory (used for MAP generation).
+	std::string getFolder() const;
 	/// Gets the mapblock's x size.
 	int getSizeX() const;
 	/// Get the mapblock's y size.

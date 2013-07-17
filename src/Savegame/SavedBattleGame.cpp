@@ -34,13 +34,13 @@
 #include "../Battlescape/TileEngine.h"
 #include "../Battlescape/BattlescapeState.h"
 #include "../Battlescape/BattlescapeGame.h"
-#include "../Battlescape/EndBattleBState.h"
 #include "../Battlescape/Position.h"
 #include "../Resource/ResourcePack.h"
 #include "../Ruleset/Ruleset.h"
 #include "../Ruleset/Armor.h"
 #include "../Engine/Language.h"
 #include "../Engine/Game.h"
+#include "../Engine/Palette.h"
 #include "../Ruleset/RuleInventory.h"
 #include "../Battlescape/PatrolBAIState.h"
 #include "../Battlescape/AggroBAIState.h"
@@ -60,7 +60,7 @@ SavedBattleGame::SavedBattleGame() : _battleState(0), _mapsize_x(0), _mapsize_y(
                                      _mapsize_z(0),   _tiles(), _selectedUnit(0),
                                      _lastSelectedUnit(0), _nodes(), _units(),
                                      _items(), _pathfinding(0), _tileEngine(0),
-                                     _missionType(""), _globalShade(0), _side(FACTION_PLAYER),
+                                     _missionType(""), _globalShade(0), _depth(0), _side(FACTION_PLAYER),
                                      _turn(1), _debugMode(false), _aborted(false),
                                      _itemId(0), _objectiveDestroyed(false), _fallingUnits(),
                                      _unitsFalling(false), _strafeEnabled(false), _sneaky(false),
@@ -119,14 +119,17 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
 	node["height"] >> _mapsize_z;
 	node["missionType"] >> _missionType;
 	node["globalshade"] >> _globalShade;
+	node["depth"] >> _depth;
 	node["turn"] >> _turn;
 	node["selectedUnit"] >> selectedUnit;
 
 	for (YAML::Iterator i = node["mapdatasets"].begin(); i != node["mapdatasets"].end(); ++i)
 	{
-		std::string name;
-		*i >> name;
-		MapDataSet *mds = new MapDataSet(name);
+		std::string name, folder, game;
+		(*i)["name"] >> name;
+		(*i)["folder"] >> folder;
+		(*i)["game"] >> game;
+		MapDataSet *mds = new MapDataSet(name, folder, game);
 		_mapDataSets.push_back(mds);
 	}
 
@@ -318,10 +321,15 @@ void SavedBattleGame::load(const YAML::Node &node, Ruleset *rule, SavedGame* sav
  */
 void SavedBattleGame::loadMapResources(Game *game)
 {
+	std::string paletteName;
 	ResourcePack *res = game->getResourcePack();
 	for (std::vector<MapDataSet*>::const_iterator i = _mapDataSets.begin(); i != _mapDataSets.end(); ++i)
 	{
-		(*i)->loadData();
+		if ((*i)->getGame() == "xcom2")
+			paletteName = "TFTD_PALETTES.DAT_3";
+		else
+			paletteName = "PALETTES.DAT_4";
+		(*i)->loadData(game->getResourcePack()->getPalette(paletteName)->getColors());
 		if (game->getRuleset()->getMCDPatch((*i)->getName()))
 		{
 			game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
@@ -365,6 +373,7 @@ void SavedBattleGame::save(YAML::Emitter &out) const
 	out << YAML::Key << "height" << YAML::Value << _mapsize_z;
 	out << YAML::Key << "missionType" << YAML::Value << _missionType;
 	out << YAML::Key << "globalshade" << YAML::Value << _globalShade;
+	out << YAML::Key << "depth" << YAML::Value << _depth;
 	out << YAML::Key << "turn" << YAML::Value << _turn;
 	out << YAML::Key << "selectedUnit" << YAML::Value << (_selectedUnit?_selectedUnit->getId():-1);
 
@@ -372,7 +381,11 @@ void SavedBattleGame::save(YAML::Emitter &out) const
 	out << YAML::BeginSeq;
 	for (std::vector<MapDataSet*>::const_iterator i = _mapDataSets.begin(); i != _mapDataSets.end(); ++i)
 	{
-		out << (*i)->getName();
+		out << YAML::BeginMap;
+		out << YAML::Key << "name" << YAML::Value << (*i)->getName();
+		out << YAML::Key << "folder" << YAML::Value << (*i)->getDataFolder();
+		out << YAML::Key << "game" << YAML::Value << (*i)->getGame();
+		out << YAML::EndMap;
 	}
 	out << YAML::EndSeq;
 #if 0
@@ -537,6 +550,24 @@ void SavedBattleGame::setGlobalShade(int shade)
 int SavedBattleGame::getGlobalShade() const
 {
 	return _globalShade;
+}
+
+/**
+ * Sets battle depth.
+ * @param depth
+ */
+void SavedBattleGame::setDepth(int depth)
+{
+	_depth = depth;
+}
+
+/**
+ * Gets battle depth.
+ * @return depth
+ */
+int SavedBattleGame::getDepth() const
+{
+	return _depth;
 }
 
 /**
@@ -1026,8 +1057,7 @@ void SavedBattleGame::setObjectiveDestroyed(bool flag)
 	_objectiveDestroyed = flag;
 	if (flag && Options::getBool("battleAutoEnd"))
 	{
-		// doesn't really matter what number we push here, as long as it's not 0. the player already won, so let's push 1.
-		_battleState->getBattleGame()->statePushBack(new EndBattleBState(_battleState->getBattleGame(), 1, _battleState));
+		_battleState->getBattleGame()->statePushBack(0);
 	}
 }
 
@@ -1656,4 +1686,5 @@ void SavedBattleGame::resetTiles()
 		_tiles[i]->setDiscovered(false, 2);
 	}
 }
+
 }

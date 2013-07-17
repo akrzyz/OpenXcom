@@ -57,8 +57,11 @@ private:
 	InteractiveSurface *_btnUnitUp, *_btnUnitDown, *_btnMapUp, *_btnMapDown, *_btnShowMap, *_btnKneel;
 	InteractiveSurface *_btnInventory, *_btnCenter, *_btnNextSoldier, *_btnNextStop, *_btnShowLayers, *_btnHelp;
 	InteractiveSurface *_btnEndTurn, *_btnAbort, *_btnStats, *_btnLaunch, *_btnPsi;
-	ImageButton *_reserve;
-	ImageButton *_btnReserveNone, *_btnReserveSnap, *_btnReserveAimed, *_btnReserveAuto;
+	ImageButton *_reserve, *_reserveNone;
+	ImageButton *_btnUnitUpTFTD, *_btnUnitDownTFTD, *_btnMapUpTFTD, *_btnMapDownTFTD, *_btnShowMapTFTD, *_btnKneelTFTD;
+	ImageButton *_btnInventoryTFTD, *_btnCenterTFTD, *_btnNextSoldierTFTD, *_btnNextStopTFTD, *_btnShowLayersTFTD;
+	ImageButton *_btnHelpTFTD, *_btnEndTurnTFTD, *_btnAbortTFTD;
+	ImageButton *_btnReserveNone, *_btnReserveSnap, *_btnReserveAimed, *_btnReserveAuto, *_btnReserveKneel, *_btnReserve0TU;
 	InteractiveSurface *_btnLeftHandItem, *_btnRightHandItem;
 	InteractiveSurface *_btnVisibleUnit[10];
 	NumberText *_numVisibleUnit[10];
@@ -72,6 +75,7 @@ private:
 	Text *_txtDebug;
 	std::vector<State*> _popups;
 	BattlescapeGame *_battleGame;
+	std::string _palette;
 	bool firstInit;
 	bool isMouseScrolling;
 	bool isMouseScrolled;

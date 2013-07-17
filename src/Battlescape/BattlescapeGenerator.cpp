@@ -35,6 +35,8 @@
 #include "../Savegame/Node.h"
 #include "../Engine/RNG.h"
 #include "../Engine/Exception.h"
+#include "../Engine/Palette.h"
+#include "../Engine/SurfaceSet.h"
 #include "../Ruleset/MapBlock.h"
 #include "../Ruleset/MapDataSet.h"
 #include "../Ruleset/RuleUfo.h"
@@ -50,7 +52,6 @@
 #include "../Ruleset/AlienRace.h"
 #include "../Ruleset/AlienDeployment.h"
 #include "../Ruleset/RuleBaseFacility.h"
-#include "../Resource/XcomResourcePack.h"
 #include "../Engine/Game.h"
 #include "../Engine/Language.h"
 #include "../Engine/CrossPlatform.h"
@@ -58,6 +59,7 @@
 #include "../Savegame/TerrorSite.h"
 #include "../Savegame/AlienBase.h"
 #include "../Savegame/EquipmentLayoutItem.h"
+#include "../Resource/ResourcePack.h"
 #include "PatrolBAIState.h"
 #include "Pathfinding.h"
 
@@ -69,7 +71,7 @@ namespace OpenXcom
  * @param game pointer to Game object.
  */
 BattlescapeGenerator::BattlescapeGenerator(Game *game) : _game(game), _save(game->getSavedGame()->getSavedBattle()), _res(_game->getResourcePack()), _craft(0), _ufo(0), _base(0), _terror(0), _terrain(0),
-														 _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0), _unitSequence(0), _craftInventoryTile(0), _alienRace(""), _alienItemLevel(0)
+														 _mapsize_x(0), _mapsize_y(0), _mapsize_z(0), _worldTexture(0), _worldShade(0), _unitSequence(0), _craftInventoryTile(0), _alienRace(""), _alienItemLevel(0), _depth(0)
 {
 }
 
@@ -141,6 +143,16 @@ void BattlescapeGenerator::setAlienRace(const std::string &alienRace)
 void BattlescapeGenerator::setAlienItemlevel(int alienItemLevel)
 {
 	_alienItemLevel = alienItemLevel;
+}
+
+/**
+ * Sets mission depth.
+ * - this value should be from 0 to 3.
+ * @param depth Depth.
+ */
+void BattlescapeGenerator::setDepth(int depth)
+{
+	_depth = depth;
 }
 
 /**
@@ -259,6 +271,8 @@ void BattlescapeGenerator::nextStage()
 				_save->getTiles()[i]->setDiscovered(true, 2);
 	}
 	_save->setGlobalShade(_worldShade);
+	_save->setDepth(_depth);
+
 	_save->getTileEngine()->calculateSunShading();
 	_save->getTileEngine()->calculateTerrainLighting();
 	_save->getTileEngine()->calculateUnitLighting();
@@ -462,6 +476,7 @@ void BattlescapeGenerator::run()
 
 	// set shade (alien bases are a little darker, sites depend on worldshade)
 	_save->setGlobalShade(_worldShade);
+	_save->setDepth(_depth);
 
 	_save->getTileEngine()->calculateSunShading();
 	_save->getTileEngine()->calculateTerrainLighting();
@@ -1016,12 +1031,13 @@ void BattlescapeGenerator::generateMap()
 	int ufoX = 0, ufoY = 0;
 	bool placed = false;
 
-	MapBlock* dummy = new MapBlock(_terrain, "dummy", 0, 0, MT_DEFAULT);
-	MapBlock* craftMap = 0;
-	MapBlock* ufoMap = 0;
+	MapBlock* dummy = new MapBlock(_terrain, "dummy", _terrain->getFolder(), 0, 0, MT_DEFAULT);
+	MapBlock* craftMap = 0;	MapBlock* ufoMap = 0;
 
 	int mapDataSetIDOffset = 0;
 	int craftDataSetIDOffset = 0;
+
+	std::string paletteName;
 
 	blocks.resize((_mapsize_x / 10), std::vector<MapBlock*>((_mapsize_y / 10)));
 	landingzone.resize((_mapsize_x / 10), std::vector<bool>((_mapsize_y / 10),false));
@@ -1278,7 +1294,11 @@ void BattlescapeGenerator::generateMap()
 
 	for (std::vector<MapDataSet*>::iterator i = _terrain->getMapDataSets()->begin(); i != _terrain->getMapDataSets()->end(); ++i)
 	{
-		(*i)->loadData();
+		if ((*i)->getGame() == "xcom2")
+			paletteName = "TFTD_PALETTES.DAT_3";
+		else
+			paletteName = "PALETTES.DAT_4";
+		(*i)->loadData(_res->getPalette(paletteName)->getColors());
 		if (_game->getRuleset()->getMCDPatch((*i)->getName()))
 		{
 			_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
@@ -1420,7 +1440,11 @@ void BattlescapeGenerator::generateMap()
 	{
 		for (std::vector<MapDataSet*>::iterator i = _ufo->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _ufo->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
-			(*i)->loadData();
+			if ((*i)->getGame() == "xcom2")
+				paletteName = "TFTD_PALETTES.DAT_3";
+			else
+				paletteName = "PALETTES.DAT_4";
+			(*i)->loadData(_res->getPalette(paletteName)->getColors());
 			if (_game->getRuleset()->getMCDPatch((*i)->getName()))
 			{
 				_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
@@ -1443,7 +1467,11 @@ void BattlescapeGenerator::generateMap()
 	{
 		for (std::vector<MapDataSet*>::iterator i = _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->begin(); i != _craft->getRules()->getBattlescapeTerrainData()->getMapDataSets()->end(); ++i)
 		{
-			(*i)->loadData();
+			if ((*i)->getGame() == "xcom2")
+				paletteName = "TFTD_PALETTES.DAT_3";
+			else
+				paletteName = "PALETTES.DAT_4";
+			(*i)->loadData(_res->getPalette(paletteName)->getColors());
 			if (_game->getRuleset()->getMCDPatch((*i)->getName()))
 			{
 				_game->getRuleset()->getMCDPatch((*i)->getName())->modifyData(*i);
@@ -1536,7 +1564,7 @@ int BattlescapeGenerator::loadMAP(MapBlock *mapblock, int xoff, int yoff, RuleTe
 	char size[3];
 	unsigned char value[4];
 	std::stringstream filename;
-	filename << "MAPS/" << mapblock->getName() << ".MAP";
+	filename << terrain->getFolder() << "MAPS/" << mapblock->getName() << ".MAP";
 	int terrainObjectID;
 
 	// Load file
@@ -1633,7 +1661,7 @@ void BattlescapeGenerator::loadRMP(MapBlock *mapblock, int xoff, int yoff, int s
 	int id = 0;
 	char value[24];
 	std::stringstream filename;
-	filename << "ROUTES/" << mapblock->getName() << ".RMP";
+	filename << mapblock->getFolder() << "ROUTES/" << mapblock->getName() << ".RMP";
 
 	// Load file
 	std::ifstream mapFile (CrossPlatform::getDataFile(filename.str()).c_str(), std::ios::in| std::ios::binary);

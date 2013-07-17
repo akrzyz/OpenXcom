@@ -32,6 +32,7 @@
 #include "../Engine/Music.h"
 #include "../Engine/Sound.h"
 #include "../Ruleset/Ruleset.h"
+#include "../Resource/ResourcePack.h"
 #include "TestState.h"
 #include "NoteState.h"
 #include "LanguageState.h"
@@ -435,7 +436,13 @@ void StartState::think()
 			_game->loadRuleset();
 			Log(LOG_INFO) << "Ruleset loaded successfully.";
 			Log(LOG_INFO) << "Loading resources...";
-			_game->setResourcePack(new XcomResourcePack(_game->getRuleset()->getExtraSprites(), _game->getRuleset()->getExtraSounds()));
+			_game->setResourcePack(new ResourcePack());
+			std::map<std::string, OptionsFolders*> folders = Options::getOptionsFolders();
+			for (std::map<std::string, OptionsFolders*>::const_iterator i = folders.begin(); i != folders.end(); ++i)
+			{
+				_game->getResourcePack()->loadGeoscapeResources(i->second->getVanillaFolder(), i->first);
+			}
+			_game->getResourcePack()->loadExtraResources(_game->getRuleset()->getExtraSprites(), _game->getRuleset()->getExtraSounds());
 			Log(LOG_INFO) << "Resources loaded successfully.";
 			std::vector<std::string> langs = Language::getList(0);
 			if (langs.empty())
@@ -445,8 +452,8 @@ void StartState::think()
 			_load = LOADING_SUCCESSFUL;
 
 			// loading done? let's play intro!
-			std::string introFile = CrossPlatform::getDataFile("UFOINTRO/UFOINT.FLI");
-			if (Options::getBool("playIntro") && CrossPlatform::fileExists(introFile))
+			std::string introFile = CrossPlatform::getDataFile(Options::getDataFolder(Options::getOptionsFolders().begin()->first) + "UFOINTRO/UFOINT.FLI");
+			if (Options::getBool("playIntro") && CrossPlatform::fileExists(introFile) && !Options::getBool("mute"))
 			{
 				audioSequence = new AudioSequence(_game->getResourcePack());
 				Flc::flc.realscreen = _game->getScreen();

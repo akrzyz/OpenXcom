@@ -868,21 +868,18 @@ regions:
         - [62.125, 101.375, -66.625, -57.125]
   - type: STR_NORTH_ATLANTIC
     cost: 500000
-    missionRegion: STR_NORTH_AMERICA
     areas:
       - [305, 335, -70, -30]
       - [300, 335, -30, -10]
       - [315, 335, -10, 0]
   - type: STR_SOUTH_ATLANTIC
     cost: 500000
-    missionRegion: STR_ANTARCTICA
     areas:
       - [330, 5, 0,  15]
       - [325, 5, 15, 60]
       - [5, 55, 40, 60]
   - type: STR_INDIAN_OCEAN
     cost: 500000
-    missionRegion: STR_SOUTHERN_AFRICA
     areas:
       - [55, 70, -15, 10]
       - [70, 90, -5, 10]
@@ -1500,7 +1497,6 @@ items:
     costSell: 31500
     transferTime: 48
     weight: 1
-    weight: 3
     bigSprite: -1 # It must be -1 to avoid putting it to the base-defense battlescape. Original value: 36
     floorSprite: 35
     hitSound: 0
@@ -4034,10 +4030,10 @@ armors:
   - type: CIVM_ARMOR
     spriteSheet: CIVM.PCK
     corpseItem: CIVM_CORPSE
-    frontArmor: 0
-    sideArmor: 0
-    rearArmor: 0
-    underArmor: 0
+    frontArmor: 4
+    sideArmor: 3
+    rearArmor: 2
+    underArmor: 2
     drawingRoutine: 4
     damageModifier:
       - 1.0
@@ -4054,10 +4050,10 @@ armors:
   - type: CIVF_ARMOR
     spriteSheet: CIVF.PCK
     corpseItem: CIVF_CORPSE
-    frontArmor: 0
-    sideArmor: 0
-    rearArmor: 0
-    underArmor: 0
+    frontArmor: 4
+    sideArmor: 3
+    rearArmor: 2
+    underArmor: 2
     drawingRoutine: 4
     damageModifier:
       - 1.0
@@ -9378,19 +9374,6 @@ MCDPatches:
         deathTile: 75
       - MCDIndex: 73
         deathTile: 76
-extraSprites:
-  - type: Pathfinding
-    width: 64
-    height: 80
-    files:
-      0: Resources/Pathfinding/
-  - type: Projectiles
-    width: 105
-    height: 33
-    subX: 3
-    subY: 3
-    files:
-      0: Resources/BulletSprites/BulletSprites.png
 #New spritesheet Example:
 #  - type: GIANTBUNNY.PCK
 #    width: 32

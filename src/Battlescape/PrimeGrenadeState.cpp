@@ -23,6 +23,7 @@
 #include "../Resource/ResourcePack.h"
 #include "../Engine/Language.h"
 #include "../Engine/Palette.h"
+#include "../Engine/Options.h"
 #include "../Engine/Action.h"
 #include "../Interface/Text.h"
 #include "../Interface/Window.h"
@@ -42,6 +43,7 @@ namespace OpenXcom
  */
 PrimeGrenadeState::PrimeGrenadeState(Game *game, BattleAction *action, bool inInventoryView, BattleItem *grenadeInInventory) : State(game), _action(action), _inInventoryView(inInventoryView), _grenadeInInventory(grenadeInInventory)
 {
+	Uint8 colors[5];
 	_screen = false;
 
 	// Create objects
@@ -57,6 +59,32 @@ PrimeGrenadeState::PrimeGrenadeState(Game *game, BattleAction *action, bool inIn
 		_number[i] = new Text(20, 20, x+((i%8)*24), y+((i/8)*25));
 	}
 
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		colors[0] = Palette::blockOffset(3)+12;
+		colors[1] = colors[0] - 4;
+		colors[2] = Palette::blockOffset(0)+1;
+		colors[3] = Palette::blockOffset(3)+6;
+		colors[4] = Palette::blockOffset(2)+12;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		colors[0] = Palette::blockOffset(6)+9;
+		colors[1] = Palette::blockOffset(6)+5;
+		colors[2] = Palette::blockOffset(1)-1;
+		colors[3] = Palette::blockOffset(0)+15;
+		colors[4] = Palette::blockOffset(3)+12;
+
+		_title->setHighContrast(true);
+
+		for (int i = 0; i < 24; ++i)
+		{
+			_number[i]->setHighContrast(true);
+		}
+	}
+
 	// Set up objects
 	SDL_Rect square;
 	square.x = 0;
@@ -64,17 +92,16 @@ PrimeGrenadeState::PrimeGrenadeState(Game *game, BattleAction *action, bool inIn
 	square.w = _bg->getWidth();
 	square.h = _bg->getHeight();
 	add(_bg);
-	_bg->drawRect(&square, Palette::blockOffset(6)+9);
+	_bg->drawRect(&square, colors[0]);
 
 	add(_window);
-	_window->setColor(Palette::blockOffset(6)+5);
+	_window->setColor(colors[1]);
 
 	add(_title);
 	_title->setAlign(ALIGN_CENTER);
 	_title->setBig();
 	_title->setText(_game->getLanguage()->getString("STR_SET_TIMER"));
-	_title->setColor(Palette::blockOffset(1)-1);
-	_title->setHighContrast(true);
+	_title->setColor(colors[2]);
 
 	for (int i = 0; i < 24; ++i)
 	{
@@ -84,12 +111,12 @@ PrimeGrenadeState::PrimeGrenadeState(Game *game, BattleAction *action, bool inIn
 		square.y = 0;
 		square.w = _button[i]->getWidth();
 		square.h = _button[i]->getHeight();
-		_button[i]->drawRect(&square, Palette::blockOffset(0)+15);
+		_button[i]->drawRect(&square, colors[3]);
 		square.x = 1;
 		square.y = 1;
 		square.w = _button[i]->getWidth()-2;
 		square.h = _button[i]->getHeight()-2;
-		_button[i]->drawRect(&square, Palette::blockOffset(2)+12);
+		_button[i]->drawRect(&square, colors[4]);
 
 		std::wstringstream ss;
 		ss << i;
@@ -97,8 +124,7 @@ PrimeGrenadeState::PrimeGrenadeState(Game *game, BattleAction *action, bool inIn
 		_number[i]->setFonts(_game->getResourcePack()->getFont("Big.fnt"), 0);
 		_number[i]->setBig();
 		_number[i]->setText(ss.str());
-		_number[i]->setColor(Palette::blockOffset(1)-1);
-		_number[i]->setHighContrast(true);
+		_number[i]->setColor(colors[2]);
 		_number[i]->setAlign(ALIGN_CENTER);
 		_number[i]->setVerticalAlign(ALIGN_MIDDLE);
 	}
@@ -146,7 +172,7 @@ void PrimeGrenadeState::btnClick(Action *action)
 	}
 
 	// got to find out which button was pressed
-	for (int i = 0; i < 10 && btnID == -1; ++i)
+	for (int i = 0; i < 24 && btnID == -1; ++i)
 	{
 		if (action->getSender() == _button[i])
 		{

@@ -37,6 +37,8 @@ namespace OpenXcom
  */
 InfoboxOKState::InfoboxOKState(Game *game, const std::wstring &msg) : State(game)
 {
+	Uint8 color;
+
 	_screen = false;
 
 	// Create objects
@@ -50,22 +52,34 @@ InfoboxOKState::InfoboxOKState(Game *game, const std::wstring &msg) : State(game
 
 	centerAllSurfaces();
 
-	// Set up objects
-	_window->setColor(Palette::blockOffset(1)-1);
-	_window->setHighContrast(true);
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		color = Palette::blockOffset(0)+1;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		color = Palette::blockOffset(1)-1;
 
-	_btnOk->setColor(Palette::blockOffset(1)-1);
+		_window->setHighContrast(true);
+		_btnOk->setHighContrast(true);
+		_txtTitle->setHighContrast(true);
+	}
+
+	// Set up objects
+	_window->setColor(color);
+
+	_btnOk->setColor(color);
 	_btnOk->setText(_game->getLanguage()->getString("STR_OK"));
 	_btnOk->onMouseClick((ActionHandler)&InfoboxOKState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&InfoboxOKState::btnOkClick, (SDLKey)Options::getInt("keyOk"));
 	_btnOk->onKeyboardPress((ActionHandler)&InfoboxOKState::btnOkClick, (SDLKey)Options::getInt("keyCancel"));
-	_btnOk->setHighContrast(true);
 
-	_txtTitle->setColor(Palette::blockOffset(1)-1);
+	_txtTitle->setColor(color);
 	_txtTitle->setBig();
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setVerticalAlign(ALIGN_MIDDLE);
-	_txtTitle->setHighContrast(true);
 	_txtTitle->setWordWrap(true);
 	_txtTitle->setText(msg);
 

@@ -308,7 +308,6 @@
 #include "./Menu/NewGameState.h"
 #include "./Menu/MainMenuState.h"
 #include "./Resource/ResourcePack.h"
-#include "./Resource/XcomResourcePack.h"
 #include "./Savegame/MovingTarget.h"
 #include "./Savegame/SavedBattleGame.h"
 #include "./Savegame/ResearchProject.h"

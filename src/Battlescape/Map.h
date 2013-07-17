@@ -68,14 +68,15 @@ private:
 	BattlescapeMessage *_message;
 	Camera *_camera;
 	int _visibleMapHeight;
-	void drawTerrain(Surface *surface);
+	void drawTerrain();
 	int getTerrainLevel(Position pos, int size);
 	std::vector<Position> _waypoints;
 	bool _unitDying;
 	int _previewSetting;
+	std::string _terrorPalette;
 public:
 	/// Creates a new map at the specified position and size.
-	Map(Game *game, int width, int height, int x, int y, int visibleMapHeight, int bpp);
+	Map(Game *game, int width, int height, int x, int y, int visibleMapHeight);
 	/// Cleans up the map.
 	~Map();
 	/// sets stuff up

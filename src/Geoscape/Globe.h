@@ -29,6 +29,8 @@ namespace OpenXcom
 {
 
 class Game;
+class GlobeLand;
+class GlobeWater;
 class Polygon;
 class SurfaceSet;
 class Timer;
@@ -44,34 +46,27 @@ class LocalizedText;
 class Globe : public InteractiveSurface
 {
 private:
-	static const int NUM_TEXTURES = 13;
-	static const int NUM_LANDSHADES = 48;
-	static const int NUM_SEASHADES = 72;
 	static const int NEAR_RADIUS = 25;
 	static const double QUAD_LONGITUDE;
 	static const double QUAD_LATITUDE;
 	static const double ROTATE_LONGITUDE;
 	static const double ROTATE_LATITUDE;
 
-	double _cenLon, _cenLat, _rotLon, _rotLat, _hoverLon, _hoverLat;
+	GlobeLand *_globeLand;
+	GlobeWater *_globeWater;
+	double _cenLon, _cenLat, _hoverLon, _hoverLat, _rotLon, _rotLat;
 	Sint16 _cenX, _cenY;
 	size_t _zoom;
-	SurfaceSet *_texture;
 	Game *_game;
 	Surface *_markers, *_countries, *_radars;
 	bool _blink, _hover;
 	Timer *_blinkTimer, *_rotTimer;
-	std::list<Polygon*> _cacheLand;
+	std::list<Polygon*> _cacheLand, _cacheWater;
 	Surface *_mkXcomBase, *_mkAlienBase, *_mkCraft, *_mkWaypoint, *_mkCity;
 	Surface *_mkFlyingUfo, *_mkLandedUfo, *_mkCrashedUfo, *_mkAlienSite;
 	FastLineClip *_clipper;
-	///normal of each pixel in earth globe per zoom level
-	std::vector<std::vector<Cord> > _earthData;
-	///data sample used for noise in shading
-	std::vector<Sint16> _randomNoiseData;
 	///list of dimension of earth on screen per zoom level
 	std::vector<double> _radius;
-
 
 	/// Checks if a point is behind the globe.
 	bool pointBack(double lon, double lat) const;
@@ -83,22 +78,16 @@ private:
 	bool targetNear(Target* target, int x, int y) const;
 	/// Caches a set of polygons.
 	void cache(std::list<Polygon*> *polygons, std::list<Polygon*> *cache);
-	/// Get position of sun relative to given position in polar cords and date.
-	Cord getSunDirection(double lon, double lat) const;
 public:
 	/// Creates a new globe at the specified position and size.
 	Globe(Game *game, int cenX, int cenY, int width, int height, int x = 0, int y = 0);
 	/// Cleans up the globe.
 	~Globe();
-	/// Loads a set of polygons from a DAT file.
-	static void loadDat(const std::string &filename, std::list<Polygon*> *polygons);
 	/// Converts polar coordinates to cartesian coordinates.
 	void polarToCart(double lon, double lat, Sint16 *x, Sint16 *y) const;
 	void polarToCart(double lon, double lat, double *x, double *y) const;
 	/// Converts cartesian coordinates to polar coordinates.
 	void cartToPolar(Sint16 x, Sint16 y, double *lon, double *lat) const;
-	/// Sets the texture set for the globe's polygons.
-	void setTexture(SurfaceSet *texture);
 	/// Starts rotating the globe left.
 	void rotateLeft();
 	/// Starts rotating the globe right.
@@ -121,6 +110,8 @@ public:
 	void center(double lon, double lat);
 	/// Checks if a point is inside land.
 	bool insideLand(double lon, double lat) const;
+	/// Checks if a point is inside water.
+	bool insideWater(double lon, double lat) const;
 	/// Turns on/off the globe detail.
 	void toggleDetail();
 	/// Gets all the targets near a point on the globe.
@@ -135,14 +126,10 @@ public:
 	void blink();
 	/// Rotates the globe.
 	void rotate();
+	/// Loads a set of polygons from  DAT file.
+	static void loadDat(const std::string &filename, std::list<Polygon*> *polygons);
 	/// Draws the whole globe.
 	void draw();
-	/// Draws the ocean of the globe.
-	void drawOcean();
-	/// Draws the land of the globe.
-	void drawLand();
-	/// Draws the shadow.
-	void drawShadow();
 	/// Draws the country details of the globe.
 	void drawRadars();
 	/// Draws the country details of the globe.
@@ -171,8 +158,6 @@ public:
 	LocalizedText tr(const std::string &id, unsigned n) const;
 	/// Draw globe range circle.
 	void drawGlobeCircle(double lat, double lon, double radius, int segments);
-	/// Special "transparent" line.
-	void XuLine(Surface* surface, Surface* src, double x1, double y1, double x2, double y2, Sint16 Color);
 	/// Sets hover base position.
 	void setNewBaseHoverPos(double lon, double lat);
 	/// Turns on new base hover mode.
@@ -183,11 +168,14 @@ public:
 	bool getNewBaseHover(void);
 	/// Gets _detail variable
 	bool getShowRadar(void);
+	/// Special "transparent" line.
+	void XuLine(Surface* surface, Surface* src, double x1, double y1, double x2, double y2, Sint16 Color);
 	/// set the _radarLines variable
 	void toggleRadarLines();
 
 	void drawVHLine(double lon1, double lat1, double lon2, double lat2, int colour);
 
+	static void loadPolygon(int numberOfPolygons, short value[][10], std::list<Polygon*> *polygons);
 };
 
 }

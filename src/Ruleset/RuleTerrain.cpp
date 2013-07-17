@@ -29,7 +29,7 @@ namespace OpenXcom
 /**
 * RuleTerrain construction
 */
-RuleTerrain::RuleTerrain(const std::string &name) : _name(name), _largeBlockLimit(0), _hemisphere(0)
+RuleTerrain::RuleTerrain(const std::string &name, const std::string &folder, const std::string &game) : _name(name), _folder(folder), _game(game), _largeBlockLimit(0), _hemisphere(0)
 {
 }
 
@@ -66,7 +66,7 @@ void RuleTerrain::load(const YAML::Node &node, Ruleset *ruleset)
 			{
 				std::string name;
 				*j >> name;
-				_mapDataSets.push_back(ruleset->getMapDataSet(name));
+				_mapDataSets.push_back(ruleset->getMapDataSet(name, _folder, _game));
 			}
 		}
 		else if (key == "mapBlocks")
@@ -76,7 +76,7 @@ void RuleTerrain::load(const YAML::Node &node, Ruleset *ruleset)
 			{
 				std::string name;
 				(*j)["name"] >> name;
-				MapBlock *map = new MapBlock(this, name, 0, 0, MT_DEFAULT);
+				MapBlock *map = new MapBlock(this, name, _folder, 0, 0, MT_DEFAULT);
 				map->load(*j);
 				_mapBlocks.push_back(map);
 			}
@@ -149,6 +149,15 @@ std::vector<MapDataSet*> *RuleTerrain::getMapDataSets()
 std::string RuleTerrain::getName() const
 {
 	return _name;
+}
+
+/**
+ * Gets the terrain's data directory.
+ * @return directory.
+ */
+std::string RuleTerrain::getFolder() const
+{
+	return _folder;
 }
 
 /**

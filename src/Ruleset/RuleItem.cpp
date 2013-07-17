@@ -28,13 +28,17 @@ namespace OpenXcom
  * Creates a blank ruleset for a certain type of item.
  * @param type String defining the type.
  */
-RuleItem::RuleItem(const std::string &type) : _type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(999), _bigSprite(0), _floorSprite(-1), _handSprite(120), _bulletSprite(-1),
+RuleItem::RuleItem(const std::string &type, const std::string &game) : _type(type), _name(type), _size(0.0), _costBuy(0), _costSell(0), _transferTime(24), _weight(999), _bigSprite(0), _floorSprite(-1), _handSprite(120), _bulletSprite(-1),
 											_fireSound(-1), _hitSound(-1), _hitAnimation(0), _power(0), _compatibleAmmo(), _damageType(DT_NONE),
 											_accuracyAuto(0), _accuracySnap(0), _accuracyAimed(0), _tuAuto(0), _tuSnap(0), _tuAimed(0), _clipSize(0), _accuracyMelee(0), _tuMelee(0),
 											_battleType(BT_NONE), _twoHanded(false), _waypoint(false), _fixedWeapon(false), _invWidth(1), _invHeight(1),
 											_painKiller(0), _heal(0), _stimulant(0), _healAmount(0), _healthAmount(0), _stun(0), _energy(0), _tuUse(0), _recoveryPoints(0), _armor(20), _turretType(-1),
 											_recover(true), _liveAlien(false), _blastRadius(-1), _attraction(0), _flatRate(false), _arcingShot(false), _listOrder(0), _range(0), _bulletSpeed(0)
 {
+	if (game == "xcom2")
+		_terrorPrefix = "TFTD_";
+	else
+		_terrorPrefix = "";
 }
 
 /**
@@ -113,9 +117,9 @@ void RuleItem::load(const YAML::Node &node, int modIndex, int listOrder)
 		else if (key == "bulletSprite")
 		{
 			i.second() >> _bulletSprite;
-			// Projectiles: 385 entries ((105*33) / (3*3)) (35 sprites per projectile(0-34), 11 projectiles (0-10))
-			_bulletSprite *= 35;
-			if (_bulletSprite >= 385)
+			// Projectiles: 396 entries ((108*33) / (3*3)) (36 sprites per projectile(0-35), 11 projectiles (0-10))
+			_bulletSprite *= 36;
+			if (_bulletSprite >= 396)
 			{
 				_bulletSprite += modIndex;
 			}
@@ -882,6 +886,15 @@ int RuleItem::getRange() const
 int RuleItem::getBulletSpeed() const
 {
 	return _bulletSpeed;
+}
+
+/**
+ * Returns prefix used by TFTD items. UFO:EU items have empty prefix.
+ * @return terror prefix.
+ */
+std::string RuleItem::getTerrorPrefix() const
+{
+	return _terrorPrefix;
 }
 
 }

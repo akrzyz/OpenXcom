@@ -38,7 +38,7 @@ class Ruleset;
 class RuleCraft
 {
 private:
-	std::string _type;
+	std::string _type, _folder, _game;
 	int _sprite;
 	int _fuelMax, _damageMax, _speedMax, _accel, _weapons, _soldiers, _vehicles, _costBuy;
 	std::string _refuelItem;
@@ -49,7 +49,7 @@ private:
 	int _listOrder;
 public:
 	/// Creates a blank craft ruleset.
-	RuleCraft(const std::string &type);
+	RuleCraft(const std::string &type, const std::string &folder, const std::string &game);
 	/// Cleans up the craft ruleset.
 	~RuleCraft();
 	/// Loads craft data from YAML.

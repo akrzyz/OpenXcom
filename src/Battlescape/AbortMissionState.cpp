@@ -47,6 +47,9 @@ namespace OpenXcom
  */
 AbortMissionState::AbortMissionState(Game *game, SavedBattleGame *battleGame, BattlescapeState *state) : State(game), _battleGame(battleGame), _state(state), _inExitArea(0), _outExitArea(0)
 {
+	Uint8 color;
+	std::string background;
+
 	// Create objects
 	_screen = false;
 	_window = new Window(this, 320, 144, 0, 0);
@@ -87,40 +90,55 @@ AbortMissionState::AbortMissionState(Game *game, SavedBattleGame *battleGame, Ba
 		}
 	}
 
-	// Set up objects
-	_window->setColor(Palette::blockOffset(0));
-	_window->setHighContrast(true);
-	_window->setBackground(_game->getResourcePack()->getSurface("TAC00.SCR"));
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		background = "TFTD_TAC00.SCR";
 
-	_txtInExit->setColor(Palette::blockOffset(0));
+		color = Palette::blockOffset(0)+1;
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		background = "TAC00.SCR";
+
+		_window->setHighContrast(true);
+		color = Palette::blockOffset(0);
+		_txtInExit->setHighContrast(true);
+		_txtOutsideExit->setHighContrast(true);
+		_txtAbort->setHighContrast(true);
+		_btnOk->setHighContrast(true);
+		_btnCancel->setHighContrast(true);
+	}
+
+	// Set up objects
+	_window->setColor(color);
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
+
+	_txtInExit->setColor(color);
 	_txtInExit->setBig();
-	_txtInExit->setHighContrast(true);
 	_txtInExit->setText(tr("STR_n_UNITS_IN_EXIT_AREA", _inExitArea));
 
-	_txtOutsideExit->setColor(Palette::blockOffset(0));
+	_txtOutsideExit->setColor(color);
 	_txtOutsideExit->setBig();
-	_txtOutsideExit->setHighContrast(true);
 	_txtOutsideExit->setText(tr("STR_n_UNITS_OUTSIDE_EXIT_AREA", _outExitArea));
 	if (_battleGame->getMissionType() == "STR_BASE_DEFENSE")
 	{
 		_txtInExit->setVisible(false);
 		_txtOutsideExit->setVisible(false);
 	}
-	_txtAbort->setColor(Palette::blockOffset(0));
+	_txtAbort->setColor(color);
 	_txtAbort->setBig();
 	_txtAbort->setAlign(ALIGN_CENTER);
-	_txtAbort->setHighContrast(true);
 	_txtAbort->setText(_game->getLanguage()->getString("STR_ABORT_MISSION_QUESTION"));
 
-	_btnOk->setColor(Palette::blockOffset(0));
+	_btnOk->setColor(color);
 	_btnOk->setText(_game->getLanguage()->getString("STR_OK"));
-	_btnOk->setHighContrast(true);
 	_btnOk->onMouseClick((ActionHandler)&AbortMissionState::btnOkClick);
 	_btnOk->onKeyboardPress((ActionHandler)&AbortMissionState::btnOkClick, (SDLKey)Options::getInt("keyOk"));
 
-	_btnCancel->setColor(Palette::blockOffset(0));
+	_btnCancel->setColor(color);
 	_btnCancel->setText(_game->getLanguage()->getString("STR_CANCEL_UC"));
-	_btnCancel->setHighContrast(true);
 	_btnCancel->onMouseClick((ActionHandler)&AbortMissionState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&AbortMissionState::btnCancelClick, (SDLKey)Options::getInt("keyCancel"));
 

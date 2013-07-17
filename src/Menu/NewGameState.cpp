@@ -39,6 +39,9 @@ namespace OpenXcom
  */
 NewGameState::NewGameState(Game *game) : State(game)
 {
+	std::string background;
+	Uint8 colors[2];
+
 	// Create objects
 	_window = new Window(this, 192, 180, 64, 10, POPUP_VERTICAL);
 	_btnBeginner = new TextButton(160, 18, 80, 42);
@@ -60,36 +63,50 @@ NewGameState::NewGameState(Game *game) : State(game)
 
 	centerAllSurfaces();
 
-	// Set up objects
-	_window->setColor(Palette::blockOffset(8)+5);
-	_window->setBackground(_game->getResourcePack()->getSurface("BACK01.SCR"));
+	if (Options::getString("GUIstyle") == "xcom2")
+	{
+		// Basic properties for display in TFTD style
+		colors[0] = colors[1] = Palette::blockOffset(0)+1;
+		background = "TFTD_BACK01.SCR";
+	}
+	else
+	{
+		// Basic properties for display in UFO style
+		colors[0] = Palette::blockOffset(8)+5;
+		colors[1] = Palette::blockOffset(8)+10;
+		background = "BACK01.SCR";
+	}
 
-	_btnBeginner->setColor(Palette::blockOffset(8)+5);
+	// Set up objects
+	_window->setColor(colors[0]);
+	_window->setBackground(_game->getResourcePack()->getSurface(background));
+
+	_btnBeginner->setColor(colors[0]);
 	_btnBeginner->setText(_game->getLanguage()->getString("STR_1_BEGINNER"));
 	_btnBeginner->onMouseClick((ActionHandler)&NewGameState::btnBeginnerClick);
 
-	_btnExperienced->setColor(Palette::blockOffset(8)+5);
+	_btnExperienced->setColor(colors[0]);
 	_btnExperienced->setText(_game->getLanguage()->getString("STR_2_EXPERIENCED"));
 	_btnExperienced->onMouseClick((ActionHandler)&NewGameState::btnExperiencedClick);
 
-	_btnVeteran->setColor(Palette::blockOffset(8)+5);
+	_btnVeteran->setColor(colors[0]);
 	_btnVeteran->setText(_game->getLanguage()->getString("STR_3_VETERAN"));
 	_btnVeteran->onMouseClick((ActionHandler)&NewGameState::btnVeteranClick);
 
-	_btnGenius->setColor(Palette::blockOffset(8)+5);
+	_btnGenius->setColor(colors[0]);
 	_btnGenius->setText(_game->getLanguage()->getString("STR_4_GENIUS"));
 	_btnGenius->onMouseClick((ActionHandler)&NewGameState::btnGeniusClick);
 
-	_btnSuperhuman->setColor(Palette::blockOffset(8)+5);
+	_btnSuperhuman->setColor(colors[0]);
 	_btnSuperhuman->setText(_game->getLanguage()->getString("STR_5_SUPERHUMAN"));
 	_btnSuperhuman->onMouseClick((ActionHandler)&NewGameState::btnSuperhumanClick);
 
-	_btnCancel->setColor(Palette::blockOffset(8)+5);
+	_btnCancel->setColor(colors[0]);
 	_btnCancel->setText(_game->getLanguage()->getString("STR_CANCEL_UC"));
 	_btnCancel->onMouseClick((ActionHandler)&NewGameState::btnCancelClick);
 	_btnCancel->onKeyboardPress((ActionHandler)&NewGameState::btnCancelClick, (SDLKey)Options::getInt("keyCancel"));
 
-	_txtTitle->setColor(Palette::blockOffset(8)+10);
+	_txtTitle->setColor(colors[1]);
 	_txtTitle->setAlign(ALIGN_CENTER);
 	_txtTitle->setSmall();
 	_txtTitle->setText(_game->getLanguage()->getString("STR_SELECT_DIFFICULTY_LEVEL"));

@@ -21,6 +21,7 @@
 #include "Map.h"
 #include "Camera.h"
 #include "../Engine/Action.h"
+#include "../Engine/Palette.h"
 #include "../Interface/Cursor.h"
 #include "../Savegame/SavedBattleGame.h"
 #include "../Engine/Game.h"
@@ -47,9 +48,13 @@ const int MAX_FRAME = 2;
  * @param camera The Battlescape camera.
  * @param battleGame Pointer to the SavedBattleGame
 */
-MiniMapView::MiniMapView(int w, int h, int x, int y, Game * game, Camera * camera, SavedBattleGame * battleGame) : InteractiveSurface(w, h, x, y), _game(game), _camera(camera), _battleGame(battleGame), _frame(0), isMouseScrolling(false), isMouseScrolled(false)
+MiniMapView::MiniMapView(int w, int h, int x, int y, int bpp, Game * game, Camera * camera, SavedBattleGame * battleGame, SDL_Color *palette) : InteractiveSurface(w, h, x, y, bpp), _game(game), _camera(camera), _battleGame(battleGame), _frame(0), _palette(palette), isMouseScrolling(false), isMouseScrolled(false)
 {
-	_set = _game->getResourcePack()->getSurfaceSet("SCANG.DAT");
+	if (_game->getResourcePack()->getPalette("PALETTES.DAT_4") != 0)
+		_set["SCANG.DAT"] = _game->getResourcePack()->getSurfaceSet("SCANG.DAT");
+	if (_game->getResourcePack()->getPalette("TFTD_PALETTES.DAT_3") != 0)
+		_set["TFTD_SCANG.DAT"] = _game->getResourcePack()->getSurfaceSet("TFTD_SCANG.DAT");
+	_palette = palette;
 }
 
 /**
@@ -61,7 +66,7 @@ void MiniMapView::draw()
 	int _startY = _camera->getCenterPosition().y - ((getHeight() / CELL_HEIGHT) / 2);
 
 	InteractiveSurface::draw();
-	if(!_set)
+	if(!(_set["SCANG.DAT"] && _set["TFTD_SCANG.DAT"]))
 	{
 		return;
 	}
@@ -70,14 +75,13 @@ void MiniMapView::draw()
 	current.w = getWidth ();
 	current.h = getHeight ();
 	drawRect(&current, 0);
-	this->lock();
 	for (int lvl = 0; lvl <= _camera->getCenterPosition().z; lvl++)
 	{
 		int py = _startY;
-		for (int y = Surface::getY(); y < getHeight () + Surface::getY(); y += CELL_HEIGHT)
+		for (int y = 0; y < getHeight (); y += CELL_HEIGHT)
 		{
 			int px = _startX;
-			for (int x = Surface::getX(); x < getWidth () + Surface::getX(); x += CELL_WIDTH)
+			for (int x = 1; x < getWidth () + 1; x += CELL_WIDTH)
 			{
 				MapData * data = 0;
 				Tile * t = 0;
@@ -100,11 +104,14 @@ void MiniMapView::draw()
 					Surface * s = 0;
 					if(data && data->getMiniMapIndex())
 					{
-						s = _set->getFrame (data->getMiniMapIndex()+35);
+						s = _set[data->getTerrorPrefix() + "SCANG.DAT"]->getFrame (data->getMiniMapIndex()+35);
 					}
 					if(s)
 					{
-						s->blitNShade(this, x, y, tileShade);
+						Surface *temp = new Surface(*s);
+						s->blitNShade(temp, 0, 0, tileShade);
+						temp->blitBattlescapeElement(this, x, y);
+						delete temp;
 					}
 				}
 				// alive units
@@ -115,15 +122,21 @@ void MiniMapView::draw()
 					frame += (t->getPosition().y - t->getUnit()->getPosition().y) * size;
 					frame += t->getPosition().x - t->getUnit()->getPosition().x;
 					frame += _frame * size * size;
-					Surface * s = _set->getFrame(frame);
-					s->blitNShade(this, x, y, 0);
+					Surface * s = _set["SCANG.DAT"]->getFrame(frame);
+					Surface *temp = new Surface(*s);
+					s->blitNShade(temp, 0, 0, 0);
+					temp->blitBattlescapeElement(this, x, y);
+					delete temp;
 				}
 				// perhaps (at least one) item on this tile?
 				if (t->isDiscovered(2) && !t->getInventory()->empty())
 				{
 					int frame = 9 + _frame;
-					Surface * s = _set->getFrame(frame);
-					s->blitNShade(this, x, y, 0);
+					Surface * s = _set["SCANG.DAT"]->getFrame(frame);
+					Surface *temp = new Surface(*s);
+					s->blitNShade(temp, 0, 0, 0);
+					temp->blitBattlescapeElement(this, x, y);
+					delete temp;
 				}
 
 				px++;
@@ -131,7 +144,6 @@ void MiniMapView::draw()
 			py++;
 		}
 	}
-	this->unlock();
 	int centerX = getWidth() / 2;
 	int centerY = getHeight() / 2;
 	Uint8 color = 1 + _frame * 3;
@@ -139,16 +151,16 @@ void MiniMapView::draw()
 	int yOffset = CELL_HEIGHT / 2;
 	drawLine(centerX - CELL_WIDTH, centerY - CELL_HEIGHT,
 		 centerX - xOffset, centerY - yOffset,
-		 color); // top left
+		 Palette::getRGBA(_palette, color)); // top left
 	drawLine(centerX + xOffset, centerY - yOffset,
 		 centerX + CELL_WIDTH, centerY - CELL_HEIGHT,
-		 color); // top right
+		 Palette::getRGBA(_palette, color)); // top right
 	drawLine(centerX - CELL_WIDTH, centerY + CELL_HEIGHT,
 		 centerX - xOffset, centerY + yOffset,
-		 color); // bottom left
+		 Palette::getRGBA(_palette, color)); // bottom left
 	drawLine(centerX + CELL_WIDTH, centerY + CELL_HEIGHT,
 		 centerX + xOffset, centerY + yOffset,
-		 color); //bottom right
+		 Palette::getRGBA(_palette, color)); //bottom right
 }
 
 /**

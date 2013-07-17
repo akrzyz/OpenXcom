@@ -38,7 +38,7 @@ private:
 	BattleUnit *_unit;
 	BattleItem *_itemA, *_itemB;
 	SurfaceSet *_unitSurface, *_itemSurfaceA, *_itemSurfaceB;
-	int _part, _animationFrame;
+	int _part, _animationFrame, _depth;
 	void drawRoutine0();
 	void drawRoutine1();
 	void drawRoutine2();
@@ -50,12 +50,14 @@ private:
 	void drawRoutine8();
 	void drawRoutine9();
 	void drawRoutine10();
+	void drawRoutine11();
+	void drawRoutine12();
 	int _drawingRoutine;
 	/// sort two handed sprites out.
 	void sortRifles();
 public:
 	/// Creates a new UnitSprite at the specified position and size.
-	UnitSprite(int width, int height, int x, int y, int bpp);
+	UnitSprite(int width, int height, int x, int y, int depth);
 	/// Cleans up the UnitSprite.
 	~UnitSprite();
 	/// Sets surfacesets for rendering.

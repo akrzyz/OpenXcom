@@ -40,7 +40,8 @@ class MiniMapView : public InteractiveSurface
 	Camera * _camera;
 	SavedBattleGame * _battleGame;
 	int _frame;
-	SurfaceSet * _set;
+	std::map<std::string, SurfaceSet*> _set;
+	SDL_Color *_palette;
 	// these two are required for right-button scrolling on the minimap
 	bool isMouseScrolling;
 	bool isMouseScrolled;
@@ -60,7 +61,7 @@ class MiniMapView : public InteractiveSurface
 	void mouseIn(Action *action, State *state);
 public:
 	/// Create the MiniMapView
-	MiniMapView(int w, int h, int x, int y, Game * game, Camera * camera, SavedBattleGame * battleGame);
+	MiniMapView(int w, int h, int x, int y, int bpp, Game * game, Camera * camera, SavedBattleGame * battleGame, SDL_Color *palette);
 	/// Draw the minimap
 	void draw();
 	/// Change the displayed minimap level

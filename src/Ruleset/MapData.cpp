@@ -25,9 +25,10 @@ namespace OpenXcom
 *  Creates a new Map Data Object.
 * @param dataset The dataset this object belongs to.
 */
-MapData::MapData(MapDataSet *dataset) : _dataset(dataset)
+MapData::MapData(MapDataSet *dataset, const std::string &game) : _dataset(dataset), _terrorPrefix("")
 {
-
+	if (game == "xcom2")
+		_terrorPrefix = "TFTD_";
 }
 
 /**
@@ -504,4 +505,14 @@ void MapData::setTUSlide(const int TUSlide)
 {
 	_TUSlide = TUSlide;
 }
+
+/**
+ * Returns prefix used by TFTD items. UFO:EU items have empty prefix.
+ * @return terror prefix.
+ */
+std::string MapData::getTerrorPrefix() const
+{
+	return _terrorPrefix;
+}
+
 }
