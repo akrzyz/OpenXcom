@@ -240,7 +240,7 @@ void Map::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 void Map::drawTerrain()
 {
 	int frameNumber = 0;
-	Surface *tmpSurface, *shadeSurface = 0;
+	Surface *tmpSurface;
 	Tile *tile;
 	int beginX = 0, endX = _save->getMapSizeX() - 1;
 	int beginY = 0, endY = _save->getMapSizeY() - 1;
@@ -396,11 +396,7 @@ void Map::drawTerrain()
 					tmpSurface = tile->getSprite(MapData::O_FLOOR);
 					if (tmpSurface)
 					{
-						if (shadeSurface != 0)
-							delete shadeSurface;
-						shadeSurface = new Surface(*tmpSurface);
-						tmpSurface->blitNShade(shadeSurface, 0, 0, tileShade, false);
-						shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_FLOOR)->getYOffset()); 
+						tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_FLOOR)->getYOffset(), tileShade, false);
 					}
 					unit = tile->getUnit();
 
@@ -423,21 +419,13 @@ void Map::drawTerrain()
 									frameNumber = 6; // red static crosshairs
 							}
 							tmpSurface = _res->getSurfaceSet("CURSOR.PCK")->getFrame(frameNumber);
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
-							tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y);
+							tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y, 0);
 						}
 						else if (_camera->getViewLevel() > itZ)
 						{
 							frameNumber = 2; // blue box
 							tmpSurface = _res->getSurfaceSet("CURSOR.PCK")->getFrame(frameNumber);
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
-							tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y);
+							tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y, 0);
 						}
 					}
 
@@ -448,24 +436,17 @@ void Map::drawTerrain()
 						tmpSurface = tile->getSprite(MapData::O_WESTWALL);
 						if (tmpSurface)
 						{
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
 							if ((tile->getMapData(MapData::O_WESTWALL)->isDoor() || tile->getMapData(MapData::O_WESTWALL)->isUFODoor())
 								 && tile->isDiscovered(0))
 								wallShade = tile->getShade();
 							else
 								wallShade = tileShade;
-							tmpSurface->blitNShade(shadeSurface, 0, 0, wallShade, false);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_WESTWALL)->getYOffset());
+							tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_WESTWALL)->getYOffset(), wallShade, false);
 						}
 						// Draw north wall
 						tmpSurface = tile->getSprite(MapData::O_NORTHWALL);
 						if (tmpSurface)
 						{
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
 							if ((tile->getMapData(MapData::O_NORTHWALL)->isDoor() || tile->getMapData(MapData::O_NORTHWALL)->isUFODoor())
 								 && tile->isDiscovered(1))
 								wallShade = tile->getShade();
@@ -473,13 +454,11 @@ void Map::drawTerrain()
 								wallShade = tileShade;
 							if (tile->getMapData(MapData::O_WESTWALL))
 							{
-								tmpSurface->blitNShade(shadeSurface, 0, 0, wallShade, true);
-								shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_NORTHWALL)->getYOffset());
+								tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_NORTHWALL)->getYOffset(), wallShade, true);
 							}
 							else
 							{
-								tmpSurface->blitNShade(shadeSurface, 0, 0, wallShade, false);
-								shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_NORTHWALL)->getYOffset());
+								tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_NORTHWALL)->getYOffset(), wallShade, false);
 							}
 						}
 						// Draw object
@@ -488,11 +467,7 @@ void Map::drawTerrain()
 							tmpSurface = tile->getSprite(MapData::O_OBJECT);
 							if (tmpSurface)
 							{
-								if (shadeSurface != 0)
-									delete shadeSurface;
-								shadeSurface = new Surface(*tmpSurface);
-								tmpSurface->blitNShade(shadeSurface, 0, 0, tileShade, false);
-								shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_OBJECT)->getYOffset());
+								tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_OBJECT)->getYOffset(), tileShade, false);
 							}
 						}
 						// draw an item on top of the floor (if any)
@@ -500,11 +475,7 @@ void Map::drawTerrain()
 						if (sprite != 0)
 						{
 							tmpSurface = _res->getSurfaceSet(sprite->getRules()->getTerrorPrefix() + "FLOOROB.PCK")->getFrame(sprite->getRules()->getFloorSprite());
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
-							tmpSurface->blitNShade(shadeSurface, 0, 0, tileShade, false);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y + tile->getTerrainLevel());
+							tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y + tile->getTerrainLevel(), tileShade, false);
 						}
 						
 					}
@@ -516,9 +487,6 @@ void Map::drawTerrain()
 						if (_projectile->getItem())
 						{
 							tmpSurface = _projectile->getSprite();
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
 
 							Position voxelPos = _projectile->getPosition();
 							// draw shadow on the floor
@@ -531,8 +499,7 @@ void Map::drawTerrain()
 								_save->getTileEngine()->isVoxelVisible(voxelPos))
 							{
 								_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
-								tmpSurface->blitNShade(shadeSurface, 0, 0, 16);
-								shadeSurface->blitBattlescapeElement(this, bulletPositionScreen.x - 16, bulletPositionScreen.y - 26);
+								tmpSurface->blitNShade(this, bulletPositionScreen.x - 16, bulletPositionScreen.y - 26, 16);
 							}
 
 							voxelPos = _projectile->getPosition();
@@ -545,22 +512,17 @@ void Map::drawTerrain()
 								_save->getTileEngine()->isVoxelVisible(voxelPos))
 							{
 								_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
-								tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-								shadeSurface->blitBattlescapeElement(this, bulletPositionScreen.x - 16, bulletPositionScreen.y - 26);
+								tmpSurface->blitNShade(this, bulletPositionScreen.x - 16, bulletPositionScreen.y - 26, 0);
 							}
 
 						}
 						else
 						{
 							std::string palette;
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(3, 3);
 							if (_projectile->getShootingItem()->getRules()->getTerrorPrefix() == "")
 								palette = "PALETTES.DAT_4";
 							else
 								palette = _terrorPalette;
-							shadeSurface->setPalette(_res->getPalette(palette)->getColors());
 							// draw bullet on the correct tile
 							if (itX >= bulletLowX && itX <= bulletHighX && itY >= bulletLowY && itY <= bulletHighY)
 							{
@@ -569,8 +531,8 @@ void Map::drawTerrain()
 									tmpSurface = _res->getSurfaceSet(_projectile->getShootingItem()->getRules()->getTerrorPrefix() + "Projectiles")->getFrame(_projectile->getParticle(i));
 									if (tmpSurface)
 									{
-										shadeSurface->clear();
-										shadeSurface->copy(tmpSurface);
+										//HACK ugly hack to set correct palette
+										tmpSurface->setPalette(_res->getPalette(palette)->getColors());
 										Position voxelPos = _projectile->getPosition(1-i);
 										// draw shadow on the floor
 										voxelPos.z = _save->getTileEngine()->castedShade(voxelPos);
@@ -582,8 +544,7 @@ void Map::drawTerrain()
 											_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
 											bulletPositionScreen.x -= tmpSurface->getWidth() / 2;
 											bulletPositionScreen.y -= tmpSurface->getHeight() / 2;
-											tmpSurface->blitNShade(shadeSurface, 0, 0, 16);
-											shadeSurface->blitBattlescapeElement(this, bulletPositionScreen.x, bulletPositionScreen.y);
+											tmpSurface->blitNShade(this, bulletPositionScreen.x, bulletPositionScreen.y, 16);
 										}
 										
 										// draw bullet itself
@@ -596,8 +557,7 @@ void Map::drawTerrain()
 											_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
 											bulletPositionScreen.x -= tmpSurface->getWidth() / 2;
 											bulletPositionScreen.y -= tmpSurface->getHeight() / 2;
-											tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-											shadeSurface->blitBattlescapeElement(this, bulletPositionScreen.x, bulletPositionScreen.y);
+											tmpSurface->blitNShade(this, bulletPositionScreen.x, bulletPositionScreen.y, 0);
 										}
 									}
 								}
@@ -615,19 +575,14 @@ void Map::drawTerrain()
 						tmpSurface = unit->getCache(&invalid, part);
 						if (tmpSurface)
 						{
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
 							Position offset;
 							calculateWalkingOffset(unit, &offset);
-							tmpSurface->blitNShade(shadeSurface, 0, 0, tileShade);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x + offset.x, screenPosition.y + offset.y);
+							tmpSurface->blitNShade(this, screenPosition.x + offset.x, screenPosition.y + offset.y, tileShade);
 							if (unit->getFire() > 0)
 							{
 								frameNumber = 4 + (_animFrame / 2);
 								tmpSurface = _res->getSurfaceSet("SMOKE.PCK")->getFrame(frameNumber);
-								tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-								shadeSurface->blitBattlescapeElement(this, screenPosition.x + offset.x, screenPosition.y + offset.y);
+								tmpSurface->blitNShade(this, screenPosition.x + offset.x, screenPosition.y + offset.y, 0);
 							}
 						}
 					}
@@ -646,14 +601,10 @@ void Map::drawTerrain()
 							tmpSurface = tunit->getCache(&invalid, part);
 							if (tmpSurface)
 							{
-								if (shadeSurface != 0)
-									delete shadeSurface;
-								shadeSurface = new Surface(*tmpSurface);
 								Position offset;
 								calculateWalkingOffset(tunit, &offset);
 								offset.y += 24;
-								tmpSurface->blitNShade(shadeSurface, 0, 0, ttile->getShade());
-								shadeSurface->blitBattlescapeElement(this, screenPosition.x + offset.x, screenPosition.y + offset.y);
+								tmpSurface->blitNShade(this, screenPosition.x + offset.x, screenPosition.y + offset.y, ttile->getShade());
 								if (tunit->getArmor()->getSize() > 1)
 								{
 									offset.y += 4;
@@ -662,8 +613,7 @@ void Map::drawTerrain()
 								{
 									frameNumber = 4 + (_animFrame / 2);
 									tmpSurface = _res->getSurfaceSet("SMOKE.PCK")->getFrame(frameNumber);
-									tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-									shadeSurface->blitBattlescapeElement(this, screenPosition.x + offset.x, screenPosition.y + offset.y);
+									tmpSurface->blitNShade(this, screenPosition.x + offset.x, screenPosition.y + offset.y, 0);
 								}
 							}
 						}
@@ -688,11 +638,7 @@ void Map::drawTerrain()
 							frameNumber += (_animFrame / 2) + tile->getAnimationOffset();
 						}
 						tmpSurface = _res->getSurfaceSet("SMOKE.PCK")->getFrame(frameNumber);
-						if (shadeSurface != 0)
-							delete shadeSurface;
-						shadeSurface = new Surface(*tmpSurface);
-						tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-						shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y);
+						tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y, 0);
 					}
 
 					if (!tile->isVoid())
@@ -703,11 +649,7 @@ void Map::drawTerrain()
 							tmpSurface = tile->getSprite(MapData::O_OBJECT);
 							if (tmpSurface)
 							{
-								if (shadeSurface != 0)
-									delete shadeSurface;
-								shadeSurface = new Surface(*tmpSurface);
-								tmpSurface->blitNShade(shadeSurface, 0, 0, tileShade, false);
-								shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_OBJECT)->getYOffset());
+								tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y - tile->getMapData(MapData::O_OBJECT)->getYOffset(), tileShade, false);
 							}
 						}
 					}
@@ -719,21 +661,13 @@ void Map::drawTerrain()
 							tmpSurface = _res->getSurfaceSet("Pathfinding")->getFrame(22);
 							if (tmpSurface)
 							{
-								if (shadeSurface != 0)
-									delete shadeSurface;
-								shadeSurface = new Surface(*tmpSurface);
-								tmpSurface->blitNShade(shadeSurface, 0, 0, 0, false, tile->getMarkerColor());
-								shadeSurface->blitBattlescapeElement(this, screenPosition.x - 16, screenPosition.y - 20);
+								tmpSurface->blitNShade(this, screenPosition.x - 16, screenPosition.y - 20, 0, false, tile->getMarkerColor());
 							}
 						}
 						tmpSurface = _res->getSurfaceSet("Pathfinding")->getFrame(tile->getPreview());
 						if (tmpSurface)
 						{
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
-							tmpSurface->blitNShade(shadeSurface, 0, 0, 0, false, tileColor);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x - 16, screenPosition.y - (20 - tile->getTerrainLevel()));
+							tmpSurface->blitNShade(this, screenPosition.x - 16, screenPosition.y - (20 - tile->getTerrainLevel()), 0, false, tileColor);
 						}
 					}
 					// Draw cursor front
@@ -755,31 +689,19 @@ void Map::drawTerrain()
 									frameNumber = 6; // red static crosshairs
 							}
 							tmpSurface = _res->getSurfaceSet("CURSOR.PCK")->getFrame(frameNumber);
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
-							tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y);
+							tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y, 0);
 						}
 						else if (_camera->getViewLevel() > itZ)
 						{
 							frameNumber = 5; // blue box
 							tmpSurface = _res->getSurfaceSet("CURSOR.PCK")->getFrame(frameNumber);
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
-							tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y);
+							tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y, 0);
 						}
 						if (_cursorType > 2 && _camera->getViewLevel() == itZ)
 						{
 							int frame[6] = {0, 0, 0, 11, 13, 15};
 							tmpSurface = _res->getSurfaceSet("CURSOR.PCK")->getFrame(frame[_cursorType] + (_animFrame / 4));
-							if (shadeSurface != 0)
-								delete shadeSurface;
-							shadeSurface = new Surface(*tmpSurface);
-							tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y);
+							tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y, 0);
 						}
 					}
 
@@ -795,16 +717,11 @@ void Map::drawTerrain()
 							if (waypXOff == 2 && waypYOff == 2)
 							{
 								tmpSurface = _res->getSurfaceSet("CURSOR.PCK")->getFrame(7);
-								if (shadeSurface != 0)
-									delete shadeSurface;
-								shadeSurface = new Surface(*tmpSurface);
-								tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-								shadeSurface->blitBattlescapeElement(this, screenPosition.x, screenPosition.y);
+								tmpSurface->blitNShade(this, screenPosition.x, screenPosition.y, 0);
 							}
 							_numWaypid->setValue(waypid);
 							_numWaypid->draw();
-							_numWaypid->blitNShade(shadeSurface, 0, 0, 0);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x + waypXOff, screenPosition.y + waypYOff);
+							_numWaypid->blitNShade(this, screenPosition.x + waypXOff, screenPosition.y + waypYOff, 0);
 							waypXOff += waypid > 9 ? 8 : 6;
 							if (waypXOff >= 26)
 							{
@@ -846,22 +763,14 @@ void Map::drawTerrain()
 								tmpSurface = _res->getSurfaceSet("Pathfinding")->getFrame(23);
 								if (tmpSurface)
 								{
-									if (shadeSurface != 0)
-										delete shadeSurface;
-									shadeSurface = new Surface(*tmpSurface);
-									tmpSurface->blitNShade(shadeSurface, 0, 0, 0, false, tile->getMarkerColor());
-									shadeSurface->blitBattlescapeElement(this, screenPosition.x - 16, screenPosition.y - 20);
+									tmpSurface->blitNShade(this, screenPosition.x - 16, screenPosition.y - 20, 0, false, tile->getMarkerColor());
 								}
 							}
 							int overlay = tile->getPreview() + 11;
 							tmpSurface = _res->getSurfaceSet("Pathfinding")->getFrame(overlay);
 							if (tmpSurface)
 							{
-								if (shadeSurface != 0)
-									delete shadeSurface;
-								shadeSurface = new Surface(*tmpSurface);
-								tmpSurface->blitNShade(shadeSurface, 0, 0, 0, false, tile->getMarkerColor());
-								shadeSurface->blitBattlescapeElement(this, screenPosition.x - 16, screenPosition.y - adjustment);
+								tmpSurface->blitNShade(this, screenPosition.x - 16, screenPosition.y - adjustment, 0, false, tile->getMarkerColor());
 							}
 						}
 						
@@ -872,8 +781,7 @@ void Map::drawTerrain()
 							_numWaypid->setValue(tuMarker);
 							_numWaypid->draw();
 							int off = tile->getTUMarker() > 9 ? 4 : 2;
-							_numWaypid->blitNShade(shadeSurface, 0, 0, 0);
-							shadeSurface->blitBattlescapeElement(this, screenPosition.x + 16 - off, screenPosition.y + (50-adjustment));
+							_numWaypid->blitNShade(this, screenPosition.x + 16 - off, screenPosition.y + (50-adjustment), 0);
 						}
 					}
 				}
@@ -892,11 +800,7 @@ void Map::drawTerrain()
 			offset.y += 4;
 		}
 
-		if (shadeSurface != 0)
-			delete shadeSurface;
-		shadeSurface = new Surface(*_arrow);
-		_arrow->blitNShade(shadeSurface, 0, 0, 0);
-		shadeSurface->blitBattlescapeElement(this, screenPosition.x + offset.x + (_spriteWidth / 2) - (_arrow->getWidth() / 2), screenPosition.y + offset.y - _arrow->getHeight() + _animFrame);
+		_arrow->blitNShade(this, screenPosition.x + offset.x + (_spriteWidth / 2) - (_arrow->getWidth() / 2), screenPosition.y + offset.y - _arrow->getHeight() + _animFrame, 0);
 	}
 	delete _numWaypid;
 
@@ -910,33 +814,21 @@ void Map::drawTerrain()
 				Position voxelPos = (*i)->getPosition();
 				_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
 				tmpSurface = _res->getSurfaceSet((*i)->getTerrorPrefix() + "X1.PCK")->getFrame((*i)->getCurrentFrame());
-				if (shadeSurface != 0)
-					delete shadeSurface;
-				shadeSurface = new Surface(*tmpSurface);
-				tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-				shadeSurface->blitBattlescapeElement(this, bulletPositionScreen.x - 64, bulletPositionScreen.y - 64);
+				tmpSurface->blitNShade(this, bulletPositionScreen.x - 64, bulletPositionScreen.y - 64, 0);
 			}
 			else if ((*i)->isHit())
 			{
 				Position voxelPos = (*i)->getPosition();
 				_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
 				tmpSurface = _res->getSurfaceSet((*i)->getTerrorPrefix() + "HIT.PCK")->getFrame((*i)->getCurrentFrame());
-				if (shadeSurface != 0)
-					delete shadeSurface;
-				shadeSurface = new Surface(*tmpSurface);
-				tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-				shadeSurface->blitBattlescapeElement(this, bulletPositionScreen.x - 15, bulletPositionScreen.y - 15);
+				tmpSurface->blitNShade(this, bulletPositionScreen.x - 15, bulletPositionScreen.y - 15, 0);
 			}
 			else
 			{
 				Position voxelPos = (*i)->getPosition();
 				_camera->convertVoxelToScreen(voxelPos, &bulletPositionScreen);
 				tmpSurface = _res->getSurfaceSet((*i)->getTerrorPrefix() + "SMOKE.PCK")->getFrame((*i)->getCurrentFrame());
-				if (shadeSurface != 0)
-					delete shadeSurface;
-				shadeSurface = new Surface(*tmpSurface);
-				tmpSurface->blitNShade(shadeSurface, 0, 0, 0);
-				shadeSurface->blitBattlescapeElement(this, bulletPositionScreen.x - 15, bulletPositionScreen.y - 15);
+				tmpSurface->blitNShade(this, bulletPositionScreen.x - 15, bulletPositionScreen.y - 15, 0);
 			}
 		}
 	}
