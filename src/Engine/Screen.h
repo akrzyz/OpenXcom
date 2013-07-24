@@ -29,6 +29,14 @@ namespace OpenXcom
 class Surface;
 class Action;
 
+struct BGR_Color
+{
+	Uint8 b;
+	Uint8 g;
+	Uint8 r;
+	Uint8 unused;
+};
+
 /**
  * A display screen, handles rendering onto the game window.
  * In SDL a Screen is treated like a Surface, so this is just

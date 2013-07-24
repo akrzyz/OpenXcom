@@ -610,12 +610,201 @@ void Zoom::flipWithZoom(SDL_Surface *src, SDL_Surface *dst, OpenGL *glOut)
 
 		glOut->refresh(glOut->linear, glOut->iwidth, glOut->iheight, dst->w, dst->h);
 		SDL_GL_SwapBuffers();
-	} else
+	}
+	else
 	{
 		_zoomSurfaceY(src, dst, 0, 0);
 	}
 }
 
+namespace
+{
+/**
+ * Helper class used for coping diffrent pixel representation
+ */
+template<typename Pixel_Src, typename Pixel_Dst>
+struct CopyPixel
+{
+	static inline void func(Pixel_Src* sx, Pixel_Dst* dx)
+	{
+		//fix colors if Pixel_Src != Pixel_Dst
+		dx->r = sx->r;
+		dx->g = sx->g;
+		dx->b = sx->b;
+	}
+};
+
+/**
+ * Helper class used for coping same type pixel
+ */
+template<typename Pixel>
+struct CopyPixel<Pixel, Pixel>
+{
+	static inline void func(Pixel* sx, Pixel* dx)
+	{
+		memcpy(dx, sx, 1*sizeof(Pixel));
+	}
+};
+
+template<typename Pixel_Dst, Uint32 Zoom>
+struct CopyRow
+{
+	static const Uint32 off = (1<<(Zoom-1));
+	static inline void func(Pixel_Dst* dx)
+	{
+		CopyRow<Pixel_Dst, Zoom - 1>::func(dx);
+		memcpy(dx + off, dx, off*sizeof(Pixel_Dst));
+	}
+};
+
+template<typename Pixel_Dst>
+struct CopyRow<Pixel_Dst, 0>
+{
+	static inline void func(Pixel_Dst* dx)
+	{
+	}
+};
+
+template<typename Pixel_Dst, Uint32 Zoom, Uint32 Rest>
+struct CopyRowRest
+{
+	static const Uint32 off = 1<<Zoom;
+	static inline void func(Pixel_Dst* dx)
+	{
+		CopyRow<Pixel_Dst, Zoom>::func(dx);
+		memcpy(dx + off, dx, Rest*sizeof(Pixel_Dst));
+	}
+};
+
+template<typename Pixel_Src, typename Pixel_Dst, Uint32 Zoom, Uint32 Rest>
+struct LoopX
+{
+	static inline void func(Pixel_Src* sx, Pixel_Dst* dx, Uint32 length, Uint32* step)
+	{
+		//igonre last loop step because it could overflow
+		--length;
+		for (int x = 0; x < length; ++x, ++sx, ++step)
+		{
+			int xsize = *step;
+			CopyPixel<Pixel_Src, Pixel_Dst>::func(sx, dx);
+			CopyRowRest<Pixel_Dst, Zoom, Rest>::func(dx);
+			dx += xsize;
+		}
+		//last step. not effective but will not overflow
+		CopyPixel<Pixel_Src, Pixel_Dst>::func(sx, dx);
+		for (int x = *step - 1; x >= 0; --x)
+		{
+			memcpy(dx + x, dx, 1*sizeof(Pixel_Dst));
+		}
+		
+	}
+};
+
+}//namespace
+
+/**
+ * Simple resize 32bit surface.
+ * @param src The surface to zoom (input).
+ * @param dst The zoomed surface (output).
+ */
+template<typename Pixel_Src, typename Pixel_Dst>
+static void Zoom32Surf(SDL_Surface * src, SDL_Surface * dst)
+{
+	static std::vector<Uint32> sax, say;
+	
+	/*
+	* Allocate memory for row increments
+	*/
+	sax.resize(src->w + 1);
+	say.resize(src->h + 1);
+
+
+	/*
+	* Precalculate row increments
+	*/
+	const Uint32 scaleX = dst->w / src->w;
+	const Uint32 scaleXdiff = dst->w % src->w;
+	Uint32 scaleXrund = src->w / 2; //more equal spred of bigger pixels
+	Uint32 *csax = &sax.front();
+	for (int x = 0; x < src->w; ++x, ++csax)
+	{
+		if(scaleXrund >= src->w)
+		{
+			scaleXrund -= src->w;
+			*csax = scaleX + 1;
+		}
+		else
+		{
+			*csax = scaleX;
+		}
+		scaleXrund += scaleXdiff;
+	}
+	const Uint32 scaleY = dst->h / src->h;
+	const Uint32 scaleYdiff = dst->h % src->h;
+	Uint32 scaleYrund = src->h / 2;
+	Uint32 *csay = &say.front();
+	for (int y = 0; y < src->h; ++y, ++csay)
+	{
+		if(scaleYrund >= src->h)
+		{
+			scaleYrund -= src->h;
+			*csay = scaleY + 1;
+		}
+		else
+		{
+			*csay = scaleY;
+		}
+		scaleYrund += scaleYdiff;
+	}
+	
+	Pixel_Src *sx, *sy;
+	Pixel_Dst *dx, *dy;
+	const int dpitch = dst->pitch / dst->format->BytesPerPixel;
+	const int spitch = src->pitch / src->format->BytesPerPixel;
+	/*
+	* Pointer setup
+	*/
+	sx = sy = (Pixel_Src *) src->pixels;
+	dx = dy = (Pixel_Dst *) dst->pixels;
+	csay = &say.front();
+	/*
+	* Draw
+	*/
+	for (int y = 0; y < src->h; ++y, sy += spitch, ++csay)
+	{
+		int ysize = *csay;
+		csax = &sax.front();
+		sx = sy;
+		dx = dy;
+		switch(scaleY + (scaleYdiff > 0))
+		{
+			case 1: LoopX<Pixel_Src, Pixel_Dst, 1, 0>::func(sx, dx, src->w, csax); break;
+			
+			case 2: LoopX<Pixel_Src, Pixel_Dst, 1, 1>::func(sx, dx, src->w, csax); break;
+			case 3: LoopX<Pixel_Src, Pixel_Dst, 2, 0>::func(sx, dx, src->w, csax); break;
+			
+			case 4: LoopX<Pixel_Src, Pixel_Dst, 2, 1>::func(sx, dx, src->w, csax); break;
+			case 5: LoopX<Pixel_Src, Pixel_Dst, 2, 2>::func(sx, dx, src->w, csax); break;
+			case 6: LoopX<Pixel_Src, Pixel_Dst, 2, 3>::func(sx, dx, src->w, csax); break;
+			case 7: LoopX<Pixel_Src, Pixel_Dst, 2, 4>::func(sx, dx, src->w, csax); break;
+			
+			case 8: LoopX<Pixel_Src, Pixel_Dst, 3, 0>::func(sx, dx, src->w, csax); break;
+		}
+//		for (int x = 0; x < src->w; ++x, ++sx, ++csax)
+//		{
+//			int xsize = *csax;
+//			
+//			CopyPixel<Pixel_Src, Pixel_Dst>::func(sx, dx);
+//			memcpy(dx + 1, dx, 1*sizeof(Pixel_Dst));
+//			memcpy(dx + 2, dx, 2*sizeof(Pixel_Dst));
+//			dx += xsize;
+//		}
+		int loop = ysize;
+		while(loop--)
+			memcpy(dy + loop*dpitch, dy, dpitch*sizeof(Pixel_Dst));
+		dy += ysize*dpitch;
+	}
+}
 
 /**
  * Internal 8 bit Zoomer without smoothing.
@@ -639,7 +828,9 @@ int Zoom::_zoomSurfaceY(SDL_Surface * src, SDL_Surface * dst, int flipx, int fli
 	int csx, csy;
 	int dgap;
 	static bool proclaimed = false;
-
+	
+	Zoom32Surf<SDL_Color, BGR_Color>(src, dst);
+	return 0;
 	if (Options::getBool("useHQXFilter"))
 	{
 		static bool initDone = false;
@@ -796,7 +987,7 @@ int Zoom::_zoomSurfaceY(SDL_Surface * src, SDL_Surface * dst, int flipx, int fli
 			csy -= dst->h;
 			(*csay)++;
 		}
-		(*csay) *= src->pitch / dst->format->BytesPerPixel * (flipy ? -1 : 1);
+		(*csay) *= src->pitch / src->format->BytesPerPixel * (flipy ? -1 : 1);
 		csay++;
 	}
 	/*
