@@ -786,15 +786,29 @@ struct StandartShade
 	*/
 	static inline void func(Uint8& dest, const Uint8& src, const int& shade, const int&, const int&)
 	{
-		if(src)
-		{
-			const int newShade = (src&15) + shade;
-			if (newShade > 15)
-				// so dark it would flip over to another color - make it black instead
-				dest = 15;
-			else
-				dest = (src&(15<<4)) | newShade;
-		}
+//		if(src)
+//		{
+//			const int newShade = (src&15) + shade;
+//			if (newShade > 15)
+//				// so dark it would flip over to another color - make it black instead
+//				dest = 15;
+//			else
+//				dest = (src&(15<<4)) | newShade;
+//		}
+		unsigned fifteen = 15;
+		unsigned g = src > 0 ? -1 : 0;
+		unsigned hi = src & g;
+		unsigned low = hi & fifteen;
+		dest = dest & ~g;
+		low = low + shade;
+		low = low & g;
+		g = low > fifteen ? -1 : 0;
+		hi = hi & ~fifteen;
+		hi = hi | low;
+		hi = hi & ~g;
+		g = fifteen & g;
+		hi = hi | g;
+		dest = dest | hi;
 	}
 	
 };
