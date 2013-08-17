@@ -34,37 +34,38 @@ class ShaderMove : public helper::ShaderBase<Pixel>
 	
 public:
 	typedef helper::ShaderBase<Pixel> _base;
+	typedef helper::CorrectConst<Pixel> _corect_const;
 	friend class helper::controler<ShaderMove<Pixel> >;
 	
-	inline ShaderMove(Surface* s):
+	inline ShaderMove(typename _corect_const::surf* s) :
 		_base(s),
 		_move_x(s->getX()), _move_y(s->getY())
 	{
 		
 	}
 	
-	inline ShaderMove(Surface* s, int move_x, int move_y): 
+	inline ShaderMove(typename _corect_const::surf* s, int move_x, int move_y) :
 		_base(s),
 		_move_x(move_x), _move_y(move_y)
 	{
 		
 	}
 	
-	inline ShaderMove(const ShaderMove& f):
+	inline ShaderMove(const ShaderMove& f) :
 		_base(f),
 		_move_x(f._move_x), _move_y(f._move_y)
 	{
 		
 	}
 	
-	inline ShaderMove(std::vector<Pixel>& f, int max_x, int max_y): 
+	inline ShaderMove(typename _corect_const::vector& f, int max_x, int max_y) :
 		_base(f, max_x, max_y),
 		_move_x(), _move_y()
 	{
 		
 	}
 	
-	inline ShaderMove(std::vector<Pixel>& f, int max_x, int max_y, int move_x, int move_y): 
+	inline ShaderMove(typename _corect_const::vector& f, int max_x, int max_y, int move_x, int move_y) :
 		_base(f, max_x, max_y),
 		_move_x(move_x), _move_y(move_y)
 	{
@@ -101,7 +102,7 @@ struct controler<ShaderMove<Pixel> > : public controler_base<typename ShaderMove
 	
 	typedef controler_base<PixelPtr, PixelRef> base_type;
 		
-	controler(const ShaderMove<Pixel>& f) : base_type(f.ptr(), f.getDomain(), f.getImage(), std::make_pair(1, f.pitch()))
+	controler(const ShaderMove<Pixel>& f) : base_type(f.ptr(), f.getDomain(), f.getImage(), std::make_pair(sizeof(Pixel), f.pitch()))
 	{
 		
 	}

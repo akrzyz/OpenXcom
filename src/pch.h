@@ -120,7 +120,6 @@
 #include "./Engine/Font.h"
 #include "./Engine/FixedFloat.h"
 #include "./Engine/RNG.h"
-#include "./Engine/ShaderRotate.h"
 #include "./Engine/Palette.h"
 #include "./Engine/Music.h"
 #include "./Engine/Language.h"

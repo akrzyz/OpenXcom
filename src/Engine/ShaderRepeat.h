@@ -26,7 +26,9 @@
 namespace OpenXcom
 {
 
-	
+/**
+ * Repeat surface infinite times in every direction
+ */
 template<typename Pixel>
 class ShaderRepeat : public helper::ShaderBase<const Pixel>
 {
@@ -38,12 +40,16 @@ public:
 	friend class helper::controler<ShaderRepeat<Pixel> >;
 	
 	inline ShaderRepeat(const Surface* s):
-		_base(s)
+		_base(s),
+		_off_x(0),
+		_off_y(0)
 	{
         setOffset(0, 0);
 	}
 	inline ShaderRepeat(const std::vector<Pixel>& f, int max_x, int max_y):
-		_base(f, max_x, max_y)
+		_base(f, max_x, max_y),
+		_off_x(0),
+		_off_y(0)
 	{
         setOffset(0, 0);
 	}
@@ -84,6 +90,7 @@ struct controler<ShaderRepeat<Pixel> >
 	int _curr_x;
 	int _curr_y;
 	
+	const int _step;
 	const int _pitch;
 	
 	PixelPtr _ptr_curr_x;
@@ -99,6 +106,7 @@ struct controler<ShaderRepeat<Pixel> >
 		_size_y(_range_domain.size_y()),
 		_curr_x(0),
 		_curr_y(0),
+		_step(sizeof(Pixel)),
 		_pitch(f.pitch()),
 		_ptr_curr_x(0),
 		_ptr_curr_y(0)
@@ -128,16 +136,16 @@ struct controler<ShaderRepeat<Pixel> >
 	inline void set_y(const int& begin, const int&)
 	{
 		_curr_y = (_curr_y + begin)%_size_y;
-		_ptr_curr_y += (_range_domain.beg_y+_curr_y)*_pitch;
+		_ptr_curr_y = add_byte_offset(_ptr_curr_y, (_range_domain.beg_y+_curr_y)*_pitch);
 	}
 	inline void inc_y()
 	{
 		++_curr_y;
-		_ptr_curr_y += _pitch;
+		_ptr_curr_y = add_byte_offset(_ptr_curr_y, _pitch);
 		if(_curr_y == _size_y)
 		{
 			_curr_y = 0;
-			_ptr_curr_y -= _size_y*_pitch;
+			_ptr_curr_y = add_byte_offset(_ptr_curr_y, -_size_y*_pitch);
 		}
 	}
 	
@@ -152,16 +160,16 @@ struct controler<ShaderRepeat<Pixel> >
 	inline void set_x(const int& begin, const int&)
 	{
 		_curr_x = (_curr_x + begin)%_size_x;
-		_ptr_curr_x += _range_domain.beg_x +_curr_x;
+		_ptr_curr_x = add_byte_offset(_ptr_curr_x, (_range_domain.beg_x +_curr_x)*_step);
 	}
 	inline void inc_x()
 	{
 		++_curr_x;
-		_ptr_curr_x += 1;
+		_ptr_curr_x = add_byte_offset(_ptr_curr_x, _step);
 		if(_curr_x == _size_x)
 		{
 			_curr_x = 0;
-			_ptr_curr_x -= _size_x;
+			_ptr_curr_x = add_byte_offset(_ptr_curr_x, -_size_x*_step);
 		}
 	}
 	
