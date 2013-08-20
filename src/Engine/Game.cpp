@@ -285,7 +285,7 @@ void Game::run()
 					SDL_Delay((Uint32)delaytime);
 				framestarttime = SDL_GetTicks();
 #else
-				SDL_Delay(1); 
+				SDL_Delay(0); 
 #endif
 				
 				break; //Save CPU from going 100%
