@@ -44,9 +44,13 @@ SurfaceSet::SurfaceSet(const SurfaceSet& other)
 	_width = other._width;
 	_height = other._height;
 	
-	for (std::map<int, Surface*>::const_iterator f = other._frames.begin(); f != other._frames.end(); ++f)
+	_frames.reserve(other._frames.size());
+	for (std::vector<Surface*>::const_iterator f = other._frames.begin(); f != other._frames.end(); ++f)
 	{
-		_frames[f->first] = new Surface(*f->second);
+		if(*f)
+			_frames.push_back(new Surface(**f));
+		else
+			_frames.push_back(0);
 	}
 }
 
@@ -55,9 +59,9 @@ SurfaceSet::SurfaceSet(const SurfaceSet& other)
  */
 SurfaceSet::~SurfaceSet()
 {
-	for (std::map<int, Surface*>::iterator i = _frames.begin(); i != _frames.end(); ++i)
+	for (std::vector<Surface*>::iterator i = _frames.begin(); i != _frames.end(); ++i)
 	{
-		delete (*i).second;
+		delete *i;
 	}
 }
 
@@ -80,7 +84,7 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
 	{
 		nframes = 1;
 		Surface *surface = new Surface(_width, _height);
-		_frames[0] = surface;
+		_frames.push_back(surface);
 	}
 	else
 	{
@@ -89,7 +93,7 @@ void SurfaceSet::loadPck(const std::string &pck, const std::string &tab)
 		{
 			off = SDL_SwapLE16(off);
 			Surface *surface = new Surface(_width, _height);
-			_frames[nframes] = surface;
+			_frames.push_back(surface);
 			nframes++;
 		}
 	}
@@ -168,6 +172,7 @@ void SurfaceSet::loadDat(const std::string &filename)
 
 	nframes = (int)size / (_width * _height);
 
+	_frames.resize(nframes);
 	for (int i = 0; i < nframes; ++i)
 	{
 		Surface *surface = new Surface(_width, _height);
@@ -210,7 +215,7 @@ void SurfaceSet::loadDat(const std::string &filename)
  */
 Surface *SurfaceSet::getFrame(int i)
 {
-	if (_frames.find(i) != _frames.end())
+	if (i < _frames.size())
 	{
 		return _frames[i];
 	}
@@ -224,6 +229,14 @@ Surface *SurfaceSet::getFrame(int i)
  */
 Surface *SurfaceSet::addFrame(int i)
 {
+	if(i < _frames.size())
+	{
+		delete _frames[i];
+	}
+	else
+	{
+		_frames.resize(i + 1);
+	}	
 	_frames[i] = new Surface(_width, _height);
 	return _frames[i];
 }
@@ -264,13 +277,14 @@ int SurfaceSet::getTotalFrames() const
  */
 void SurfaceSet::setPalette(SDL_Color *colors, int firstcolor, int ncolors)
 {
-	for (std::map<int, Surface*>::iterator i = _frames.begin(); i != _frames.end(); ++i)
+	for (std::vector<Surface*>::iterator i = _frames.begin(); i != _frames.end(); ++i)
 	{
-		(*i).second->setPalette(colors, firstcolor, ncolors);
+		if(*i)
+			(*i)->setPalette(colors, firstcolor, ncolors);
 	}
 }
 
-std::map<int, Surface*> *SurfaceSet::getFrames()
+std::vector<Surface*> *SurfaceSet::getFrames()
 {
 	return &_frames;
 }

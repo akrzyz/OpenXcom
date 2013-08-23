@@ -703,10 +703,12 @@ XcomResourcePack::XcomResourcePack(std::vector<std::pair<std::string, ExtraSprit
 	// copy constructor doesn't like doing this directly, so let's make a second handobs file the old fashioned way.
 	// handob2 is used for all the left handed sprites.
 	_sets["HANDOB2.PCK"] = new SurfaceSet(_sets["HANDOB.PCK"]->getWidth(), _sets["HANDOB.PCK"]->getHeight());
-	std::map<int, Surface*> *handob = _sets["HANDOB.PCK"]->getFrames();
-	for (std::map<int, Surface*>::const_iterator i = handob->begin(); i != handob->end(); ++i)
+	SurfaceSet *handob = _sets["HANDOB.PCK"];
+	for (int i = handob->getTotalFrames() - 1; i >= 0; --i) //resize _sets["HANDOB2.PCK"] only once
 	{
-		(i->second)->blit(_sets["HANDOB2.PCK"]->addFrame(i->first));
+		Surface* surf = handob->getFrame(i);
+		if(surf)
+			surf->blit(_sets["HANDOB2.PCK"]->addFrame(i));
 	}
 
 	for (std::vector<std::pair<std::string, ExtraSounds *> >::const_iterator i = extraSounds.begin(); i != extraSounds.end(); ++i)
