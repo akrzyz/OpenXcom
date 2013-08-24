@@ -161,14 +161,6 @@ struct GlobeStaticData
 
 GlobeStaticData static_data;
 
-struct Ocean
-{
-	static inline void func(Uint8& dest, const int&, const int&, const int&, const int&)
-	{
-		dest = Palette::blockOffset(12) + 0;
-	}
-};
-
 struct CreateShadow
 {
 	static inline Uint8 getShadowValue(const Uint8& dest, const Cord& earth, const Cord& sun, const Sint16& noise)
@@ -231,12 +223,12 @@ struct CreateShadow
 		}
 	}
 	
-	static inline void func(Uint8& dest, const Cord& earth, const Cord& sun, const Sint16& noise)
+	static inline void func(Uint8* dest, const Cord* earth, const Cord* sun, const Sint16* noise)
 	{
-		if(dest && earth.z)
-			dest = getShadowValue(dest, earth, sun, noise);
+		if(*dest && earth->z)
+			*dest = getShadowValue(*dest, *earth, *sun, *noise);
 		else
-			dest = 0;
+			*dest = 0;
 	}
 };
 
@@ -1082,12 +1074,12 @@ Cord Globe::getSunDirection(double lon, double lat) const
 void Globe::drawShadow()
 {
 	ShaderMove<Cord> earth = ShaderMove<Cord>(_earthData[_zoom], getWidth(), getHeight());
-	ShaderRepeat<Sint16> noise = ShaderRepeat<Sint16>(_randomNoiseData, static_data.random_surf_size, static_data.random_surf_size);
+	//ShaderRepeat<Sint16> noise = ShaderRepeat<Sint16>(_randomNoiseData, static_data.random_surf_size, static_data.random_surf_size);
 	
 	earth.setMove(_cenX-getWidth()/2, _cenY-getHeight()/2);
 	
 	lock();
-	ShaderDraw<CreateShadow>(ShaderSurface(this), earth, ShaderScalar(getSunDirection(_cenLon, _cenLat)), noise);
+	ShaderDraw<CreateShadow, false>(ShaderSurface(this), earth, ShaderScalar(getSunDirection(_cenLon, _cenLat)), ShaderScalar(_randomNoiseData[0]));
 	unlock();
 		
 }

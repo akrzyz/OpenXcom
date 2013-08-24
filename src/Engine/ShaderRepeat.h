@@ -37,7 +37,8 @@ class ShaderRepeat : public helper::ShaderBase<const Pixel>
 	
 public:
 	typedef helper::ShaderBase<const Pixel> _base;
-	friend class helper::controler<ShaderRepeat<Pixel> >;
+	friend class helper::controler<ShaderRepeat<Pixel>, 16>;
+	friend class helper::controler<ShaderRepeat<Pixel>, 1>;
 	
 	inline ShaderRepeat(const Surface* s):
 		_base(s),
@@ -70,8 +71,8 @@ public:
 namespace helper
 {
 
-template<typename Pixel>
-struct controler<ShaderRepeat<Pixel> >
+template<typename Pixel, int DataRowSize>
+struct controler<ShaderRepeat<Pixel>, DataRowSize>
 {
 	typedef typename ShaderRepeat<Pixel>::PixelPtr PixelPtr;
 	typedef typename ShaderRepeat<Pixel>::PixelRef PixelRef;

@@ -84,6 +84,7 @@ template<typename Pixel>
 class ShaderBase
 {
 public:
+	typedef Pixel  PixelVal;
 	typedef Pixel* PixelPtr;
 	typedef Pixel& PixelRef;
 	
@@ -101,9 +102,9 @@ public:
 		_range_domain(s.getDomain()),
 		_pitch(s.pitch())
 	{
-			
+
 	}
-	
+
 	/**
 	 * create surface using vector `f` as data source.
 	 * surface will have `max_y` x `max_x` dimensions.
@@ -190,9 +191,10 @@ public:
 
 /// helper class for handling implementation differences in different surfaces types
 /// Used in function `ShaderDraw`.
-template<typename SurfaceType>
+template<typename SurfaceType, int DataRowSize>
 struct controler
 {
+	typedef SurfaceType DataRow[DataRowSize];
 	/**
 	 * NOT IMPLEMENTED ANYWHERE!
 	 * you need create your own specification or use different type, no default version
@@ -226,18 +228,43 @@ struct controler
 	inline void set_x(const int& begin, const int& end) {}
 	inline void inc_x() {}
 
-	inline SurfaceType& get_ref();
+	inline void load() {}
+	inline void store() {}
+	inline void load_tail() {}
+	inline void store_tail() {}
+
+	inline DataRow& get_ref();
 };
 
-/// implementation for scalars types aka `int`, `double`, `float`
-template<typename T>
-struct controler<Scalar<T> >
+template<typename T, int DataRowSize>
+struct controler<Scalar<const T>, DataRowSize> : controler<Scalar<T>, DataRowSize>
 {
-	T& ref;
-	
-	inline controler(const Scalar<T>& s) : ref(s.ref)
+	typedef const typename controler<Scalar<T>, DataRowSize>::DataRow DataRow;
+	inline controler(const Scalar<const T>& s)
 	{
-		
+		for(int i=0; i< DataRowSize; ++i)
+			this->ref[i] = s.ref;
+	}
+
+	inline DataRow& get_ref()
+	{
+		return this->ref;
+	}
+};
+/// implementation for scalars types aka `int`, `double`, `float`
+template<typename T, int DataRowSize>
+struct controler<Scalar<T>, DataRowSize>
+{
+protected:
+	inline controler() {}
+public:
+	typedef T DataRow[DataRowSize];
+	DataRow ref __attribute__((aligned(0x10)));
+	
+	inline controler(const Scalar<T>& s)
+	{
+		for(int i=0; i< DataRowSize; ++i)
+			ref[i] = s.ref;
 	}
 	
 	//cant use this function
@@ -279,15 +306,35 @@ struct controler<Scalar<T> >
 		//nothing
 	}
 	
-	inline T& get_ref()
+	inline void load()
+	{
+		//nothing
+	}
+
+	inline void store()
+	{
+		//nothing
+	}
+
+	inline void load_tail()
+	{
+		//nothing
+	}
+
+	inline void store_tail()
+	{
+		//nothing
+	}
+
+	inline DataRow& get_ref()
 	{
 		return ref;
 	}
 };
 
 /// implementation for not used arg
-template<>
-struct controler<Nothing>
+template<int DataRowSize>
+struct controler<Nothing, DataRowSize>
 {
 	inline controler(const Nothing&)
 	{
@@ -332,6 +379,26 @@ struct controler<Nothing>
 		//nothing
 	}
 	
+	inline void load()
+	{
+		//nothing
+	}
+
+	inline void store()
+	{
+		//nothing
+	}
+
+	inline void load_tail()
+	{
+		//nothing
+	}
+
+	inline void store_tail()
+	{
+		//nothing
+	}
+
 	/**
 	 * Dont return anything
 	 */
@@ -350,16 +417,23 @@ static inline PixelPtr add_byte_offset(PixelPtr ptr, int off)
 	return (PixelPtr)(((char*)ptr)+off);
 }
 
-template<typename PixelPtr, typename PixelRef>
+template<typename Pixel, int DataRowSize>
 struct controler_base
 {
+	typedef Pixel* PixelPtr;
+	typedef Pixel& PixelRef;
+	typedef Pixel PixelRow[DataRowSize];
 	
 	const PixelPtr data;
 	PixelPtr ptr_pos_y;
 	PixelPtr ptr_pos_x;
+	PixelPtr ptr_pos_x_temp;
 	GraphSubset range;
 	int start_x;
 	int start_y;
+	int last_tail;
+
+	PixelRow current_row __attribute__((aligned(0x10)));
 	
 	///step in bytes
 	const std::pair<int, int> step;
@@ -410,30 +484,52 @@ struct controler_base
 	{
 		ptr_pos_x = ptr_pos_y;
 	}
-	inline void set_x(const int& begin, const int&)
+	inline void set_x(const int& begin, const int& end)
 	{
 		ptr_pos_x = add_byte_offset(ptr_pos_x , step.first*begin);
+		last_tail = (end - begin) % DataRowSize;
 	}
 	inline void inc_x()
 	{
-		ptr_pos_x = add_byte_offset(ptr_pos_x, step.first);
+		ptr_pos_x = add_byte_offset(ptr_pos_x, step.first*DataRowSize);
 	}
 	
-	inline PixelRef get_ref()
+	inline void load()
 	{
-		return *ptr_pos_x;
+		//memcpy(current_row, ptr_pos_x, sizeof(PixelRow));
+		ptr_pos_x_temp = ptr_pos_x;
+	}
+
+	inline void store()
+	{
+		//memcpy(ptr_pos_x, current_row, sizeof(PixelRow));
+	}
+
+	inline void load_tail()
+	{
+		memcpy(current_row, ptr_pos_x, sizeof(Pixel)*last_tail);
+		ptr_pos_x_temp = current_row;
+	}
+
+	inline void store_tail()
+	{
+		memcpy(ptr_pos_x, current_row, sizeof(Pixel)*last_tail);
+	}
+
+	inline PixelRow& get_ref()
+	{
+		return *((PixelRow*)ptr_pos_x_temp);
 	}
 };
 
 
 
-template<typename Pixel>
-struct controler<ShaderBase<Pixel> > : public controler_base<typename ShaderBase<Pixel>::PixelPtr, typename ShaderBase<Pixel>::PixelRef>
+template<typename Pixel, int DataRowSize>
+struct controler<ShaderBase<Pixel>, DataRowSize> : public controler_base<typename ShaderBase<Pixel>::PixelVal, DataRowSize>
 {
-	typedef typename ShaderBase<Pixel>::PixelPtr PixelPtr;
-	typedef typename ShaderBase<Pixel>::PixelRef PixelRef;
+	typedef typename ShaderBase<Pixel>::PixelVal PixelVal;
 	
-	typedef controler_base<PixelPtr, PixelRef> base_type;
+	typedef controler_base<PixelVal, DataRowSize> base_type;
 		
 	controler(const ShaderBase<Pixel>& f) : base_type(f.ptr(), f.getDomain(), f.getImage(), std::make_pair(sizeof(Pixel), f.pitch()))
 	{

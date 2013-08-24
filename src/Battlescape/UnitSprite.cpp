@@ -111,15 +111,15 @@ struct ColorFace
 
 	static const Uint8 Hair = 9 << 4;
 	static const Uint8 Face = 6 << 4;
-	static inline void func(Uint8& src, const Uint8& hair_color, const Uint8& face_color)
+	static inline void func(Uint8* src, const Uint8* hair_color, const Uint8* face_color)
 	{
-		if((src & ColorGroup) == Hair)
+		if((*src & ColorGroup) == Hair)
 		{
-			src = hair_color + (src & ColorShade);
+			*src = *hair_color + (*src & ColorShade);
 		}
-		else if((src & ColorGroup) == Face)
+		else if((*src & ColorGroup) == Face)
 		{
-			src = face_color + (src & ColorShade);
+			*src = *face_color + (*src & ColorShade);
 		}
 	}
 };
@@ -247,7 +247,7 @@ void UnitSprite::drawRoutine0()
 						break;
 				}
 				lock();
-				ShaderDraw<ColorFace>(ShaderSurface(this), ShaderScalar(hair_color), ShaderScalar(face_color));
+				ShaderDraw<ColorFace, false>(ShaderSurface(this), ShaderScalar(hair_color), ShaderScalar(face_color));
 				unlock();
 			}
 		}
@@ -491,10 +491,10 @@ void UnitSprite::drawRoutine0()
 					break;
 			}
 			lock();
-			ShaderDraw<ColorFace>(ShaderSurface(newLeftArm), ShaderScalar(hair_color), ShaderScalar(face_color));
-			ShaderDraw<ColorFace>(ShaderSurface(newRightArm), ShaderScalar(hair_color), ShaderScalar(face_color));
-			ShaderDraw<ColorFace>(ShaderSurface(newTorso), ShaderScalar(hair_color), ShaderScalar(face_color));
-			ShaderDraw<ColorFace>(ShaderSurface(newLegs), ShaderScalar(hair_color), ShaderScalar(face_color));
+			ShaderDraw<ColorFace, false>(ShaderSurface(newLeftArm), ShaderScalar(hair_color), ShaderScalar(face_color));
+			ShaderDraw<ColorFace, false>(ShaderSurface(newRightArm), ShaderScalar(hair_color), ShaderScalar(face_color));
+			ShaderDraw<ColorFace, false>(ShaderSurface(newTorso), ShaderScalar(hair_color), ShaderScalar(face_color));
+			ShaderDraw<ColorFace, false>(ShaderSurface(newLegs), ShaderScalar(hair_color), ShaderScalar(face_color));
 			unlock();
 			torso = newTorso;
 			legs = newLegs;

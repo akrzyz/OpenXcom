@@ -27,6 +27,7 @@
 #include "Exception.h"
 #include "ShaderMove.h"
 #include <stdlib.h>
+#include <emmintrin.h>
 #ifdef _WIN32
 #include <malloc.h>
 #endif
@@ -60,12 +61,12 @@ Surface::Surface(int width, int height, int x, int y, int bpp) : _x(x), _y(y), _
 {
 	//_surface = SDL_CreateRGBSurface(SDL_SWSURFACE, width, height, 8, 0, 0, 0, 0);
 	int pitch = (bpp/8) * ((width+15)& ~0xF);
-
+	int total_size = pitch * (height+1) * (bpp/8);
 #ifndef _WIN32
 
 	#ifdef __MORPHOS__
 
-	_alignedBuffer = calloc( pitch * height * (bpp/8), 1 );
+	_alignedBuffer = calloc( total_size, 1 );
 	if (!_alignedBuffer)
 	{
 		throw Exception("Where's the memory, Lebowski?");
@@ -73,7 +74,7 @@ Surface::Surface(int width, int height, int x, int y, int bpp) : _x(x), _y(y), _
 
 	#else
 	int rc;
-	if ((rc = posix_memalign(&_alignedBuffer, 16, pitch * height * (bpp/8))))
+	if ((rc = posix_memalign(&_alignedBuffer, 16, total_size)))
 	{
 		throw Exception(strerror(rc));
 	}
@@ -81,14 +82,14 @@ Surface::Surface(int width, int height, int x, int y, int bpp) : _x(x), _y(y), _
 	
 #else
 	// of course Windows has to be difficult about this!
-	_alignedBuffer = _aligned_malloc(pitch*height*(bpp/8), 16);
+	_alignedBuffer = _aligned_malloc(total_size, 16);
 	if (!_alignedBuffer)
 	{
 		throw Exception("Where's the memory, Lebowski?");
 	}
 #endif
 	
-	memset(_alignedBuffer, 0, pitch * height * (bpp/8));
+	memset(_alignedBuffer, 0, total_size);
 	
 	_surface = SDL_CreateRGBSurfaceFrom(_alignedBuffer,width, height, bpp, pitch, 0, 0, 0, 0);
 
@@ -755,16 +756,18 @@ struct ColorReplace
 	* @param shade value of shade of this surface
 	* @param newColor new color to set (it should be offseted by 4)
 	*/
-	static inline void func(Uint8& dest, const Uint8& src, const int& shade, const int& newColor)
+	template<int I>
+	static inline void func(Uint8 (&dest)[I], const Uint8 (&src)[I], const Uint8 (&shade)[I], const Uint8 (&newColor)[I])
 	{
-		if(src)
+		for(int i =0; i < I; ++i)
+		if(src[i])
 		{
-			const int newShade = (src&15) + shade;
+			const int newShade = (src[i]&15) + shade[i];
 			if (newShade > 15)
 				// so dark it would flip over to another color - make it black instead
-				dest = 15;
+				dest[i] = 15;
 			else
-				dest = newColor | newShade;
+				dest[i] = newColor[i] | newShade;
 		}
 	}
 	
@@ -784,7 +787,8 @@ struct StandartShade
 	* @param notused
 	* @param notused
 	*/
-	static inline void func(Uint8& dest, const Uint8& src, const int& shade)
+	template<int I>
+	static inline void func(Uint8 (&dest_array)[I], const Uint8 (&src_array)[I], const Uint8 (&shade_array)[I])
 	{
 //		if(src)
 //		{
@@ -795,20 +799,70 @@ struct StandartShade
 //			else
 //				dest = (src&(15<<4)) | newShade;
 //		}
-		unsigned fifteen = 15;
-		unsigned g = src > 0 ? -1 : 0;
-		unsigned hi = src & g;
-		unsigned low = hi & fifteen;
-		dest = dest & ~g;
-		low = low + shade;
-		low = low & g;
-		g = low > fifteen ? -1 : 0;
-		hi = hi & ~fifteen;
-		hi = hi | low;
-		hi = hi & ~g;
-		g = fifteen & g;
-		hi = hi | g;
-		dest = dest | hi;
+//		for(int i=0; i<I; ++i)
+//		{
+//			Uint8 fifteen = 15;
+//			Uint8 g = src[i] > 0 ? -1 : 0;
+//			Uint8 hi = src[i];
+//			Uint8 low = hi & fifteen;
+//			dest[i] = dest[i] & ~g;
+//			low = low + shade[i];
+//			low = low & g;
+//			g = low > fifteen ? -1 : 0;
+//			hi = hi & ~fifteen;
+//			hi = hi | low;
+//			hi = hi & ~g;
+//			g = fifteen & g;
+//			hi = hi | g;
+//			dest[i] = dest[i] | hi;
+//		}
+		__m128i zero = _mm_setzero_si128();
+		__m128i fifteen = _mm_set1_epi8(15);
+		__m128i dest = _mm_loadu_si128((__m128i*)dest_array);
+		__m128i src = _mm_loadu_si128((const __m128i*)src_array);
+		__m128i shade = _mm_loadu_si128((const __m128i*)shade_array);
+		__m128i g = _mm_cmpeq_epi8(src, zero); //src[i] == 0 ? -1 : 0;
+		__m128i low = _mm_and_si128(src, fifteen); //hi & fifteen;
+		dest = _mm_and_si128(dest, g); //dest[i] = dest[i] & g;
+		low = _mm_add_epi8(low, shade); //low = low + shade[i];
+		low = _mm_andnot_si128(g, low); //low = low & ~g;
+		g = _mm_cmpgt_epi8(low, fifteen); //g = low > fifteen ? -1 : 0;
+		src = _mm_andnot_si128(fifteen, src); //hi = hi & ~fifteen;
+		src = _mm_or_si128(src, low); //hi = hi | low;
+		src = _mm_andnot_si128(g, src); //hi = hi & ~g;
+		g = _mm_and_si128(fifteen, g); //g = fifteen & g;
+		src = _mm_or_si128(src, g); //hi = hi | g;
+		dest = _mm_or_si128(dest, src); //dest[i] = dest[i] | hi;
+		_mm_storeu_si128((__m128i*)dest_array, dest);
+
+//		__m128i zero = _mm_setzero_si128();
+//		__m128i fifteen = _mm_set1_epi8(0xF);
+//		__m128i dest = _mm_loadu_si128((__m128i*)dest_array);
+//		__m128i src = _mm_loadu_si128((const __m128i*)src_array);
+//		__m128i shade = _mm_loadu_si128((const __m128i*)shade_array);
+//		__m128i cmp;
+//		__m128i low;
+//
+//		cmp = _mm_cmpeq_epi8(src, zero);
+//
+//		low = _mm_and_si128(fifteen, src);
+//		src = _mm_andnot_si128(fifteen, src);
+//
+//		dest = _mm_and_si128(cmp, dest);
+//		shade = _mm_and_si128(cmp, shade);
+//		low = _mm_add_epi8(shade, low);
+//
+//		cmp = _mm_cmplt_epi8(fifteen, low);
+//
+//		src = _mm_andnot_si128(cmp, src);
+//		low = _mm_andnot_si128(cmp, low);
+//		fifteen = _mm_and_si128(fifteen, cmp);
+//
+//		dest = _mm_or_si128(src, dest);
+//		dest = _mm_or_si128(low, dest);
+//		dest = _mm_or_si128(fifteen, dest);
+//
+//		_mm_storeu_si128((__m128i*)dest_array, dest);
 	}
 	
 };
@@ -828,6 +882,7 @@ struct StandartShade
  */
 void Surface::blitNShade(Surface *surface, int x, int y, int off, bool half, int newBaseColor)
 {
+	Uint8 off8 = off;
 	ShaderMove<Uint8> src(this, x, y);
 	if(half)
 	{
@@ -839,10 +894,11 @@ void Surface::blitNShade(Surface *surface, int x, int y, int off, bool half, int
 	{
 		--newBaseColor;
 		newBaseColor <<= 4;
-		ShaderDraw<ColorReplace>(ShaderSurface(surface), src, ShaderScalar(off), ShaderScalar(newBaseColor));
+		Uint8 col8 = newBaseColor;
+		ShaderDraw<ColorReplace, true>(ShaderSurface(surface), src, ShaderScalar(off8), ShaderScalar(col8));
 	}
 	else
-		ShaderDraw<StandartShade>(ShaderSurface(surface), src, ShaderScalar(off));
+		ShaderDraw<StandartShade, true>(ShaderSurface(surface), src, ShaderScalar(off8));
 		
 }
 

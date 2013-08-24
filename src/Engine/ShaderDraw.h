@@ -28,13 +28,13 @@ namespace OpenXcom
 namespace helper
 {
 
-typedef controler<Nothing> ConNone;
+#define MACR_NO controler<Nothing, data_size>
 
 /**
  * variadic templates for the poor
  * 8 arguments version
  */
-template<typename ColorFunc,
+template<typename ColorFunc, int data_size,
 	typename ConArg0, typename ConArg1,
 	typename ConArg2, typename ConArg3,
 	typename ConArg4, typename ConArg5,
@@ -59,22 +59,22 @@ struct ArgReducer
  * variadic templates for the poor
  * 7 arguments version
  */
-template<typename ColorFunc,
+template<typename ColorFunc, int data_size,
 	typename ConArg0, typename ConArg1,
 	typename ConArg2, typename ConArg3,
 	typename ConArg4, typename ConArg5,
 	typename ConArg6>
-struct ArgReducer<ColorFunc,
+struct ArgReducer<ColorFunc, data_size,
 	ConArg0, ConArg1,
 	ConArg2, ConArg3,
 	ConArg4, ConArg5,
-	ConArg6, ConNone >
+	ConArg6, MACR_NO >
 {
 	static inline void func(
 		ConArg0& arg0, ConArg1& arg1,
 		ConArg2& arg2, ConArg3& arg3,
 		ConArg4& arg4, ConArg5& arg5,
-		ConArg6& arg6, ConNone& arg7)
+		ConArg6& arg6, MACR_NO& arg7)
 	{
 		ColorFunc::func(
 			arg0.get_ref(), arg1.get_ref(),
@@ -88,21 +88,21 @@ struct ArgReducer<ColorFunc,
  * variadic templates for the poor
  * 6 arguments version
  */
-template<typename ColorFunc,
+template<typename ColorFunc, int data_size,
 	typename ConArg0, typename ConArg1,
 	typename ConArg2, typename ConArg3,
 	typename ConArg4, typename ConArg5>
-struct ArgReducer<ColorFunc,
+struct ArgReducer<ColorFunc, data_size,
 	ConArg0, ConArg1,
 	ConArg2, ConArg3,
 	ConArg4, ConArg5,
-	ConNone, ConNone >
+	MACR_NO, MACR_NO >
 {
 	static inline void func(
 		ConArg0& arg0, ConArg1& arg1,
 		ConArg2& arg2, ConArg3& arg3,
 		ConArg4& arg4, ConArg5& arg5,
-		ConNone& arg6, ConNone& arg7)
+		MACR_NO& arg6, MACR_NO& arg7)
 	{
 		ColorFunc::func(
 			arg0.get_ref(), arg1.get_ref(),
@@ -115,21 +115,21 @@ struct ArgReducer<ColorFunc,
  * variadic templates for the poor
  * 5 arguments version
  */
-template<typename ColorFunc,
+template<typename ColorFunc, int data_size,
 	typename ConArg0, typename ConArg1,
 	typename ConArg2, typename ConArg3,
 	typename ConArg4>
-struct ArgReducer<ColorFunc,
+struct ArgReducer<ColorFunc, data_size,
 	ConArg0, ConArg1,
 	ConArg2, ConArg3,
-	ConArg4, ConNone,
-	ConNone, ConNone >
+	ConArg4, MACR_NO,
+	MACR_NO, MACR_NO >
 {
 	static inline void func(
 		ConArg0& arg0, ConArg1& arg1,
 		ConArg2& arg2, ConArg3& arg3,
-		ConArg4& arg4, ConNone& arg5,
-		ConNone& arg6, ConNone& arg7)
+		ConArg4& arg4, MACR_NO& arg5,
+		MACR_NO& arg6, MACR_NO& arg7)
 	{
 		ColorFunc::func(
 			arg0.get_ref(), arg1.get_ref(),
@@ -142,20 +142,20 @@ struct ArgReducer<ColorFunc,
  * variadic templates for the poor
  * 5 arguments version
  */
-template<typename ColorFunc,
+template<typename ColorFunc, int data_size,
 	typename ConArg0, typename ConArg1,
 	typename ConArg2, typename ConArg3>
-struct ArgReducer<ColorFunc,
+struct ArgReducer<ColorFunc, data_size,
 	ConArg0, ConArg1,
 	ConArg2, ConArg3,
-	ConNone, ConNone,
-	ConNone, ConNone >
+	MACR_NO, MACR_NO,
+	MACR_NO, MACR_NO >
 {
 	static inline void func(
 		ConArg0& arg0, ConArg1& arg1,
 		ConArg2& arg2, ConArg3& arg3,
-		ConNone& arg4, ConNone& arg5,
-		ConNone& arg6, ConNone& arg7)
+		MACR_NO& arg4, MACR_NO& arg5,
+		MACR_NO& arg6, MACR_NO& arg7)
 	{
 		ColorFunc::func(
 			arg0.get_ref(), arg1.get_ref(),
@@ -167,20 +167,20 @@ struct ArgReducer<ColorFunc,
  * variadic templates for the poor
  * 3 arguments version
  */
-template<typename ColorFunc,
+template<typename ColorFunc, int data_size,
 	typename ConArg0, typename ConArg1,
 	typename ConArg2>
-struct ArgReducer<ColorFunc,
+struct ArgReducer<ColorFunc, data_size,
 	ConArg0, ConArg1,
-	ConArg2, ConNone,
-	ConNone, ConNone,
-	ConNone, ConNone >
+	ConArg2, MACR_NO,
+	MACR_NO, MACR_NO,
+	MACR_NO, MACR_NO >
 {
 	static inline void func(
 		ConArg0& arg0, ConArg1& arg1,
-		ConArg2& arg2, ConNone& arg3,
-		ConNone& arg4, ConNone& arg5,
-		ConNone& arg6, ConNone& arg7)
+		ConArg2& arg2, MACR_NO& arg3,
+		MACR_NO& arg4, MACR_NO& arg5,
+		MACR_NO& arg6, MACR_NO& arg7)
 	{
 		ColorFunc::func(
 			arg0.get_ref(), arg1.get_ref(),
@@ -192,19 +192,19 @@ struct ArgReducer<ColorFunc,
  * variadic templates for the poor
  * 2 arguments version
  */
-template<typename ColorFunc,
+template<typename ColorFunc, int data_size,
 	typename ConArg0, typename ConArg1>
-struct ArgReducer<ColorFunc,
+struct ArgReducer<ColorFunc, data_size,
 	ConArg0, ConArg1,
-	ConNone, ConNone,
-	ConNone, ConNone,
-	ConNone, ConNone >
+	MACR_NO, MACR_NO,
+	MACR_NO, MACR_NO,
+	MACR_NO, MACR_NO >
 {
 	static inline void func(
 		ConArg0& arg0, ConArg1& arg1,
-		ConNone& arg2, ConNone& arg3,
-		ConNone& arg4, ConNone& arg5,
-		ConNone& arg6, ConNone& arg7)
+		MACR_NO& arg2, MACR_NO& arg3,
+		MACR_NO& arg4, MACR_NO& arg5,
+		MACR_NO& arg6, MACR_NO& arg7)
 	{
 		ColorFunc::func(
 			arg0.get_ref(), arg1.get_ref());
@@ -215,19 +215,19 @@ struct ArgReducer<ColorFunc,
  * variadic templates for the poor
  * 1 argument version
  */
-template<typename ColorFunc,
+template<typename ColorFunc, int data_size,
 	typename ConArg0>
-struct ArgReducer<ColorFunc,
-	ConArg0, ConNone,
-	ConNone, ConNone,
-	ConNone, ConNone,
-	ConNone, ConNone >
+struct ArgReducer<ColorFunc, data_size,
+	ConArg0, MACR_NO,
+	MACR_NO, MACR_NO,
+	MACR_NO, MACR_NO,
+	MACR_NO, MACR_NO >
 {
 	static inline void func(
-		ConArg0& arg0, ConNone& arg1,
-		ConNone& arg2, ConNone& arg3,
-		ConNone& arg4, ConNone& arg5,
-		ConNone& arg6, ConNone& arg7)
+		ConArg0& arg0, MACR_NO& arg1,
+		MACR_NO& arg2, MACR_NO& arg3,
+		MACR_NO& arg4, MACR_NO& arg5,
+		MACR_NO& arg6, MACR_NO& arg7)
 	{
 		ColorFunc::func(
 			arg0.get_ref());
@@ -273,7 +273,7 @@ struct ArgReducer<ColorFunc,
  * @param src6_frame surface or scalar
  * @param src7_frame surface or scalar
  */
-template<typename ColorFunc,
+template<typename ColorFunc, bool SSE2,
 	typename Src0Type, typename Src1Type,
 	typename Src2Type, typename Src3Type,
 	typename Src4Type, typename Src5Type,
@@ -284,15 +284,16 @@ static inline void ShaderDraw(
 	const Src4Type& src4_frame, const Src5Type& src5_frame,
 	const Src6Type& src6_frame, const Src7Type& src7_frame)
 {
+	const int data_size = SSE2 ? 16 : 1;
 	//creating helper objects
-	helper::controler<Src0Type> src0(src0_frame);
-	helper::controler<Src1Type> src1(src1_frame);
-	helper::controler<Src2Type> src2(src2_frame);
-	helper::controler<Src3Type> src3(src3_frame);
-	helper::controler<Src4Type> src4(src4_frame);
-	helper::controler<Src5Type> src5(src5_frame);
-	helper::controler<Src6Type> src6(src6_frame);
-	helper::controler<Src7Type> src7(src7_frame);
+	helper::controler<Src0Type, data_size> src0(src0_frame);
+	helper::controler<Src1Type, data_size> src1(src1_frame);
+	helper::controler<Src2Type, data_size> src2(src2_frame);
+	helper::controler<Src3Type, data_size> src3(src3_frame);
+	helper::controler<Src4Type, data_size> src4(src4_frame);
+	helper::controler<Src5Type, data_size> src5(src5_frame);
+	helper::controler<Src6Type, data_size> src6(src6_frame);
+	helper::controler<Src7Type, data_size> src7(src7_frame);
 
 	//get basic draw range in 2d space
 	GraphSubset end_temp = src0.get_range();
@@ -329,16 +330,30 @@ static inline void ShaderDraw(
 		MACRO_SHADER_SRC_SEMICOLON(.set_x(begin_x, end_x))
 		
 		//iteration on x-axis
-		for(int x = end_x-begin_x; x>0; --x,
+		for(int x = (end_x-begin_x) / data_size; x>0; --x,
 			MACRO_SHADER_SRC_COMMA(.inc_x())
 			)
 		{
-			helper::ArgReducer<ColorFunc,
-				helper::controler<Src0Type>, helper::controler<Src1Type>,
-				helper::controler<Src2Type>, helper::controler<Src3Type>,
-				helper::controler<Src4Type>, helper::controler<Src5Type>,
-				helper::controler<Src6Type>, helper::controler<Src7Type> >
+			MACRO_SHADER_SRC_SEMICOLON(.load())
+			helper::ArgReducer<ColorFunc, data_size,
+				helper::controler<Src0Type, data_size>, helper::controler<Src1Type, data_size>,
+				helper::controler<Src2Type, data_size>, helper::controler<Src3Type, data_size>,
+				helper::controler<Src4Type, data_size>, helper::controler<Src5Type, data_size>,
+				helper::controler<Src6Type, data_size>, helper::controler<Src7Type, data_size> >
 				::func(src0, src1, src2, src3, src4, src5, src6, src7);
+			MACRO_SHADER_SRC_SEMICOLON(.store())
+		}
+		//final step on x-axis
+		if((end_x-begin_x) % data_size)
+		{
+			MACRO_SHADER_SRC_SEMICOLON(.load_tail())
+			helper::ArgReducer<ColorFunc, data_size,
+				helper::controler<Src0Type, data_size>, helper::controler<Src1Type, data_size>,
+				helper::controler<Src2Type, data_size>, helper::controler<Src3Type, data_size>,
+				helper::controler<Src4Type, data_size>, helper::controler<Src5Type, data_size>,
+				helper::controler<Src6Type, data_size>, helper::controler<Src7Type, data_size> >
+				::func(src0, src1, src2, src3, src4, src5, src6, src7);
+			MACRO_SHADER_SRC_SEMICOLON(.store_tail())
 		}
 	}
 
@@ -347,7 +362,7 @@ static inline void ShaderDraw(
 #undef MACRO_SHADER_SRC_COMMA
 #undef MACRO_SHADER_SRC_SEMICOLON
 
-template<typename ColorFunc,
+template<typename ColorFunc, bool SSE2,
 	typename DestType, typename Src0Type,
 	typename Src1Type, typename Src2Type,
 	typename Src3Type, typename Src4Type,
@@ -359,14 +374,14 @@ static inline void ShaderDraw(
 	const Src5Type& src5_frame)
 {
 	helper::Nothing none_frame;
-	ShaderDraw<ColorFunc>(
+	ShaderDraw<ColorFunc, SSE2>(
 		dest_frame, src0_frame,
 		src1_frame, src2_frame,
 		src3_frame, src4_frame,
 		src5_frame, none_frame);
 }
 
-template<typename ColorFunc,
+template<typename ColorFunc, bool SSE2,
 	typename DestType, typename Src0Type,
 	typename Src1Type, typename Src2Type,
 	typename Src3Type, typename Src4Type>
@@ -376,14 +391,14 @@ static inline void ShaderDraw(
 	const Src3Type& src3_frame, const Src4Type& src4_frame)
 {
 	helper::Nothing none_frame;
-	ShaderDraw<ColorFunc>(
+	ShaderDraw<ColorFunc, SSE2>(
 		dest_frame, src0_frame,
 		src1_frame, src2_frame,
 		src3_frame, src4_frame,
 		none_frame, none_frame);
 }
 
-template<typename ColorFunc,
+template<typename ColorFunc, bool SSE2,
 	typename DestType, typename Src0Type,
 	typename Src1Type, typename Src2Type,
 	typename Src3Type>
@@ -393,51 +408,63 @@ static inline void ShaderDraw(
 	const Src3Type& src3_frame)
 {
 	helper::Nothing none_frame;
-	ShaderDraw<ColorFunc>(
+	ShaderDraw<ColorFunc, SSE2>(
 		dest_frame, src0_frame,
 		src1_frame, src2_frame,
 		src3_frame, none_frame,
 		none_frame, none_frame);
 }
 
-template<typename ColorFunc, typename DestType, typename Src0Type, typename Src1Type, typename Src2Type>
-static inline void ShaderDraw(const DestType& dest_frame, const Src0Type& src0_frame, const Src1Type& src1_frame, const Src2Type& src2_frame)
+template<typename ColorFunc, bool SSE2,
+	typename DestType, typename Src0Type,
+	typename Src1Type, typename Src2Type>
+static inline void ShaderDraw(
+	const DestType& dest_frame, const Src0Type& src0_frame,
+	const Src1Type& src1_frame, const Src2Type& src2_frame)
 {
 	helper::Nothing none_frame;
-	ShaderDraw<ColorFunc>(
+	ShaderDraw<ColorFunc, SSE2>(
 		dest_frame, src0_frame,
 		src1_frame, src2_frame,
 		none_frame, none_frame,
 		none_frame, none_frame);
 }
 
-template<typename ColorFunc, typename DestType, typename Src0Type, typename Src1Type>
-static inline void ShaderDraw(const DestType& dest_frame, const Src0Type& src0_frame, const Src1Type& src1_frame)
+template<typename ColorFunc, bool SSE2,
+	typename DestType, typename Src0Type,
+	typename Src1Type>
+static inline void ShaderDraw(
+	const DestType& dest_frame, const Src0Type& src0_frame,
+	const Src1Type& src1_frame)
 {
 	helper::Nothing none_frame;
-	ShaderDraw<ColorFunc>(
+	ShaderDraw<ColorFunc, SSE2>(
 		dest_frame, src0_frame,
 		src1_frame, none_frame,
 		none_frame, none_frame,
 		none_frame, none_frame);
 }
 
-template<typename ColorFunc, typename DestType, typename Src0Type>
-static inline void ShaderDraw(const DestType& dest_frame, const Src0Type& src0_frame)
+template<typename ColorFunc, bool SSE2,
+	typename DestType, typename Src0Type>
+static inline void ShaderDraw(
+	const DestType& dest_frame, const Src0Type& src0_frame)
 {
 	helper::Nothing none_frame;
-	ShaderDraw<ColorFunc>(
+	ShaderDraw<ColorFunc, SSE2>(
 		dest_frame, src0_frame,
 		none_frame, none_frame,
 		none_frame, none_frame,
 		none_frame, none_frame);
 }
 
-template<typename ColorFunc, typename DestType>
-static inline void ShaderDraw(const DestType& dest_frame)
+template<typename ColorFunc, bool SSE2,
+	typename DestType>
+static inline void ShaderDraw(
+	const DestType& dest_frame)
 {
 	helper::Nothing none_frame;
-	ShaderDraw<ColorFunc>(
+	ShaderDraw<ColorFunc, SSE2>(
 		dest_frame, none_frame,
 		none_frame, none_frame,
 		none_frame, none_frame,

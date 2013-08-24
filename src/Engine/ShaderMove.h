@@ -35,7 +35,8 @@ class ShaderMove : public helper::ShaderBase<Pixel>
 public:
 	typedef helper::ShaderBase<Pixel> _base;
 	typedef helper::CorrectConst<Pixel> _corect_const;
-	friend class helper::controler<ShaderMove<Pixel> >;
+	friend class helper::controler<ShaderMove<Pixel>, 1>;
+	friend class helper::controler<ShaderMove<Pixel>, 16>;
 	
 	inline ShaderMove(typename _corect_const::surf* s) :
 		_base(s),
@@ -94,13 +95,12 @@ public:
 namespace helper
 {
 
-template<typename Pixel>
-struct controler<ShaderMove<Pixel> > : public controler_base<typename ShaderMove<Pixel>::PixelPtr, typename ShaderMove<Pixel>::PixelRef>
+template<typename Pixel, int DataRowSize>
+struct controler<ShaderMove<Pixel>, DataRowSize> : public controler_base<typename ShaderMove<Pixel>::PixelVal, DataRowSize>
 {
-	typedef typename ShaderMove<Pixel>::PixelPtr PixelPtr;
-	typedef typename ShaderMove<Pixel>::PixelRef PixelRef;
+	typedef typename ShaderMove<Pixel>::PixelVal PixelVal;
 	
-	typedef controler_base<PixelPtr, PixelRef> base_type;
+	typedef controler_base<PixelVal, DataRowSize> base_type;
 		
 	controler(const ShaderMove<Pixel>& f) : base_type(f.ptr(), f.getDomain(), f.getImage(), std::make_pair(sizeof(Pixel), f.pitch()))
 	{
