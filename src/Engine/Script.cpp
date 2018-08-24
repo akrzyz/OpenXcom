@@ -1495,6 +1495,7 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 			//start of number
 			case digitSign:
 				--off; //skipping +- sign
+				[[fallthrough]];
 			case digit:
 				hex = c == '0'; //expecting hex number
 				type = TokenNumber;
@@ -1515,8 +1516,10 @@ SelectedToken ScriptRefTokens::getNextToken(TokenEnum excepted)
 			case charRest:
 				if (off != 1) break;
 				if (c != 'x' && c != 'X') break; //X in "0x1"
+				[[fallthrough]];
 			case charHex:
 				if (!hex) break;
+				[[fallthrough]];
 			case digit:
 				if (off == 0) hex = c == '0'; //expecting hex number
 				continue;

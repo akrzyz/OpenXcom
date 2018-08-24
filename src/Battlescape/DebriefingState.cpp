@@ -442,7 +442,7 @@ DebriefingState::DebriefingState() : _region(0), _country(0), _positiveScore(tru
 
 		SoldierRank rank = (*deadUnit)->getGeoscapeSoldier()->getRank();
 		// Rookies don't get this next award. No one likes them.
-		if (rank == RANK_ROOKIE) 
+		if (rank == RANK_ROOKIE)
 		{
 			continue;
 		}
@@ -1799,6 +1799,7 @@ void DebriefingState::recoverItems(std::vector<BattleItem*> *from, Base *base)
 						// It's a weapon, count any rounds left in the clip.
 						recoveryAmmoInWeapon(*it);
 						// Fall-through, to recover the weapon itself.
+						[[fallthrough]];
 					default:
 						base->getStorageItems()->addItem(rule->getType(), 1);
 				}

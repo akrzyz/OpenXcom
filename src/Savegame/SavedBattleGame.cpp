@@ -1957,12 +1957,16 @@ int SavedBattleGame::getUnitMoraleModifier(BattleUnit* unit)
 		{
 		case 5:
 			result += 25;
+			[[fallthrough]];
 		case 4:
 			result += 20;
+			[[fallthrough]];
 		case 3:
 			result += 10;
+			[[fallthrough]];
 		case 2:
 			result += 20;
+			[[fallthrough]];
 		default:
 			break;
 		}
@@ -1989,12 +1993,16 @@ int SavedBattleGame::getFactionMoraleModifier(bool player)
 			{
 			case 5:
 				result += 25;
+				[[fallthrough]];
 			case 4:
 				result += 10;
+				[[fallthrough]];
 			case 3:
 				result += 5;
+				[[fallthrough]];
 			case 2:
 				result += 10;
+				[[fallthrough]];
 			default:
 				break;
 			}
